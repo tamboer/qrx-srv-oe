@@ -1,0 +1,11 @@
+<!-- sample configuration file -->
+<config>
+	<!-- application configuration section -->
+	<section name="Application">
+		<!-- custom authentication service -->
+		<key name="authentication" object="Service">org.pam.authentication</key>
+		<!-- localization settings, date format and locale code -->
+		<key name="dateformat">mdy</key>
+		<key name="locale">us_en</key>
+	</section>
+</config>

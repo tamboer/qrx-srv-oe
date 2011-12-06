@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<UMLProfile profiletype="uml2">
+	<Documentation id="A7E0C86A-F" name="Links" version="1.0" notes="Links"/>
+	<!-- The profile content -->
+	<Content>
+		<!-- List of stereotypes used in this profile-->
+		<Stereotypes>
+			<Stereotype name="ActionLink" notes="" cx="242" cy="64" bgcolor="-1" fontcolor="-1" bordercolor="-1" borderwidth="-1" hideicon="">
+				<AppliesTo>
+					<Apply type="Association">
+						<Property name="direction" value="Source -&gt; Destination"/>
+					</Apply>
+				</AppliesTo>
+				<Redefinitions/>
+				<TaggedValues>
+					<Tag name="doColumnName" type="char" description="" unit="" values="" default=""/>
+				</TaggedValues>
+				<Constraints/>
+			</Stereotype>
+			<Stereotype name="TableIOLink" notes="" cx="242" cy="68" bgcolor="-1" fontcolor="-1" bordercolor="-1" borderwidth="-1" hideicon="">
+				<AppliesTo>
+					<Apply type="Association">
+						<Property name="direction" value="Source -&gt; Destination"/>
+					</Apply>
+				</AppliesTo>
+				<Redefinitions/>
+				<TaggedValues/>
+				<Constraints/>
+			</Stereotype>
+			<Stereotype name="NavigationLink" notes="" cx="254" cy="70" bgcolor="-1" fontcolor="-1" bordercolor="-1" borderwidth="-1" hideicon="">
+				<AppliesTo>
+					<Apply type="Association">
+						<Property name="direction" value="Source -&gt; Destination"/>
+					</Apply>
+				</AppliesTo>
+				<Redefinitions/>
+				<TaggedValues>
+					<Tag name="targetPart" type="char" description="Table name in case the target object is a dataset." unit="" values="" default=""/>
+				</TaggedValues>
+				<Constraints/>
+			</Stereotype>
+			<Stereotype name="DataLink" notes="" cx="225" cy="70" bgcolor="-1" fontcolor="-1" bordercolor="-1" borderwidth="-1" hideicon="">
+				<AppliesTo>
+					<Apply type="Association">
+						<Property name="direction" value="Source -&gt; Destination"/>
+					</Apply>
+				</AppliesTo>
+				<Redefinitions/>
+				<TaggedValues>
+					<Tag name="fieldMapping" type="char" description="Comma separated list of parent and child field pairs." unit="" values="" default=""/>
+					<Tag name="sourcePart" type="char" description="Table name in case the source object is a dataset." unit="" values="" default=""/>
+				</TaggedValues>
+				<Constraints/>
+			</Stereotype>
+		</Stereotypes>
+		<TaggedValueTypes/>
+	</Content>
+	<Order>
+		<OrderItem node="Contains::association" order="0"/>
+		<OrderItem node="DataLink::association" order="1"/>
+		<OrderItem node="TableIOLink::association" order="2"/>
+		<OrderItem node="NavigationLink::association" order="3"/>
+		<OrderItem node="ActionLink::association" order="4"/>
+	</Order>
+</UMLProfile>
