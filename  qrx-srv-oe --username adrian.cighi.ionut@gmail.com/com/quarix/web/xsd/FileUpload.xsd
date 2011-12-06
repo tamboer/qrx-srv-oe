@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xsd:schema xmlns:prodata="urn:schemas-progress-com:xml-prodata:0001" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <xsd:element prodata:proDataSet="true" name="fileUpload">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccurs="1" maxOccurs="unbounded" name="fileItem">
+          <xsd:complexType>
+            <xsd:sequence>
+              <xsd:element prodata:dataType="prodata:clob" prodata:userOrder="5" minOccurs="1" maxOccurs="1" name="fileBody" type="xsd:string" />
+            </xsd:sequence>
+            <xsd:attribute prodata:userOrder="1" name="fieldName" type="xsd:string" use="required" />
+            <xsd:attribute prodata:userOrder="2" name="fileName" type="xsd:string" use="required" />
+            <xsd:attribute prodata:userOrder="3" name="mimeType" type="xsd:string" use="required" />
+            <xsd:attribute prodata:userOrder="4" name="fileSize" type="xsd:long" use="required" />
+          </xsd:complexType>
+        </xsd:element>
+      </xsd:sequence>
+    </xsd:complexType>
+	<xsd:unique prodata:primaryIndex="true" name="pk">
+      <xsd:selector xpath=".//fileItem" />
+      <xsd:field xpath="@fieldName" />
+    </xsd:unique>
+  </xsd:element>
+</xsd:schema>
