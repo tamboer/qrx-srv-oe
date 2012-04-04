@@ -71,48 +71,7 @@ class com.quarix.service.context.ContextBase
 
    method public logical GetValue (input keyName as character , output keyValue as character):
 
-		case keyName:
-
-			when 'SessionID':u
-			then do:
-				GetValue('', keyName, keyValue).
-
-				/*dynamic-function('', input keyName, input keyValue).*/
-
-				return true.
-			end.
-
-			when 'LanguageID':u
-			then do:
-				GetValue('', keyName, keyValue).
-
-				/*dynamic-function('', input keyName, input keyValue).*/
-
-				return true.
-			end.
-
-			when 'UsrID':u
-			then do:
-				GetValue('', keyName, keyValue).
-
-				/*dynamic-function('', input keyName, input keyValue).*/
-
-				return true.
-			end.
-
-			when 'Company':u
-			then do:
-				keyValue = dynamic-function('getgBedrijf') no-error.
-
-				if Util:IsError()
-				then GetValue('', keyName, keyValue).
-
-				return true.
-			end.
-
-		end case. /* case keyName */
-
-      	return GetValue('', keyName, keyValue).
+		return GetValue('', keyName, keyValue).
 
    end method.
 
@@ -376,31 +335,7 @@ class com.quarix.service.context.ContextBase
 
    method public logical SetValue (input keyName as character , input keyValue as character):
 
-		case keyName:
-
-			when 'SessionID':u
-			then do:
-				/*dynamic-function('', input keyName, input keyValue).*/
-			end.
-
-			when 'LanguageID':u
-			then do:
-				/*dynamic-function('', input keyName, input keyValue).*/
-			end.
-
-			when 'UsrID':u
-			then do:
-				/*dynamic-function('', input keyName, input keyValue).*/
-			end.
-
-			when 'Company':u
-			then do:
-				dynamic-function('setgBedrijf', input keyValue, input false) no-error.
-			end.
-
-		end case. /* case keyName */
-
-      	return SetValue('', keyName, keyValue).
+		return SetValue('', keyName, keyValue).
 
    end method.
 

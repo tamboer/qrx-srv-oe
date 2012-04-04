@@ -31,7 +31,19 @@
 &global-define url_reserved_chars   '~;/?:@=&+$,':u
 &global-define hex-list             '0123456789ABCDEF':u
 
+using com.quarix.base.Util.
+
 class com.quarix.base.Util  implements com.quarix.base.iSingleton use-widget-pool final:
+
+  &if keyword-all('static':u) ne ? &then
+   define private static variable util as Util no-undo.
+
+   method public static Util GetInstance():
+      if not valid-object(util) then
+         util = new Util().
+      return util.
+   end method.
+   &endif
 
    method public logical IsEmpty (input pcValue as character):
       if pcValue = ? or
@@ -61,6 +73,22 @@ class com.quarix.base.Util  implements com.quarix.base.iSingleton use-widget-poo
    end method.
 
    method public logical IsEmpty (input pdValue as date):
+      if pdValue = ?
+      then return true.
+
+      return false.
+
+   end method.
+
+   method public logical IsEmpty (input pdValue as datetime):
+      if pdValue = ?
+      then return true.
+
+      return false.
+
+   end method.
+
+   method public logical IsEmpty (input pdValue as datetime-tz):
       if pdValue = ?
       then return true.
 
@@ -183,11 +211,30 @@ class com.quarix.base.Util  implements com.quarix.base.iSingleton use-widget-poo
 
    end method.
 
+	method public void DisposeAndEmptyDataset(input hds as handle):
+
+		if not valid-handle(hds)
+		then return.
+
+		hds:empty-dataset ().
+
+		DisposeDataset(input hds).
+
+		return.
+
+		catch appError as Progress.Lang.Error :
+			delete object appError.
+			return.
+		end catch.
+
+	end method.
+
 	method public void DisposeDataset(input hds as handle):
 
-		define variable iBuff      as integer	no-undo.
-		define variable iHandle    as integer	no-undo.
-		define variable cTTHandles as character	no-undo init ?.
+		define variable iBuff		as integer		no-undo.
+		define variable iHandle		as integer		no-undo.
+		define variable cTTHandles	as character	no-undo init ?.
+		define variable hTT			as handle		no-undo.
 
 		if not valid-handle(hds)
 		then return.
@@ -199,13 +246,30 @@ class com.quarix.base.Util  implements com.quarix.base.iSingleton use-widget-poo
 
 		end.
 
-		delete object hds.
+		delete object hds no-error.
+
+		if not valid-handle(hds)
+		then hds = ?.
 
 		if cTTHandles <> ?
     	then
     		do iHandle = 1 to num-entries(cTTHandles):
-				delete object handle(entry(iHandle, cTTHandles)).
+
+    			hTT = handle(entry(iHandle, cTTHandles)) no-error.
+
+    			hTT = hTT:table-handle no-error.
+
+				delete object handle(entry(iHandle, cTTHandles)) no-error.
+
+				delete object hTT no-error.
 			end.
+
+		return.
+
+		catch appError as Progress.Lang.Error :
+			delete object appError.
+			return.
+		end catch.
 
 	end method.
 
@@ -309,7 +373,13 @@ class com.quarix.base.Util  implements com.quarix.base.iSingleton use-widget-poo
 
     	end. /* do while search(cFullLogFileName) = ? */
 
-    	phDataSet:write-xml('file':U, cFullLogFileName, plFormatted, ?, ?, ?, plWriteBeforeImage).
+    	message
+    		'------------------------------------------------------------------------------------------------------------------------------':U skip
+    		'Write file in: ' cFullLogFileName skip
+    		'------------------------------------------------------------------------------------------------------------------------------':U skip
+		view-as alert-box.
+
+    	phDataSet:write-xml('file':U, cFullLogFileName, plFormatted, 'utf-8':u, ?, no, no, plWriteBeforeImage, no).
 
 		return.
 
@@ -366,6 +436,12 @@ class com.quarix.base.Util  implements com.quarix.base.iSingleton use-widget-poo
     			cFullLogFileName	= cLogDirectory + '~/':U + cLogFileName.
 
     	end. /* do while search(cFullLogFileName) = ? */
+
+    	message
+    		'------------------------------------------------------------------------------------------------------------------------------':U skip
+    		'Write file in: ' cFullLogFileName skip
+    		'------------------------------------------------------------------------------------------------------------------------------':U skip
+		view-as alert-box.
 
     	phBuffer:write-xml('file':U, cFullLogFileName, yes).
 
@@ -734,6 +810,21 @@ class com.quarix.base.Util  implements com.quarix.base.iSingleton use-widget-poo
         delete procedure hProc no-error.
 
         return intProcessHandle.
+    end method.
+
+    method public character ReplaceString (input cText as character, input cSource as character, input cTarget as character):
+        if not IsEmpty(cText) and
+           cSource ne cTarget and
+           index(cText,cSource) gt 0
+        then do:
+           cText = trim(replace(cText,cSource,cTarget)).
+        end.
+
+        return cText.
+    end method.
+
+    method public character RemoveString (input cText as character, input cString as character):
+        return ReplaceString(cText,cString,'':U).
     end method.
 
 end class.

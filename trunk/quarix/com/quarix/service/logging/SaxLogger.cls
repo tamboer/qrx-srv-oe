@@ -31,6 +31,8 @@ Notes       :
 ---------------------------------------------------------------------*/
 routine-level on error undo, throw.
 
+using com.quarix.service.logging.SaxLogger.
+
 class com.quarix.service.logging.SaxLogger
    inherits com.quarix.service.logging.BaseLogger
    implements com.quarix.base.iSingleton use-widget-pool:
@@ -50,6 +52,15 @@ class com.quarix.service.logging.SaxLogger
          end.
       end set.
 
+    &if keyword-all('static':u) ne ? &then
+    define private static variable saxLogger as SaxLogger no-undo.
+
+    method public static SaxLogger GetInstance():
+        if not valid-object(saxLogger) then
+            saxLogger = new SaxLogger().
+        return saxLogger.
+    end method.
+   &endif
 
    constructor public SaxLogger():
    end constructor.

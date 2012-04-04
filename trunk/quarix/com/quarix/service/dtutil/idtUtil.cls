@@ -1,11 +1,11 @@
 
 /*------------------------------------------------------------------------
-    File        : iDataTransaction
+    File        : idtUtil
     Purpose     :
     Syntax      :
     Description :
     Author(s)   : Andriuhan
-    Created     : Mon Nov 29 10:40:45 EET 2010
+    Created     : Wed Jan 25 14:15:23 EET 2012
     Notes       :
     License     :
     This file is part of the QRX-SRV-OE software framework.
@@ -28,23 +28,18 @@
     http://www.gnu.org/licenses/lgpl-2.1.txt
   ----------------------------------------------------------------------*/
 
-    using Progress.Lang.*.
-    using com.quarix.web.*.
+using Progress.Lang.*.
 
-    interface com.quarix.data.iDataTransaction:
+interface com.quarix.service.dtutil.idtUtil:
 
-        method public logical HandleRequest(actionName as character, webRequest as Request, webResponse as Response).
+    method public datetime-tz sysNow().
 
-        method public logical BeforeDataFetch ().
+    method public date sysDate().
 
-        method public logical AfterDataFetch  ().
+    method public datetime-tz nowTZ().
 
-        method public logical BeforeDataUpdate ().
+    method public date todayTZ().
 
-        method public logical AfterDataUpdate  ().
+    method public integer sysTime().
 
-        method public logical DataFetch  (      output dataset-handle dsHandle).
-
-        method public logical DataUpdate (input-output dataset-handle dsHandle).
-
-    end interface.
+end interface.

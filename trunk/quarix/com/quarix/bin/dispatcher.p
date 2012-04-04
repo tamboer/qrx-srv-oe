@@ -46,9 +46,41 @@ define input  parameter pstrRequest   as memptr    no-undo.
 define output parameter table         for ttResponse.
 define output parameter pstrResponse  as memptr    no-undo.
 
-define variable mainController as Controller no-undo.
-define variable startUpHdl     as handle     no-undo.
-define variable superProc      as integer    no-undo.
+define variable mainController	as Controller	no-undo.
+define variable startUpHdl		as handle		no-undo.
+define variable superProc		as integer		no-undo.
+define variable iStartTime		as integer		no-undo.
+define variable iCallDuration	as integer		no-undo.
+
+/* Start Enable Profiler */
+
+define variable cProfilerOut	as character	no-undo.
+define variable iNum			as integer		no-undo.
+
+cProfilerOut = substitute('&1/&2.&3':u, session:temp-directory, 'profiler':u, 'out':u).
+
+assign
+	cProfilerOut = replace(cProfilerOut, '~\':u, '~/':u)
+	cProfilerOut = replace(cProfilerOut, '~/~/':u, '~/':u).
+
+do while search(cProfilerOut) <> ?:
+
+	iNum = iNum + 1.
+
+	assign
+		cProfilerOut = substitute('&1/&2_&3.&4':u, session:temp-directory, 'profiler':u, string(iNum), 'out':u)
+		cProfilerOut = replace(cProfilerOut, '~\':u, '~/':u)
+		cProfilerOut = replace(cProfilerOut, '~/~/':u, '~/':u).
+
+end. /* do while search(cProfilerOut) <> ? */
+
+profiler:enabled   = no.
+profiler:file-name = cProfilerOut.
+profiler:listings  = true.
+profiler:directory = session:temp-directory.
+profiler:profiling = no.
+
+/* End Enable Profiler */
 
 /* try to avoid memory leak issues when calling external code
    all dinamicaly created objects that are not explicitely created
@@ -104,9 +136,19 @@ if valid-object(mainController) then do
 
    message 'START HandleRequest: ' skip.
 
+   if profiler:enabled and
+      cProfilerOut <> '':u and
+      cProfilerOut <> ?
+   then
+      message 'Profiler log file created: ' cProfilerOut skip.
+
+   iStartTime = etime.
+
    mainController:HandleRequest(table ttRequest by-reference, pstrRequest, table ttResponse by-reference, pstrResponse).
 
-   message 'END HandleRequest: ' skip.
+   iCallDuration = etime - iStartTime.
+
+   message 'END HandleRequest: ' iCallDuration skip.
 
    message '------------------------------------------------------------------------------------------------------------------------------':U skip.
 
@@ -115,5 +157,34 @@ if valid-object(mainController) then do
 end. /* if valid-object(mainController) then do */
 
 output close.
+run UnloadInstances.
+/* Disable Profiler */
 
+if profiler:enabled
+then do:
+	profiler:profiling = false.
+	profiler:write-data().
+end.
 
+procedure UnloadInstances:
+
+    define variable obj		as Progress.Lang.Object	no-undo.
+    define variable delObj	as Progress.Lang.Object	no-undo.
+
+    obj = session:first-object.
+
+    do while valid-object(obj):
+
+        if not type-of(obj, 'com.quarix.base.iSingleton':u) and
+               type-of(obj, 'com.quarix.base.iDisposable':u)
+		then do:
+            delObj = obj.
+        end.
+
+        obj = obj:next-sibling.
+
+        delete object delObj no-error.
+
+    end. /* do while valid-object(obj) */
+
+end procedure.

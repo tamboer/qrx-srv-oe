@@ -147,6 +147,16 @@ class com.quarix.system.Application
 
     define private stream streamSrv.
 
+    &if keyword-all('static':u) ne ? &then
+    define private static variable app as Application no-undo.
+
+    method public static Application GetInstance():
+        if not valid-object(app) then
+            app = new Application().
+        return app.
+    end method.
+   &endif
+
     constructor public Application ():
     end constructor.
 
@@ -251,6 +261,7 @@ class com.quarix.system.Application
                 configObj:LoadConfiguration(Configuration).
                 ttService.isConfigured = true.
              end.
+
              if type-of(ttService.classObj, 'com.quarix.base.iSingleton':u) then
                 cast(ttService.classObj, 'com.quarix.base.iSingleton':u):Reset().
           end.

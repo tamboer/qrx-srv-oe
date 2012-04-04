@@ -30,12 +30,24 @@ Notes       :
     http://www.gnu.org/licenses/lgpl-2.1.txt
 ---------------------------------------------------------------------*/
 routine-level on error undo, throw.
+using com.quarix.service.logging.LoggingCore.
+
 class com.quarix.service.logging.LoggingCore
    inherits com.quarix.service.logging.BaseLogger
    implements com.quarix.base.iSingleton use-widget-pool:
 
    define variable applicationId as character no-undo.
    define variable appUserId     as character no-undo.
+
+   &if keyword-all('static':u) ne ? &then
+    define private static variable loggingCore as LoggingCore no-undo.
+
+    method public static LoggingCore GetInstance():
+        if not valid-object(loggingCore) then
+            loggingCore = new LoggingCore().
+        return loggingCore.
+    end method.
+   &endif
 
    method override public logical OpenLog():
       if valid-object(Application) then

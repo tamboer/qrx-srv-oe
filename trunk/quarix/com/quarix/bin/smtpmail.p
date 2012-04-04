@@ -495,7 +495,7 @@ RUN get-tz(OUTPUT oTimezone).
 
 DEFINE STREAM sLogfile.
 &GLOBAL-DEFINE Stream STREAM sLogFile
-&GLOBAL-DEFINE LOGGER0 PUT {&Stream} UNFORMATTED com.quarix.util.dtutil:sysDate() " " STRING (com.quarix.util.dtutil:sysTime(), "hh:mm:ss") " "
+&GLOBAL-DEFINE LOGGER0 PUT {&Stream} UNFORMATTED today " " STRING (time, "hh:mm:ss") " "
 &GLOBAL-DEFINE LOGGER  IF logLevel < 4  THEN {&LOGGER0}
 &GLOBAL-DEFINE LOGGER1 IF logLevel <= 1 THEN {&LOGGER0}
 &GLOBAL-DEFINE LOGGER2 IF logLevel <= 2 THEN {&LOGGER0}
@@ -983,10 +983,10 @@ LK 12/11/2003 change "SUBSTRING(emailto" to "SUBSTRING(emailtoTMP" */
             /* Derek Marley 02/25/03 */
             smtpcmd = smtpcmd + "Importance: " + string(Importance) + crlf
             /* Sample format    Date: 27 March 2001 10:30:00 EST */
-            smtpcmd = smtpcmd + "Date: " + STRING(DAY(com.quarix.util.dtutil:sysDate())) + " " +
-                      entry(MONTH(com.quarix.util.dtutil:sysDate()),cMonth) + " " +
-                      STRING(YEAR(com.quarix.util.dtutil:sysDate()),"9999") + " " +
-                      STRING(com.quarix.util.dtutil:sysTime(),"hh:mm:ss") + " " + oTimezone + crlf.
+            smtpcmd = smtpcmd + "Date: " + STRING(day(today)) + " " +
+                      entry(month(today),cMonth) + " " +
+                      STRING(year(today),"9999") + " " +
+                      STRING(time,"hh:mm:ss") + " " + oTimezone + crlf.
 
           SET-SIZE(mData) = LENGTH(smtpcmd {&RAW}) + 1.
           PUT-STRING(mData,1) = smtpcmd.
@@ -1709,12 +1709,12 @@ PROCEDURE Get-SMTP-Date:
 
   M = "Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec":U.
   D = "Sun,Mon,Tue,Wed,Thu,Fri,Sat":U.
-  RUN get-tz(OUTPUT S).
-  S = ENTRY(WEEKDAY(com.quarix.util.dtutil:sysDate()), D)      + ", ":U
-    + STRING(DAY(com.quarix.util.dtutil:sysDate()), "99":U)    + " ":U
-    + ENTRY(MONTH(com.quarix.util.dtutil:sysDate()), M)        + " ":U
-    + STRING(YEAR(com.quarix.util.dtutil:sysDate()), "9999":U) + " ":U
-    + STRING(com.quarix.util.dtutil:sysTime(), "HH:MM:SS":U)    + " ":U
+  run get-tz(output S).
+  S = entry(weekday(today), D)      + ", ":U
+    + STRING(day(today), "99":U)    + " ":U
+    + ENTRY(month(today), M)        + " ":U
+    + STRING(year(today), "9999":U) + " ":U
+    + STRING(time, "HH:MM:SS":U)    + " ":U
     + S.
   R = S.
 END.

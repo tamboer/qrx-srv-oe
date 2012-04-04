@@ -85,6 +85,7 @@ class com.quarix.base.Factory
       (className  as character, input instantiatingObjectHandle as Progress.Lang.Object):
 
       define variable objInstance   as Progress.Lang.Object no-undo.
+      define variable clsInstance   as Progress.Lang.Class  no-undo.
       define variable factoryHelper as handle               no-undo.
 
       define buffer   ttInstance    for ttInstance.
@@ -109,23 +110,37 @@ class com.quarix.base.Factory
          delete ttInstance.
       end.
 
-      /* use the 'old' factory helper way if dynamic-new isn't available or default
-         constructor isn't available (either does not exist or is not public) */
-
-      factoryHelper = getFactoryHelper(className).
-
-      if valid-handle(factoryHelper) then
-         run getInstance in factoryHelper (substring(className, r-index(className, '.') + 1, -1, 'character':u),
-            output objInstance) no-error.
-      else
-         assign
-            ErrorStatus  = true
-            ErrorMessage = 'Factory helper can not be loaded.':u.
-
-      /* try first the dynamic-new statement if available */
       &if keyword-all('dynamic-new':u) ne ? &then
-      if not valid-object(objInstance) then
-         objInstance = dynamic-new className () no-error.
+      clsInstance = Progress.Lang.Class:GetClass(className) no-error.
+      if not valid-object(clsInstance) then do:
+          assign
+            ErrorStatus  = true
+            ErrorMessage = substitute ('Unable to instantiate class &1.':u, className).
+
+          return ?.
+      end.
+
+      if clsInstance:IsA('com.quarix.base.iSingleton':u) then do:
+          objInstance = clsInstance:Invoke('GetInstance') no-error.
+      end.
+      else do:
+          objInstance = dynamic-new className () no-error.
+      end.
+      &else
+      /* use the 'old' factory helper way if dynamic-new isn't available or default
+             constructor isn't available (either does not exist or is not public) */
+      if not valid-object(objInstance) then do:
+
+          factoryHelper = getFactoryHelper(className).
+
+          if valid-handle(factoryHelper) then
+             run getInstance in factoryHelper (substring(className, r-index(className, '.') + 1, -1, 'character':u),
+                output objInstance) no-error.
+          else
+             assign
+                ErrorStatus  = true
+                ErrorMessage = 'Factory helper can not be loaded.':u.
+      end.
       &endif
 
       if valid-object(objInstance) then
@@ -261,27 +276,41 @@ class com.quarix.base.Factory
    method private handle getFactoryHelper
       (className     as character):
 
-      define variable packageName   as character no-undo.
-      define variable factoryHdl    as handle    no-undo.
-      define buffer   ttHelper      for ttHelper.
+      define variable packageName   	as character	no-undo.
+      define variable factoryHdl    	as handle		no-undo.
+      define buffer   ttHelper      	for ttHelper.
+      define variable FactoryHelperUc	as character	no-undo.
+      define variable FactoryHelperLc	as character	no-undo.
+      define variable ProcedureName		as character	no-undo.
 
       assign
-         packageName = substring(className, 1, r-index(className, '.') - 1, 'character':u)
-         className   = replace(substitute('&1.FactoryHelper':u, packageName), '.', '/').
+         packageName		= substring(className, 1, r-index(className, '.') - 1, 'character':u)
+         FactoryHelperUc	= replace(substitute('&1.FactoryHelper':u, packageName), '.', '/')
+         FactoryHelperLc	= replace(substitute('&1.factoryhelper':u, packageName), '.', '/').
 
       for each ttHelper where ttHelper.packageName eq packageName:
          if valid-handle(ttHelper.helperHandle) then return ttHelper.helperHandle.
          delete ttHelper.
       end.
 
-      if search(substitute('&1.p':u, className)) ne ?
-         or search(substitute('&1.r':u, className)) ne ? then
+      ProcedureName = '':u.
+
+      if search(substitute('&1.p':u, FactoryHelperUc)) ne ?
+         or search(substitute('&1.r':u, FactoryHelperUc)) ne ?
+      then ProcedureName = substitute('&1.p':u, FactoryHelperUc).
+      else
+      	if search(substitute('&1.p':u, FactoryHelperLc)) ne ?
+        	or search(substitute('&1.r':u, FactoryHelperLc)) ne ?
+      	then ProcedureName = substitute('&1.p':u, FactoryHelperLc).
+
+      if ProcedureName <> '' and
+      		ProcedureName <> ? then
       do
          on error undo, leave
          on quit  undo, leave
          on stop  undo, leave:
 
-         run value(substitute('&1.p':u, className)) persistent set factoryHdl no-error.
+         run value(ProcedureName) persistent set factoryHdl no-error.
 
          if valid-handle(factoryHdl) then
          do:

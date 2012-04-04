@@ -28,6 +28,8 @@
   ----------------------------------------------------------------------*/
 routine-level on error undo, throw.
 
+using com.quarix.data.DataRequest.
+
 class com.quarix.data.DataRequest
    inherits com.quarix.base.BaseObject
    implements com.quarix.base.iSingleton  use-widget-pool final:
@@ -78,6 +80,16 @@ class com.quarix.data.DataRequest
       protected set.
 
    define private variable xsdFile       as character no-undo initial 'com/quarix/data/xsd/DataRequest.xsd':u.
+
+   &if keyword-all('static':u) ne ? &then
+   define private static variable dataRequest as DataRequest no-undo.
+
+   method public static DataRequest GetInstance():
+      if not valid-object(dataRequest) then
+         dataRequest = new DataRequest().
+      return dataRequest.
+   end method.
+   &endif
 
    method public logical Parse (mpRequest as memptr):
 

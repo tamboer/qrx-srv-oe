@@ -1,11 +1,10 @@
-
 /*------------------------------------------------------------------------
-    File        : iDataTransaction
+    File        : dtUtilBase
     Purpose     :
     Syntax      :
     Description :
     Author(s)   : Andriuhan
-    Created     : Mon Nov 29 10:40:45 EET 2010
+    Created     : Wed Jan 25 11:34:19 EET 2012
     Notes       :
     License     :
     This file is part of the QRX-SRV-OE software framework.
@@ -26,25 +25,43 @@
     Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
     02110-1301  USA or on the internet at the following address:
     http://www.gnu.org/licenses/lgpl-2.1.txt
-  ----------------------------------------------------------------------*/
+ ----------------------------------------------------------------------*/
 
-    using Progress.Lang.*.
-    using com.quarix.web.*.
+using com.quarix.service.dtutil.dtUtilBase.
 
-    interface com.quarix.data.iDataTransaction:
+class com.quarix.service.dtutil.dtUtilBase implements com.quarix.base.iSingleton use-widget-pool:
 
-        method public logical HandleRequest(actionName as character, webRequest as Request, webResponse as Response).
+    &if keyword-all('static':u) ne ? &then
+    define private static variable dtUtilBase as dtUtilBase no-undo.
 
-        method public logical BeforeDataFetch ().
+    method public static dtUtilBase GetInstance():
+        if not valid-object(dtUtilBase) then
+            dtUtilBase = new dtUtilBase().
+        return dtUtilBase.
+    end method.
+   &endif
 
-        method public logical AfterDataFetch  ().
+    method public datetime-tz sysNow():
+        return now.
+    end method.
 
-        method public logical BeforeDataUpdate ().
+    method public date sysDate():
+        return today.
+    end method.
 
-        method public logical AfterDataUpdate  ().
+    method public datetime-tz nowTZ():
+        return now.
+    end method.
 
-        method public logical DataFetch  (      output dataset-handle dsHandle).
+    method public date todayTZ():
+        return today.
+    end method.
 
-        method public logical DataUpdate (input-output dataset-handle dsHandle).
+    method public integer sysTime():
+        return time.
+    end method.
 
-    end interface.
+    method public void Reset():
+    end method.
+
+end class.

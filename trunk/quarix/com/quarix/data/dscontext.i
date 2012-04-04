@@ -31,9 +31,9 @@
     http://www.gnu.org/licenses/lgpl-2.1.txt
   ----------------------------------------------------------------------*/
 
-  	{com/quarix/data/queryTables.i &scope=private}
+  	{com/quarix/data/queryTables.i  {&*}}
 
-    define private temp-table ttInfo no-undo
+    define {&scope} temp-table ttInfo no-undo {&reference-only}
         field ttName		as character
         field ttRowPos		as character
         field lastBatch		as logical		initial true
@@ -46,7 +46,7 @@
         field isSearchReq	as logical		initial false
         index xpk is primary unique ttName.
 
-    define private temp-table ttRowId no-undo
+    define {&scope} temp-table ttRowId no-undo {&reference-only}
         field ttName	as character
         field ttRowId	as character
         field dbRowId	as character
@@ -54,11 +54,11 @@
         index xpk is primary unique ttName ttRowId
         index idxNumRec is unique NumRec.
 
-    define private temp-table ttProperty no-undo
+    define {&scope} temp-table ttProperty no-undo {&reference-only}
     	field propertyName	as character
     	field propertyValue	as character
     	index xpk is primary unique propertyName.
 
-    define dataset dsContext for ttFilter, ttSort, ttInfo, ttRowId, ttProperty.
+    define dataset dsContext {&reference-only} for ttFilter, ttSort, ttInfo, ttRowId, ttProperty.
 
 

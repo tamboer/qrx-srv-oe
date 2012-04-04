@@ -29,40 +29,75 @@
   ----------------------------------------------------------------------*/
 
    using Progress.Lang.*.
+   using com.quarix.web.*.
+   using com.quarix.data.*.
 
    interface com.quarix.data.iDataModel:
-      method public void       ClearFilters ().
 
-      method public void       RemoveFilter (fieldName as character).
+      method public void       SetDataContext (input dtContext as DataContext).
 
-      method public void       RemoveFilter (tableName as character, fieldName as character).
+      method public character  GetFilterValue (fieldname as character, operName as character).
 
-      method public void       RemoveTableFilters (tableName as character).
+      method public character  GetKeyValue    (tableName as character, keyField as character, keyValue as character, lookupField as character).
 
-      method public logical    SetFilter (fieldName as character, operName as character, fieldValue as character).
+      method public character  GetKeyValue    (tableName as character, keyField as character, keyValue as character, lookupField as character, filterXml as memptr).
 
-      method public logical    SetFilter (tableName as character, fieldName as character, operName as character, fieldValue as character).
+      method public logical    BeforeRemoveFilter (fieldName as character).
 
-      method public void       ClearSort ().
+      method public void       RemoveFilter       (fieldName as character).
 
-      method public void       RemoveSort (fieldName as character).
+      method public logical    BeforeSetFilter (fieldName as character, operName as character, fieldValue as character).
 
-      method public void       RemoveSort (tableName as character, fieldName as character).
+      method public logical    SetFilter       (fieldName as character, operName as character, fieldValue as character).
 
-      method public void       RemoveTableSort (tableName as character).
+      method public logical    SetFilter       (tableName as character, fieldName as character, operName as character, fieldValue as character).
 
-      method public logical    SetSort (fieldName as character).
+      method public logical    BeforeRemoveSort (fieldName as character).
 
-      method public logical    SetSort (tableName as character, fieldName as character).
+      method public void       RemoveSort       (fieldName as character).
 
-      method public logical    SetSort (fieldName as character, descendingSort as logical).
+      method public logical    BeforeSetSort (fieldName as character, descendingSort as logical).
 
-      method public logical    SetSort (tableName as character, fieldName as character, descendingSort as logical).
+      method public logical    SetSort       (fieldName as character).
+
+      method public logical    SetSort       (tableName as character, fieldName as character).
+
+      method public logical    SetSort       (fieldName as character, descendingSort as logical).
+
+      method public void       SetUseIndex (tableName as character, useIndex as character).
 
       method public integer    GetBatchSize (bufferName as character).
+
+      method public logical    IsFirstBatch ().
+
+      method public logical    IsLastBatch  ().
+
+      method public logical    HandleRequest          (methodName as character, webRequest as Request, webResponse as Response).
+
+      method public logical    HandleRequestDummyData (lReloadDataRequest as logical).
+
+      method public logical    dataFetch  (      output dataset-handle dsHandle).
+
+      method public logical    dataUpdate (input-output dataset-handle dsHandle).
 
       method public logical    LoadData ().
 
       method public logical    SaveData ().
+
+      method public logical    BeforeDataService (actionName as character).
+
+      method public logical    BeforeService     (actionName as character).
+
+      method public logical    BeforeLoadData    ().
+
+      method public logical    BeforeSaveData    ().
+
+      method public logical    AfterDataService  (actionName as character).
+
+      method public logical    AfterService      (actionName as character).
+
+      method public logical    AfterLoadData     ().
+
+      method public logical    AfterSaveData     ().
 
    end interface.

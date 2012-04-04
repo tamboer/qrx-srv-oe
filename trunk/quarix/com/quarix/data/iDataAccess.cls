@@ -29,6 +29,8 @@
   ----------------------------------------------------------------------*/
 
    using Progress.Lang.*.
+   using com.quarix.base.Collection.
+   using com.quarix.data.*.
 
    interface com.quarix.data.iDataAccess:
 
@@ -40,11 +42,75 @@
 
       method public logical		AddDataSource (pcTable as character, pcBuffer as character, pcKeyFields as character, pcWhere as character, pcFieldsMap as character).
 
-      method public character	GetPhysicalFieldName (logicalName as character).
+      method public logical     AddDataSource (pcTable as character, pcBuffer as character, pcKeyFields as character, pcWhere as character, pcFieldsMap as character, excludeFields as character).
+
+      method public logical     AddDataSource (pcTable as character, pcBuffer as character, pcKeyFields as character, pcWhere as character, pcFieldsMap as character, excludeFields as character, includeFields as character).
+
+      method public logical     AddDataSource (pcTable as character, pcBuffer as character, pcKeyFields as character, pcWhere as character, pcFieldsMap as character, excludeFields as character, includeFields as character, joinClause as character).
+
+      method public logical     AddDataSource (pcTable as character, pcBuffer as character, pcKeyFields as character, pcWhere as character, pcFieldsMap as character, excludeFields as character, includeFields as character, joinClause as character, joinType as logical).
+
+      method public logical     AddDataSource (pcTable as character, phBuffer as handle,    pcKeyFields as character, pcWhere as character, pcFieldsMap as character, excludeFields as character, includeFields as character, joinClause as character).
+
+      method public logical     AddDataSource (pcTable as character, phBuffer as handle,    pcKeyFields as character, pcWhere as character, pcFieldsMap as character, excludeFields as character, includeFields as character, joinClause as character, joinType as logical).
+
+      method public logical     AttachDataSource ().
+
+      method public logical     AddJoinClause  (tableName as character, bufferName as character, joinClause as character).
+
+      method public logical     AddWhereClause (tableName as character, bufferName as character, whereClause as character).
+
+      method public Collection  AutocompleteKey (tableName as character, keyField as character, keyValue as character).
+
+      method public Collection  AutocompleteKey (tableName as character, keyField as character, keyValue as character, filterXml as memptr).
+
+      method public character   GetKeyValue     (tableName as character, keyField as character, keyValue as character, lookupField as character, filterXml as memptr).
+
+      method public logical     CheckMandatory  (hBuf as handle, pcField as character).
+
+      method public void        DetachDataSource ().
+
+      method public void        DisableDebugQuery().
+
+      method public void        EnableDebugQuery().
+
+      method public handle      GetIdListTmpHandle().
+
+      method public character   GetFullFieldName     (fieldName    as character).
+
+      method public character   GetLogicalFieldName  (physicalName as character).
+
+      method public character	GetPhysicalFieldName (logicalName  as character).
+
+      method public character   GetQueryName().
+
+      method public logical     BeforeRowFill   (hBuf    as handle).
+
+      method public logical     BeforeRowDelete (hBuffBi as handle, hDbBuff as handle).
+
+      method public logical     BeforeRowSave   (hBuff   as handle, hBuffBi as handle, hDbBuff as handle).
+
+      method public logical     AfterRowFill    (hBuf    as handle).
+
+      method public logical     AfterRowDelete  (hBuffBi as handle).
+
+      method public logical     AfterRowSave    (hBuff   as handle, hDbBuff as handle).
+
+      method public logical     BeforeLoadData ().
+
+      method public logical     AfterLoadData  ().
 
       method public logical		LoadData ().
 
+      method public logical     BeforeSaveData ().
+
+      method public logical     AfterSaveData  ().
+
       method public logical		SaveData ().
+
+      method public void        LocalizeDataset (dataset-handle dsHandle).
+
+      method public void        SetDataModel    (dtModel as DataModel).
 
       method public logical		SetDataSource (pcTable as character, pcBuffer as character).
 
@@ -53,5 +119,11 @@
       method public logical		SetDataSource (pcTable as character, pcBuffer as character, pcKeyFields as character, pcWhere as character).
 
       method public logical		SetDataSource (pcTable as character, pcBuffer as character, pcKeyFields as character, pcWhere as character, pcFieldsMap as character).
+
+      method public logical     SetDataSource (pcTable as character, pcBuffer as character, pcKeyFields as character, pcWhere as character, pcFieldsMap as character, excludeFields as character).
+
+      method public logical     SetDataSource (pcTable as character, pcBuffer as character, pcKeyFields as character, pcWhere as character, pcFieldsMap as character, excludeFields as character, includeFields as character).
+
+      method public logical     SetDataSource (pcTable as character, pcBuffer as character, pcKeyFields as character, pcWhere as character, pcFieldsMap as character, excludeFields as character, includeFields as character, joinClause as character).
 
    end interface.

@@ -61,7 +61,7 @@ class com.quarix.service.logging.BaseLogger
       input errorObject as character):
       define variable evtTime as datetime no-undo.
 
-      evtTime = com.quarix.util.dtutil:sysNow().
+      evtTime = dtutil:sysNow().
       return LogError (errorLevel, errorCode, errorText, errorParam, errorObject, evtTime).
    end method.
 

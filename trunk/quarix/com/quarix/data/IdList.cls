@@ -31,7 +31,9 @@ routine-level on error undo, throw.
 
 using Progress.Lang.*.
 
-class com.quarix.data.IdList inherits com.quarix.base.BaseObject:
+class com.quarix.data.IdList 
+    inherits com.quarix.base.BaseObject
+    implements com.quarix.base.iDisposable:
 
 	define protected property hbttHandle as handle no-undo
 		get.
@@ -50,6 +52,29 @@ class com.quarix.data.IdList inherits com.quarix.base.BaseObject:
 		then return hbttHandle:table-handle.
 
 		return ?.
+
+	end method.
+
+	method public void setTableHandle(input phbttHandle as handle):
+
+		define variable htt as handle no-undo.
+
+		if valid-handle(hbttHandle)
+		then do:
+			hbttHandle:empty-temp-table().
+
+			htt = hbttHandle:table-handle.
+
+			delete object hbttHandle no-error.
+
+			delete object htt no-error.
+
+			if not valid-handle(hbttHandle)
+			then hbttHandle = ?.
+		end.
+
+		if valid-handle(phbttHandle)
+		then hbttHandle = phbttHandle.
 
 	end method.
 
@@ -165,7 +190,7 @@ class com.quarix.data.IdList inherits com.quarix.base.BaseObject:
 
 			if cFieldValue = '?':U
 			then cWhere = substitute('&1 = ?':U, cFieldName).
-			else cWhere = substitute('&1 = "&2"':U, cFieldName, cFieldValue).
+			else cWhere = substitute('&1 = &2':U, cFieldName, quoter(cFieldValue)).
 
 			cWhereClause =	if (cWhereClause = '':U or cWhereClause = ?)
 							then cWhere
@@ -175,6 +200,12 @@ class com.quarix.data.IdList inherits com.quarix.base.BaseObject:
 
 		cWhereClause = '(':U + cWhereClause + ')':U.
 
+		cQuery = substitute('where &1':U, cWhereClause).
+
+		hbttHandle:find-first (cQuery, no-lock) no-error.
+
+		lAvailable = hbttHandle:available.
+/*
 		cQuery = substitute('for each &1 no-lock where &2':U, hbttHandle:name, cWhereClause).
 
 		create query hQuery.
@@ -199,7 +230,7 @@ class com.quarix.data.IdList inherits com.quarix.base.BaseObject:
 		hQuery:query-close ().
 
 		delete object hQuery no-error.
-
+*/
 		if not lAvailable
 		then do:
 			iIdListOrder = GetLastIdListOrder().
@@ -325,8 +356,21 @@ class com.quarix.data.IdList inherits com.quarix.base.BaseObject:
 
 	destructor public idlist():
 
+		define variable htt as handle no-undo.
+
 		if valid-handle(hbttHandle)
-		then hbttHandle:empty-temp-table().
+		then do:
+			hbttHandle:empty-temp-table().
+
+			htt = hbttHandle:table-handle.
+
+			delete object hbttHandle no-error.
+
+			delete object htt no-error.
+
+			if not valid-handle(hbttHandle)
+			then hbttHandle = ?.
+		end.
 
 	end destructor.
 
