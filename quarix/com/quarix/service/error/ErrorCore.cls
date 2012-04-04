@@ -175,9 +175,10 @@ class com.quarix.service.error.ErrorCore
 
       if errorLevel ne ?
          and errorCode ne ?
-         and (errorLevel le LogLevel or errorLevel eq ApplicationLevel()) then do:
+         and (LogLevel = 0 or errorLevel le LogLevel or errorLevel eq ApplicationLevel()) then do:
          create ttError.
          assign
+            ttError.logTime        = dtUtil:sysNow()
             ttError.errorLevel     = errorLevel
             ttError.errorType      = errorType
             ttError.errorCode      = errorCode
@@ -186,7 +187,7 @@ class com.quarix.service.error.ErrorCore
             ttError.errorObject    = errorObject
             ttError.errorRecord    = errorRecord
             ttError.errorTag       = errorTag
-            ttError.logTime        = com.quarix.util.dtutil:sysNow().
+            .
          return true.
       end.
       return false.
@@ -212,20 +213,22 @@ class com.quarix.service.error.ErrorCore
 
     /*roxanam: add error information to temp-table (get information from callstack can be proccessed here)*/
    method protected override logical ErrorRegister (input errorLevel as integer, input errorCode as integer, input errorText as character, input errorFile as character, input errorMethod as character, input errorLine as integer):
+
    define buffer ttError for ttError.
 
       if errorLevel ne ?
          and errorCode ne ?
-         and (errorLevel le LogLevel or errorLevel eq ApplicationLevel()) then do:
+         and (LogLevel = 0 or errorLevel le LogLevel or errorLevel eq ApplicationLevel()) then do:
          create ttError.
          assign
+            ttError.logTime        = dtutil:sysNow()
             ttError.errorLevel     = errorLevel
             ttError.errorCode      = errorCode
             ttError.errorMessage   = errorText
             ttError.errorFile      = errorFile
             ttError.errorMethod    = errorMethod
             ttError.errorLine      = errorLine
-            ttError.logTime        = com.quarix.util.dtutil:sysNow().
+            .
          return true.
       end.
       return false.
@@ -299,6 +302,12 @@ class com.quarix.service.error.ErrorCore
       end.
       query qryErr:query-open().
       return true.
+   end method.
+
+   method public override handle GetTmpErrorHandle():
+
+	return buffer ttError:table-handle.
+
    end method.
 
    method public override void DumpToXml():

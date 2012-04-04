@@ -400,6 +400,81 @@ class com.quarix.data.parser.JsonWriter
       input queryString    as character,
       input standardRows   as logical):
 
+      &if keyword-all('write-json') ne ? &then
+      define variable lcJson    as longchar no-undo.
+      define variable httBuf    as handle   no-undo.
+      define variable hQry      as handle   no-undo.
+      define variable httRowid  as handle   no-undo.
+      define variable hFld      as handle   no-undo extent.
+      define variable hRowId    as handle   no-undo.
+      define variable hRowState as handle   no-undo.
+      define variable hSortOrd  as handle   no-undo.
+      define variable iNumFld   as integer  no-undo.
+
+      if not valid-handle(hTT) then
+         return false.
+
+      httBuf = hTT:default-buffer-handle.
+
+      if not valid-handle(httBuf) then
+        return false.
+
+      hRowId = httBuf:buffer-field ('rowid') no-error.
+      hRowState = httBuf:buffer-field ('rowstate') no-error.
+
+      create query hQry.
+      hQry:set-buffers(httBuf).
+      hQry:forward-only = true.
+
+      if not Util:IsEmpty(queryString) then
+         hQry:query-prepare(substitute('for each &1 &2':u, httBuf:name, queryString)) no-error.
+
+      if hQry:prepare-string eq ? then
+      do:
+        assign hSortOrd = httBuf:buffer-field('SortOrder':U) no-error.
+
+        if valid-handle(hSortOrd)
+        then hQry:query-prepare(substitute('for each &1 no-lock by &1.SortOrder':U, httBuf:name)) no-error.
+
+        /* try to see if there is a display index defined, in cases where display order is different from PK */
+        if hQry:prepare-string eq ?
+        then hQry:query-prepare(substitute('for each &1 use-index _display':u, httBuf:name)) no-error.
+
+         if hQry:prepare-string eq ?
+         then hQry:query-prepare(substitute('for each &1':u, httBuf:name)) no-error.
+
+      end. /* if hQry:prepare-string eq ? */
+
+      hQry:query-open() no-error.
+
+      httRowid = handle(hTT:private-data) no-error.
+
+      do while hQry:get-next(no-lock):
+             if valid-handle(hRowId) then
+             hRowId:buffer-value () = getTableRowid(hTT, httRowid).
+
+             if valid-handle(hRowState) then
+             hRowState:buffer-value () = if httBuf:row-state eq ? then 0 else httBuf:row-state.
+      end.
+
+      extent(hFld) = httBuf:num-fields.
+
+      do iNumFld = 1 to httBuf:num-fields:
+          hFld[iNumFld] = httBuf:buffer-field (iNumFld).
+          hFld[iNumFld]:serialize-name = ''.
+      end.
+
+      hTT:write-json ('longchar',lcJson,true).
+
+      lcJson = replace(lcJson, '~n    "":', '').
+      lcJson = replace(lcJson, '~n  ~{','[').
+      lcJson = replace(lcJson, '~n  ~}',']').
+      lcJson = substring(lcJson,length(substitute('~{"&1": ~[',httBuf:name)) + 1).
+      lcJson = substring(lcJson,1,r-index(lcJson,'~]~}') - 1).
+
+      Out(lcJson).
+      &else
+
       define variable httBuf    as handle    no-undo.
       define variable httRowid  as handle    no-undo.
       define variable hQry      as handle    no-undo.
@@ -427,14 +502,14 @@ class com.quarix.data.parser.JsonWriter
 
       if hQry:prepare-string eq ? then
       do:
-		assign hFld = httBuf:buffer-field('SortOrder':U) no-error.
+        assign hFld = httBuf:buffer-field('SortOrder':U) no-error.
 
-		if valid-handle(hFld)
-		then hQry:query-prepare(substitute('for each &1 no-lock by &1.SortOrder':U, httBuf:name)) no-error.
+        if valid-handle(hFld)
+        then hQry:query-prepare(substitute('for each &1 no-lock by &1.SortOrder':U, httBuf:name)) no-error.
 
-		/* try to see if there is a display index defined, in cases where display order is different from PK */
-		if hQry:prepare-string eq ?
-		then hQry:query-prepare(substitute('for each &1 use-index _display':u, httBuf:name)) no-error.
+        /* try to see if there is a display index defined, in cases where display order is different from PK */
+        if hQry:prepare-string eq ?
+        then hQry:query-prepare(substitute('for each &1 use-index _display':u, httBuf:name)) no-error.
 
          if hQry:prepare-string eq ?
          then hQry:query-prepare(substitute('for each &1':u, httBuf:name)) no-error.
@@ -537,6 +612,7 @@ class com.quarix.data.parser.JsonWriter
       end.
 
       return numRow gt 0.
+      &endif
 
       catch appError as Progress.Lang.Error :
          ThrowError(input appError).

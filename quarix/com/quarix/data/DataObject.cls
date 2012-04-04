@@ -34,7 +34,9 @@ using com.quarix.data.*.
 using com.quarix.web.*.
 
 
-class com.quarix.data.DataObject inherits BaseObject:
+class com.quarix.data.DataObject 
+    inherits BaseObject
+    implements com.quarix.base.iDisposable:
 
 	define public property ACTION_PAINT				as character							no-undo initial 'paint':u
         get.
@@ -163,10 +165,35 @@ class com.quarix.data.DataObject inherits BaseObject:
 
 	end constructor.
 
-
 	destructor public DataObject ( ):
 
+		define variable iNumBuf	as integer	no-undo.
+		define variable hBuf	as handle	no-undo.
+		define variable htt		as handle	no-undo.
+
 		UnloadInstance(DataContext).
+
+		if valid-handle(datasetHandle)
+		then do:
+			datasetHandle:empty-dataset ().
+
+			do iNumBuf = 1 to datasetHandle:num-buffers:
+
+				hBuf = datasetHandle:get-buffer-handle (iNumBuf).
+
+				htt = hBuf:table-handle.
+
+				delete object hBuf no-error.
+
+				delete object htt no-error.
+			end.
+
+			delete object datasetHandle no-error.
+
+			if valid-handle(datasetHandle)
+			then datasetHandle = ?.
+
+		end. /* if valid-handle(datasetHandle) */
 
 	end destructor.
 
@@ -600,6 +627,10 @@ class com.quarix.data.DataObject inherits BaseObject:
         define variable lRetValue		as logical		no-undo.
         define variable cLogDirectory	as character	no-undo.
         define variable cFileName		as character	no-undo.
+        define variable iStartTime		as integer		no-undo.
+        define variable iCallDuration	as integer		no-undo.
+
+        iStartTime = etime.
 
         if not valid-object(DataRequest)
         then return false.
@@ -697,6 +728,12 @@ class com.quarix.data.DataObject inherits BaseObject:
             delete object appError.
             return false.
         end catch.
+        finally:
+        	iCallDuration = etime - iStartTime.
+
+        	message 'Serialization: ' iCallDuration skip.
+
+        end finally.
 
     end method.
 
@@ -1195,7 +1232,10 @@ class com.quarix.data.DataObject inherits BaseObject:
 
 		hDsDataset:empty-dataset ().
 
-		return dataFetch(output dataset-handle hDsDataset by-reference).
+		if idlist:IdListHasData()
+		then return dataFetch(output dataset-handle hDsDataset by-reference).
+
+		return true.
 
         catch appError as Progress.Lang.Error :
             ThrowError(input appError).
@@ -1273,7 +1313,64 @@ class com.quarix.data.DataObject inherits BaseObject:
         return true.
     end method.
 
-    method public void AfterRequest  (actionName as character):
+    method public logical AfterRequest  (actionName as character):
+        return true.
+    end method.
+
+    method public void ClearSessionParameters():
+
+    	if valid-object(DataContext)
+    	then do:
+    		DataContext:ClearProperty('FilterSessionID':u).
+    		DataContext:ClearProperty('FilterLanguageID':u).
+    		DataContext:ClearProperty('FilterUsrID':u).
+    		DataContext:ClearProperty('Company':u).
+    		DataContext:ClearProperty('CustomerID':u).
+    	end.
+
+    end method.
+
+    method public void ClearContextManagerSessionParameters():
+
+    	if valid-object(ContextManager)
+    	then do:
+    		ContextManager:SetValue(input 'SessionID':u, input '':u).
+	    	ContextManager:SetValue(input 'LanguageID':u, input '':u).
+    		ContextManager:SetValue(input 'UsrID':u, input '':u).
+    		ContextManager:SetValue(input 'Company':u, input '':u).
+    		ContextManager:SetValue(input 'CustomerID':u, input '':u).
+    	end.
+
+    end method.
+
+    method public void SeSessionSessionID(input cFilterSessionID as character):
+
+    	DataContext:SetProperty('FilterSessionID':u, cFilterSessionID).
+
+    end method.
+
+    method public void SeSessionLanguageID(input cFilterLanguageID as character):
+
+    	DataContext:SetProperty('FilterLanguageID':u, cFilterLanguageID).
+
+    end method.
+
+    method public void SeSessionUsrID(input cFilterUsrID as character):
+
+    	DataContext:SetProperty('FilterUsrID':u, cFilterUsrID).
+
+    end method.
+
+    method public void SeSessionCompany(input cFilterCompany as character):
+
+    	DataContext:SetProperty('Company':u, cFilterCompany).
+
+    end method.
+
+    method public void SeSessionCustomer(input cFilterCustomer as character):
+
+    	DataContext:SetProperty('CustomerID':u, cFilterCustomer).
+
     end method.
 
     method public void SetSessionParameters():
@@ -1282,25 +1379,28 @@ class com.quarix.data.DataObject inherits BaseObject:
     	define variable cFilterLanguageID	as character	no-undo.
     	define variable cFilterUsrID		as character	no-undo.
     	define variable cCompany			as character	no-undo.
+    	define variable cCustomerID			as character	no-undo.
 
-    	if not valid-object(DataContext)
+    	ClearContextManagerSessionParameters().
+
+    	if not valid-object(DataContext) or
+    		not valid-object(ContextManager)
     	then return.
 
     	assign
     		cFilterSessionID	= DataContext:GetProperty('FilterSessionID':u)
     		cFilterLanguageID	= DataContext:GetProperty('FilterLanguageID':u)
     		cFilterUsrID		= DataContext:GetProperty('FilterUsrID':u)
-    		cCompany			= DataContext:GetProperty('Company':u).
+    		cCompany			= DataContext:GetProperty('Company':u)
+    		cCustomerID			= DataContext:GetProperty('CustomerID':u).
 
-    	DataContext:ClearProperty('FilterSessionID':u).
-    	DataContext:ClearProperty('FilterLanguageID':u).
-    	DataContext:ClearProperty('FilterUsrID':u).
-    	DataContext:ClearProperty('Company':u).
+		ClearSessionParameters().
 
     	ContextManager:SetValue(input 'SessionID':u, input cFilterSessionID).
     	ContextManager:SetValue(input 'LanguageID':u, input cFilterLanguageID).
     	ContextManager:SetValue(input 'UsrID':u, input cFilterUsrID).
     	ContextManager:SetValue(input 'Company':u, input cCompany).
+    	ContextManager:SetValue(input 'CustomerID':u, input cCustomerID).
 
         return.
 
@@ -1309,6 +1409,32 @@ class com.quarix.data.DataObject inherits BaseObject:
             delete object appError.
             return.
         end catch.
+
+    end method.
+
+    method public void DisplaySessionParameters():
+
+    	define variable cFilterSessionID	as character	no-undo.
+    	define variable cFilterLanguageID	as character	no-undo.
+    	define variable cFilterUsrID		as character	no-undo.
+    	define variable cCompany			as character	no-undo.
+    	define variable cCustomerID			as character	no-undo.
+
+    	ContextManager:GetValue(input 'SessionID':u, output cFilterSessionID).
+    	ContextManager:GetValue(input 'LanguageID':u, output cFilterLanguageID).
+    	ContextManager:GetValue(input 'UsrID':u, output cFilterUsrID).
+    	ContextManager:GetValue(input 'Company':u, output cCompany).
+    	ContextManager:GetValue(input 'CustomerID':u, output cCustomerID).
+
+    	message
+    		'------------------------------------------------------------------------------------------------------------------------------':U skip
+    		'cFilterSessionID' cFilterSessionID skip
+    		'cFilterLanguageID' cFilterLanguageID skip
+    		'cFilterUsrID' cFilterUsrID skip
+    		'cCompany' cCompany skip
+    		'cCustomerID' cCustomerID skip
+    		'------------------------------------------------------------------------------------------------------------------------------':U skip
+		view-as alert-box.
 
     end method.
 

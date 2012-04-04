@@ -381,12 +381,12 @@ class com.quarix.web.Response
       input dtExpire as datetime-tz, input stPath as character,
       input stDomain as character, input fSecure as logical):
 
-      DEFINE VARIABLE dzNow AS DATETIME-TZ NO-UNDO.
+      define variable dzNow as datetime-tz no-undo.
 
       if Util:IsEmpty(stPath) and valid-object(Request) then
          stPath = Request:ApplicationPath.
 
-      ASSIGN dzNow = com.quarix.util.dtutil:sysNow().
+      assign dzNow = dtutil:sysNow().
 
       stValue  = substitute('&1&2&3&4&5':u,
          Util:UrlEncode(stValue,'cookie':u),

@@ -155,13 +155,13 @@ class com.quarix.service.session.SessionCore
 
       define variable recCount as integer  no-undo initial 5.
       define variable dtExpire as datetime no-undo.
-      DEFINE VARIABLE dzNow    AS DATETIME-TZ NO-UNDO.
+      define variable dzNow    as datetime-tz no-undo.
 
       super:Start(sessId, sessTimeOut).
 
       /* clean-up some orphan sessions if session time-out set */
       if MaxInactivityInterval gt 0 then do:
-         dtExpire = com.quarix.util.dtutil:nowTZ() - MaxInactivityInterval * 1000.
+         dtExpire = dtutil:nowTZ() - MaxInactivityInterval * 1000.
          for each sessPool no-lock
             where sessPool.last_time lt dtExpire
                on error undo, throw:
@@ -174,7 +174,7 @@ class com.quarix.service.session.SessionCore
       for each sessPool exclusive-lock
          where sessPool.sess_id eq ID
             on error undo, throw:
-         ASSIGN dzNow = com.quarix.util.dtutil:nowTZ().
+         assign dzNow = dtutil:nowTZ().
          if sessPool.app_id eq Application:ID and
             dzNow - sessPool.last_time le MaxInactivityInterval * 1000 then
             assign

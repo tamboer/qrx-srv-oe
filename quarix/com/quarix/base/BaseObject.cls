@@ -30,7 +30,8 @@ routine-level on error undo, throw.
 
 using Progress.Lang.Object.
 
-class com.quarix.base.BaseObject use-widget-pool:
+class com.quarix.base.BaseObject
+    implements com.quarix.base.iBaseObject use-widget-pool:
 
    define private variable currentApp  as character no-undo.
 
@@ -130,6 +131,14 @@ class com.quarix.base.BaseObject use-widget-pool:
 
          return ContextManager.
 
+      end get.
+      private set.
+
+    define public property dtUtil as com.quarix.service.dtutil.dtUtilBase
+      get:
+         if not valid-object(dtUtil) then
+            dtUtil = cast(GetInstance('com.quarix.service.dtutil.dtUtilBase':u), com.quarix.service.dtutil.dtUtilBase).
+         return dtUtil.
       end get.
       private set.
 

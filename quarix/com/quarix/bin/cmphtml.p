@@ -256,8 +256,8 @@ output stream _sCmpOut to value(cOutFile) unbuffered no-convert.
 put stream _sCmpOut unformatted
   '/******************************************************************':U skip
   '**** File: ':U cOutFile skip
-  '**** Generated on: ' string(com.quarix.util.dtutil:sysDate(),'99/99/9999':U)
-  ' ':U string(com.quarix.util.dtutil:sysTime(),'HH:MM:SS':U) skip
+  '**** Generated on: ' string(today,'99/99/9999':U)
+  ' ':U string(time,'HH:MM:SS':U) skip
   '**** Source file: ':U cInFile skip
   '**** Options: ':U cWsOptions skip
   '****':U skip

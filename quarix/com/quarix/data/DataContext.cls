@@ -33,9 +33,11 @@ using Progress.Lang.*.
 using com.quarix.base.BaseObject.
 using com.quarix.data.*.
 
-class com.quarix.data.DataContext inherits BaseObject:
+class com.quarix.data.DataContext 
+    inherits BaseObject
+    implements com.quarix.base.iDisposable:
 
-    {com/quarix/data/dscontext.i}
+    {com/quarix/data/dscontext.i &scope=private}
 
     define private variable lastSortOrder	as integer	no-undo.
     define private variable iNumRec			as integer	no-undo.
@@ -81,10 +83,9 @@ class com.quarix.data.DataContext inherits BaseObject:
     end method.
 
 
-    method private character getDbRowid (bufName as character, bufRowId as character):
+    method public character getDbRowid (bufName as character, bufRowId as character):
 
         define buffer ttRowId for ttRowId.
-
 
         for each ttRowid
            where ttRowId.ttName  eq bufName
@@ -961,9 +962,6 @@ class com.quarix.data.DataContext inherits BaseObject:
         end catch.
     end method.
 
-    method public final void getQueryTables (output table ttFilter bind, output table ttSort bind):
-    end method.
-
     method public void ClearProperties():
 
     	empty temp-table ttProperty.
@@ -1287,6 +1285,22 @@ class com.quarix.data.DataContext inherits BaseObject:
 
 		ClearFilters ().
 		ClearProperties ().
+
+	end method.
+
+	method public logical RemoveTtRowId(input tableName as character, input ttRowId as character):
+
+		find first ttRowId
+			where ttRowId.ttName	= tableName
+			  and ttRowId.ttRowId	= ttRowId
+			no-lock no-error.
+
+		if not available(ttRowId)
+		then return false.
+
+		delete ttRowId.
+
+		return true.
 
 	end method.
 

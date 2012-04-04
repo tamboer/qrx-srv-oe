@@ -1,12 +1,12 @@
 
 /*------------------------------------------------------------------------
-    File        : iDataTransaction
-    Purpose     :
-    Syntax      :
-    Description :
+    File        : iDisposable
+    Purpose     : 
+    Syntax      : 
+    Description : 
     Author(s)   : Andriuhan
-    Created     : Mon Nov 29 10:40:45 EET 2010
-    Notes       :
+    Created     : Wed Apr 04 09:34:43 EEST 2012
+    Notes       : 
     License     :
     This file is part of the QRX-SRV-OE software framework.
     Copyright (C) 2011, SC Yonder SRL (http://www.tss-yonder.com)
@@ -28,23 +28,8 @@
     http://www.gnu.org/licenses/lgpl-2.1.txt
   ----------------------------------------------------------------------*/
 
-    using Progress.Lang.*.
-    using com.quarix.web.*.
+using Progress.Lang.*.
 
-    interface com.quarix.data.iDataTransaction:
-
-        method public logical HandleRequest(actionName as character, webRequest as Request, webResponse as Response).
-
-        method public logical BeforeDataFetch ().
-
-        method public logical AfterDataFetch  ().
-
-        method public logical BeforeDataUpdate ().
-
-        method public logical AfterDataUpdate  ().
-
-        method public logical DataFetch  (      output dataset-handle dsHandle).
-
-        method public logical DataUpdate (input-output dataset-handle dsHandle).
-
-    end interface.
+interface com.quarix.base.iDisposable:  
+  
+end interface.

@@ -44,10 +44,11 @@ using com.quarix.web.Response.
 &scoped-define req-var-lookup-filter    'filter':u
 &scoped-define req-var-lookup-max-rec   10
 
+class com.quarix.data.DataAccess 
+    inherits BaseObject 
+    implements iDataAccess, com.quarix.base.iDisposable:
 
-class com.quarix.data.DataAccess inherits BaseObject implements iDataAccess:
-
-    {com/quarix/data/queryTables.i &scope=private &reference-only=reference-only}
+    {com/quarix/data/dscontext.i &scope=private}
 
     {com/quarix/data/dsindexinformation.i}
 
@@ -665,6 +666,8 @@ class com.quarix.data.DataAccess inherits BaseObject implements iDataAccess:
 
         iSortOrder = 0.
 
+        if not BeforeLoadData() then return false.
+
         if not fillDataSet()
         then do:
             if valid-handle(datasetHandle)
@@ -672,6 +675,8 @@ class com.quarix.data.DataAccess inherits BaseObject implements iDataAccess:
 
             return false.
         end.
+
+        if not AfterLoadData() then return false.
 
         return true.
 
@@ -789,22 +794,23 @@ class com.quarix.data.DataAccess inherits BaseObject implements iDataAccess:
 
     method private logical fillBuffer(hBuf as handle, useSearchFilter as logical):
 
-        define variable numRel      as integer   no-undo.
-        define variable numKey      as integer   no-undo.
-        define variable numRec      as integer   no-undo.
-        define variable keyName     as character no-undo.
-        define variable dsQuery     as character no-undo.
-        define variable qryString   as character no-undo.
-        define variable startRowid  as character no-undo.
-        define variable startRow    as integer   no-undo initial ?.
-        define variable startTime   as integer   no-undo.
-        define variable queryTime   as integer   no-undo.
-        define variable hTT         as handle    no-undo.
-        define variable hQry        as handle    no-undo.
-        define variable hParentBuf  as handle    no-undo.
-        define variable firstBatch  as logical   no-undo.
-        define variable lastBatch   as logical   no-undo.
-        define variable isSearchReq as logical   no-undo.
+        define variable numRel      		as integer   	no-undo.
+        define variable numKey      		as integer   	no-undo.
+        define variable numRec      		as integer   	no-undo.
+        define variable keyName     		as character 	no-undo.
+        define variable dsQuery     		as character 	no-undo.
+        define variable qryString   		as character 	no-undo.
+        define variable startRowid  		as character 	no-undo.
+        define variable startRow    		as integer   	no-undo initial ?.
+        define variable startTime   		as integer   	no-undo.
+        define variable queryTime   		as integer   	no-undo.
+        define variable hTT         		as handle    	no-undo.
+        define variable hQry        		as handle    	no-undo.
+        define variable hParentBuf			as handle    	no-undo.
+        define variable firstBatch			as logical   	no-undo.
+        define variable lastBatch			as logical   	no-undo.
+        define variable isSearchReq			as logical   	no-undo.
+        define variable hdsContextHandle	as handle		no-undo.
 
         if LogQueryString then
         startTime = etime.
@@ -846,7 +852,9 @@ class com.quarix.data.DataAccess inherits BaseObject implements iDataAccess:
         if Util:IsEmpty(dsQuery)
         then return false.
 
-        qryString = updateDataSourceQuery(hBuf).
+        hdsContextHandle = DataContext:dsContextHandle.
+
+        qryString = updateDataSourceQuery(hBuf, input dataset-handle hdsContextHandle by-reference).
 
         if Util:IsEmpty(qryString)
         then return false.
@@ -1079,17 +1087,18 @@ class com.quarix.data.DataAccess inherits BaseObject implements iDataAccess:
 
     method private logical IsFirstRecord(hBuf as handle, lastBatch as logical, numRecords as integer):
 
-        define variable hQry        as handle       no-undo.
-        define variable qryString   as character    no-undo.
-        define variable dsQuery     as character    no-undo.
-        define variable oldRowid    as rowid        no-undo.
-        define variable newRowid    as rowid        no-undo.
-        define variable hTT         as handle       no-undo.
-        define variable fieldName   as character    no-undo.
-        define variable fieldValue  as character    no-undo.
-        define variable tableName   as character    no-undo.
-        define variable operName    as character    no-undo.
-        define variable lPrepareOk  as logical      no-undo.
+        define variable hQry				as handle       no-undo.
+        define variable qryString			as character    no-undo.
+        define variable dsQuery				as character    no-undo.
+        define variable oldRowid			as rowid        no-undo.
+        define variable newRowid			as rowid        no-undo.
+        define variable hTT					as handle       no-undo.
+        define variable fieldName			as character    no-undo.
+        define variable fieldValue			as character    no-undo.
+        define variable tableName			as character    no-undo.
+        define variable operName			as character    no-undo.
+        define variable lPrepareOk			as logical      no-undo.
+        define variable hdsContextHandle	as handle		no-undo.
 
         if not valid-handle(hBuf)
         then return ?.
@@ -1108,7 +1117,9 @@ class com.quarix.data.DataAccess inherits BaseObject implements iDataAccess:
         if Util:IsEmpty(dsQuery)
         then return ?.
 
-        qryString = updateDataSourceQuery(hBuf).
+        hdsContextHandle = DataContext:dsContextHandle.
+
+        qryString = updateDataSourceQuery(hBuf, input dataset-handle hdsContextHandle by-reference).
 
         if Util:IsEmpty(qryString)
         then return ?.
@@ -1172,7 +1183,7 @@ class com.quarix.data.DataAccess inherits BaseObject implements iDataAccess:
                 fieldName = entry(2, fieldName, '.':u) .
 
             operName   = DataContext:GetFilterOperator(tableName, fieldName, fieldValue).
-            qryString  = updateDataSourceQuery(hBuf).
+            qryString = updateDataSourceQuery(hBuf, input dataset-handle hdsContextHandle by-reference).
 
             if Util:IsEmpty(qryString)
             then return ?.
@@ -1306,13 +1317,13 @@ class com.quarix.data.DataAccess inherits BaseObject implements iDataAccess:
 
     end method.
 
-    method protected logical AfterRowFill(input hBuf as handle):
+    method public logical AfterRowFill(input hBuf as handle):
 
         return true.
 
     end method.
 
-    method protected logical BeforeRowFill(input hBuf as handle):
+    method public logical BeforeRowFill(input hBuf as handle):
 
         return true.
 
@@ -1658,6 +1669,16 @@ class com.quarix.data.DataAccess inherits BaseObject implements iDataAccess:
     end method.
 
 
+    method public logical BeforeLoadData ():
+        return true.
+    end method.
+
+
+    method public logical AfterLoadData ():
+        return true.
+    end method.
+
+
     method public logical BeforeSaveData ():
         return true.
     end method.
@@ -1908,11 +1929,27 @@ class com.quarix.data.DataAccess inherits BaseObject implements iDataAccess:
 
     end method.
 
-
     method public final logical AddDataSource
-        (pcTable    as character, phBuffer      as handle,
-        pcKeyFields as character, pcWhere       as character,
-        pcFieldsMap as character, excludeFields as character, includeFields as character, joinClause as character):
+        (pcTable      as character, phBuffer      as handle,
+        pcKeyFields   as character, pcWhere       as character,
+        pcFieldsMap   as character, excludeFields as character,
+        includeFields as character, joinClause    as character):
+
+        return AddDataSource (pcTable, phBuffer, pcKeyFields, pcWhere, pcFieldsMap, excludeFields, includeFields, joinClause, false).
+
+    end method.
+
+
+    method public final logical AddDataSource(
+    	pcTable			as character,
+        phBuffer		as handle,
+        pcKeyFields		as character,
+        pcWhere			as character,
+        pcFieldsMap		as character,
+        excludeFields	as character,
+        includeFields	as character,
+        joinClause		as character,
+        joinType		as logical):
 
         define variable hBuffer     as handle       no-undo.
         define variable hSrcBuffer  as handle       no-undo.
@@ -1947,7 +1984,11 @@ class com.quarix.data.DataAccess inherits BaseObject implements iDataAccess:
             hSrcBuffer:private-data = getBufferExcludeFields (hBuffer, excludeFields, includeFields).
 
         if not valid-handle(hDataSource)
-        then create data-source hDataSource.
+        then do:
+        	create data-source hDataSource.
+
+        	hDataSource:private-data = 'dynamic':U.
+        end.
         else do:
             if hDataSource:num-source-buffers gt 0
             then do:
@@ -1962,7 +2003,7 @@ class com.quarix.data.DataAccess inherits BaseObject implements iDataAccess:
                 end.
 
                 if valid-handle(hDataSource:query)
-                then cQryString  = substitute('&1, each &2 no-lock':u, trim(hDataSource:query:prepare-string, ' .':u), hSrcBuffer:name).
+                then cQryString  = substitute('&1, &2 &3 no-lock':u, trim(hDataSource:query:prepare-string, ' .':u), if joinType then 'first' else 'each',hSrcBuffer:name).
 
                 pcFieldsMap = trim(substitute('&1,&2', hBuffer:data-source-complete-map, pcFieldsMap), ',':u).
 
@@ -2045,10 +2086,16 @@ class com.quarix.data.DataAccess inherits BaseObject implements iDataAccess:
     end method.
 
 
-    method public final logical AddDataSource
-        (pcTable    as character, pcBuffer      as character,
-        pcKeyFields as character, pcWhere       as character,
-        pcFieldsMap as character, excludeFields as character, includeFields as character, joinClause as character):
+    method public final logical AddDataSource(
+    	pcTable			as character,
+    	pcBuffer		as character,
+        pcKeyFields		as character,
+        pcWhere			as character,
+        pcFieldsMap		as character,
+        excludeFields	as character,
+        includeFields	as character,
+        joinClause		as character,
+        joinType		as logical):
 
         define variable hSrcBuffer as handle no-undo.
 
@@ -2067,7 +2114,8 @@ class com.quarix.data.DataAccess inherits BaseObject implements iDataAccess:
             pcFieldsMap,
             excludeFields,
             includeFields,
-            joinClause
+            joinClause,
+            joinType
             )
         then do:
             DetachDataSource(pcTable).
@@ -2089,6 +2137,20 @@ class com.quarix.data.DataAccess inherits BaseObject implements iDataAccess:
             delete object appError.
             return false.
         end catch.
+
+    end method.
+
+    method public final logical AddDataSource(
+    	pcTable			as character,
+    	pcBuffer		as character,
+        pcKeyFields		as character,
+        pcWhere			as character,
+        pcFieldsMap		as character,
+        excludeFields	as character,
+        includeFields	as character,
+        joinClause		as character):
+
+       	return AddDataSource(pcTable, pcBuffer, pcKeyFields, pcWhere, pcFieldsMap, excludeFields, includeFields, joinClause, false).
 
     end method.
 
@@ -2167,6 +2229,15 @@ class com.quarix.data.DataAccess inherits BaseObject implements iDataAccess:
 
         hBuf:detach-data-source() no-error.
 
+		do numBuf = 1 to 16:
+            if hBuffer[numBuf] <> ?				and
+            	valid-handle(hBuffer[numBuf])	and
+                hBuffer[numBuf]:dynamic
+            then delete object hBuffer[numBuf] no-error.
+
+            hBuffer[numBuf] = ?.
+        end.
+
         do numBuf = 1 to hDataSource:num-source-buffers:
             hBuffer[numBuf] = hDataSource:get-source-buffer(numBuf).
         end.
@@ -2185,13 +2256,16 @@ class com.quarix.data.DataAccess inherits BaseObject implements iDataAccess:
 
         /* delete the source buffers if dinamicaly created */
         do numBuf = 1 to 16:
-            if valid-handle(hBuffer[numBuf]) and
+            if hBuffer[numBuf] <> ?				and
+            	valid-handle(hBuffer[numBuf])	and
                 hBuffer[numBuf]:dynamic
             then delete object hBuffer[numBuf] no-error.
+
+            hBuffer[numBuf] = ?.
         end.
 
         if valid-handle(hDataSource) and
-            hDataSource:dynamic
+            hDataSource:private-data = 'dynamic':U
         then delete object hDataSource no-error.
 
         return.
@@ -2519,7 +2593,7 @@ class com.quarix.data.DataAccess inherits BaseObject implements iDataAccess:
 
     end method.
 
-    method public final void localizeDataset (dataset-handle dsHandle):
+    method public final void LocalizeDataset (dataset-handle dsHandle):
 
         define variable numTbl as integer no-undo.
         define variable hTT    as handle  no-undo.
@@ -2598,7 +2672,7 @@ class com.quarix.data.DataAccess inherits BaseObject implements iDataAccess:
     end method.
 
 
-    method public final character getFullFieldName (fieldName as character):
+    method public final character GetFullFieldName (fieldName as character):
 
         define variable fieldHandle as handle no-undo.
 
@@ -2627,7 +2701,7 @@ class com.quarix.data.DataAccess inherits BaseObject implements iDataAccess:
 
     end method.
 
-    method private character updateDataSourceQuery (hBuf as handle):
+    method private character updateDataSourceQuery (hBuf as handle, input dataset dscontext):
 
         define variable hDatasource   as handle    no-undo.
         define variable hSrcBuffer    as handle    no-undo.
@@ -2654,8 +2728,6 @@ class com.quarix.data.DataAccess inherits BaseObject implements iDataAccess:
 
         if not valid-object(DataContext)
         then return ?.
-
-        DataContext:getQueryTables(output table ttFilter bind, output table ttSort bind).
 
         for each ttFilter
             where ttFilter.fieldName ne ?
@@ -2690,7 +2762,7 @@ class com.quarix.data.DataAccess inherits BaseObject implements iDataAccess:
                     and ttFilter.fieldValue  begins 'outer-join':u
                     on error undo, throw:
 
-                    bufferQuery = substitute('&1 &2', bufferQuery, ttFilter.fieldValue).
+                    bufferQuery = substitute('&1 &2', bufferQuery, NormalizeQuery(ttFilter.fieldValue)).
                     /* we can only have/use one outer-join... */
                     leave.
                 end.
@@ -2709,9 +2781,9 @@ class com.quarix.data.DataAccess inherits BaseObject implements iDataAccess:
                         else
                         'and':u,
                         if ttFilter.fieldName eq ? then
-                        ttFilter.fieldValue
+                        NormalizeQuery(ttFilter.fieldValue)
                         else
-                        DataContext:getFieldFilterCondition(ttFilter.dbFieldName, ttFilter.operName, ttFilter.fieldValue)).
+                        DataContext:getFieldFilterCondition(NormalizeQuery(ttFilter.dbFieldName), NormalizeQuery(ttFilter.operName), NormalizeQuery(ttFilter.fieldValue))).
                 end.
 
                 queryString = substitute('&1 &2 &3':u, queryString, if queryString eq '':u then '':u else ', ':u, bufferQuery).
@@ -2731,7 +2803,7 @@ class com.quarix.data.DataAccess inherits BaseObject implements iDataAccess:
             on error undo, throw:
 
             queryString = substitute('&1 by &2 &3':u, queryString,
-                GetPhysicalFieldName (substitute('&1.&2':u, ttSort.tableName, ttSort.fieldName)),
+                NormalizeQuery(GetPhysicalFieldName (substitute('&1.&2':u, ttSort.tableName, ttSort.fieldName))),
                 if ttSort.descOrder then 'descending':u else '':u).
         end.
 
@@ -3522,6 +3594,18 @@ class com.quarix.data.DataAccess inherits BaseObject implements iDataAccess:
 
     end method.
 
+    method public character NormalizeQuery (input cQueryString as character):
+        define variable cExceptList   as character no-undo initial '~~176,~\'.
+        define variable cExceptString as character no-undo.
+        define variable iNum          as integer   no-undo.
+
+        do iNum = 1 to num-entries(cExceptList):
+            cExceptString = entry(iNum,cExceptList).
+            if index(cQueryString,cExceptString) eq 0 then next.
+            cQueryString = Util:RemoveString(cQueryString,cExceptString).
+        end.
+
+        return cQueryString.
+    end method.
+
 end class.
-
-

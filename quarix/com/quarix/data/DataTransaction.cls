@@ -36,7 +36,7 @@ using Progress.Lang.*.
 
 class com.quarix.data.DataTransaction
     inherits DataObject
-    implements iDataTransaction, iWebObject:
+    implements iDataTransaction, iWebObject, com.quarix.base.iDisposable:
 
     define private temp-table ttModel no-undo
         field dataObject		as Progress.Lang.Object
@@ -534,7 +534,7 @@ class com.quarix.data.DataTransaction
 
     end method.
 
-    method public override logical dataFetch (output dataset-handle dsHandle):
+    method public override logical DataFetch (output dataset-handle dsHandle):
 
     	define variable dtObject           as com.quarix.data.DataObject   no-undo.
     	define variable hTT                as handle                       no-undo.
@@ -728,6 +728,14 @@ class com.quarix.data.DataTransaction
     end method.
 
     method public logical AfterDataFetch ():
+        return true.
+    end method.
+
+    method public logical BeforeDataUpdate ():
+        return true.
+    end method.
+
+    method public logical AfterDataUpdate ():
         return true.
     end method.
 
@@ -988,7 +996,7 @@ class com.quarix.data.DataTransaction
 
     end method.
 
-    method public override logical dataUpdate(input-output dataset-handle dsHandle):
+    method public override logical DataUpdate(input-output dataset-handle dsHandle):
 
     	if not valid-handle(dsHandle)
     	then do:
@@ -1007,12 +1015,26 @@ class com.quarix.data.DataTransaction
 
     	datasetHandle = dsHandle.
 
+    	if not BeforeDataUpdate()
+        then do:
+            restoreDatasetHandle().
+
+            return false.
+        end.
+
     	if not SaveData()
     	then do:
     	    restoreDatasetHandle().
 
     	    return false.
     	end.
+
+    	if not AfterDataUpdate()
+        then do:
+            restoreDatasetHandle().
+
+            return false.
+        end.
 
     	restoreDatasetHandle().
 

@@ -1,11 +1,14 @@
 
 /*------------------------------------------------------------------------
-    File        : iDataTransaction
+    File        : FactoryHelper.p
     Purpose     :
+
     Syntax      :
+
     Description :
+
     Author(s)   : Andriuhan
-    Created     : Mon Nov 29 10:40:45 EET 2010
+    Created     : Tue Feb 07 14:47:45 EET 2012
     Notes       :
     License     :
     This file is part of the QRX-SRV-OE software framework.
@@ -28,23 +31,21 @@
     http://www.gnu.org/licenses/lgpl-2.1.txt
   ----------------------------------------------------------------------*/
 
-    using Progress.Lang.*.
-    using com.quarix.web.*.
+procedure getInstance:
+   define input  parameter className       as character            no-undo.
+   define output parameter classInstance   as Progress.Lang.Object no-undo.
 
-    interface com.quarix.data.iDataTransaction:
+   case className:
+      /* add custom localization services */
+      when 'dtUtilBase':U then
+         classInstance = new com.quarix.service.dtutil.dtUtilBase().
 
-        method public logical HandleRequest(actionName as character, webRequest as Request, webResponse as Response).
-
-        method public logical BeforeDataFetch ().
-
-        method public logical AfterDataFetch  ().
-
-        method public logical BeforeDataUpdate ().
-
-        method public logical AfterDataUpdate  ().
-
-        method public logical DataFetch  (      output dataset-handle dsHandle).
-
-        method public logical DataUpdate (input-output dataset-handle dsHandle).
-
-    end interface.
+      /* default localization service     */
+      otherwise
+      &if keyword-all('static':u) ne ? &then
+         classInstance = com.quarix.service.dtutil.dtUtilCore:GetInstance().
+      &else
+         classInstance = new com.quarix.service.dtutil.dtUtilCore().
+      &endif
+   end case.
+end procedure.

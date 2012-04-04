@@ -23,102 +23,114 @@
 routine-level on error undo, throw.
 
 using com.quarix.system.ApplicationUser.
+using com.quarix.service.authentication.AuthenticationCore.
 
 class com.quarix.service.authentication.AuthenticationCore
     inherits      com.quarix.base.BaseObject
     implements    com.quarix.base.iSingleton, com.quarix.service.authentication.iAuthentication
     use-widget-pool:
 
-   /*
-	  Method: Login
-	  Authenticate the user for currently selected application.
+    &if keyword-all('static':u) ne ? &then
+    define private static variable authenticationCore as AuthenticationCore no-undo.
 
-	  Parameters:
-	  	userName   - [in] user login account
-	    userPasswd - [in] user password
+    method public static AuthenticationCore GetInstance():
+        if not valid-object(authenticationCore) then
+            authenticationCore = new AuthenticationCore().
+        return authenticationCore.
+    end method.
+   &endif
 
-	  Returns:
-	  	authentication result, true if user credentials were valid for given application
-   */
+    /*
+       Method: Login
+       Authenticate the user for currently selected application.
 
-   method  public logical Login
-     (appUser     as ApplicationUser,
-      userPasswd  as character):
+       Parameters:
+           userName   - [in] user login account
+         userPasswd - [in] user password
 
-      define buffer userBuf for core_user.
-      define buffer appBuf  for core_app_user.
+       Returns:
+           authentication result, true if user credentials were valid for given application
+    */
 
-      if valid-object(appUser) and valid-object(Application) then for each userBuf no-lock
-         where userBuf.user_login eq appUser:Login
-           and userBuf.user_passwd = encode(userPasswd),
-          each appBuf no-lock
+    method  public logical Login
+        (appUser     as ApplicationUser,
+        userPasswd  as character):
+
+        define buffer userBuf for core_user.
+        define buffer appBuf  for core_app_user.
+
+        if valid-object(appUser) and valid-object(Application) then
+            for each userBuf no-lock
+                where userBuf.user_login eq appUser:Login
+                and userBuf.user_passwd = encode(userPasswd),
+                each appBuf no-lock
                 where appBuf.app_id  eq Application:ID
                 and   appBuf.user_id eq userBuf.user_id:
-         return true.
-      end.
-      return false.
+                return true.
+            end.
+        return false.
 
-      catch appError as Progress.Lang.Error :
-         ThrowError(input appError).
-         delete object appError.
-         return false.
-      end catch.
-   end method.
+        catch appError as Progress.Lang.Error :
+            ThrowError(input appError).
+            delete object appError.
+            return false.
+        end catch.
+    end method.
 
-   method public void    Logout (input appUser as ApplicationUser):
-   end method.
+    method public void    Logout (input appUser as ApplicationUser):
+    end method.
 
-   method  public logical ChangePassword (input appUser as ApplicationUser, input oldPasswd as character, input newPasswd as character):
-      define buffer userBuf for core_user.
-      define buffer appBuf  for core_app_user.
+    method  public logical ChangePassword (input appUser as ApplicationUser, input oldPasswd as character, input newPasswd as character):
+        define buffer userBuf for core_user.
+        define buffer appBuf  for core_app_user.
 
-      if valid-object(appUser) and valid-object(Application) then
-         for each userBuf exclusive-lock
-         where userBuf.user_login eq appUser:Login
-           and userBuf.user_passwd = encode(oldPasswd),
-          each appBuf no-lock
+        if valid-object(appUser) and valid-object(Application) then
+            for each userBuf exclusive-lock
+                where userBuf.user_login eq appUser:Login
+                and userBuf.user_passwd = encode(oldPasswd),
+                each appBuf no-lock
                 where appBuf.app_id  eq Application:ID
                 and   appBuf.user_id eq userBuf.user_id
-                   on error undo, throw:
-         userBuf.user_passwd = encode(newPasswd).
-         return true.
-      end.
-      return false.
+                on error undo, throw:
+                userBuf.user_passwd = encode(newPasswd).
+                return true.
+            end.
+        return false.
 
-      catch appError as Progress.Lang.Error :
-         ThrowError(input appError).
-         delete object appError.
-         return false.
-      end catch.
-   end method.
+        catch appError as Progress.Lang.Error :
+            ThrowError(input appError).
+            delete object appError.
+            return false.
+        end catch.
+    end method.
 
-   method  public logical ResetPassword (input appUser as ApplicationUser, output newPasswd as character):
-      define buffer userBuf for core_user.
-      define buffer appBuf  for core_app_user.
+    method  public logical ResetPassword (input appUser as ApplicationUser, output newPasswd as character):
+        define buffer userBuf for core_user.
+        define buffer appBuf  for core_app_user.
 
-      if valid-object(appUser) and valid-object(Application) then
-         for each userBuf exclusive-lock
-         where userBuf.user_login eq appUser:Login,
-          each appBuf no-lock
+        if valid-object(appUser) and valid-object(Application) then
+            for each userBuf exclusive-lock
+                where userBuf.user_login eq appUser:Login,
+                each appBuf no-lock
                 where appBuf.app_id  eq Application:ID
                 and   appBuf.user_id eq userBuf.user_id
-                   on error undo, throw:
-         assign
-            newPasswd           = substring(encode(guid), 2, 12)
-            userBuf.user_passwd = encode(newPasswd).
-         return true.
-      end.
-      return false.
+                on error undo, throw:
+                assign
+                    newPasswd           = substring(encode(guid), 2, 12)
+                    userBuf.user_passwd = encode(newPasswd).
+                return true.
+            end.
+        return false.
 
-      catch appError as Progress.Lang.Error :
-         ThrowError(input appError).
-         delete object appError.
-         return false.
-      end catch.
-   end method.
+        catch appError as Progress.Lang.Error :
+            ThrowError(input appError).
+            delete object appError.
+            return false.
+        end catch.
+    end method.
 
-   method public void Reset():
-   end method.
+    method public void Reset():
+    end method.
 
 end class.
 

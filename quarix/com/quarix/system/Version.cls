@@ -31,6 +31,8 @@
 &global-define number.major   'version.major':u
 &global-define build.date     'version.lastbuild':u
 
+using com.quarix.system.Version.
+
 class com.quarix.system.Version implements com.quarix.base.iSingleton use-widget-pool final :
 
 	/*------------------------------------------------------------------------------
@@ -60,6 +62,16 @@ class com.quarix.system.Version implements com.quarix.base.iSingleton use-widget
 	   end get.
 
 	define private stream _stIn.
+
+	&if keyword-all('static':u) ne ? &then
+    define private static variable ver as Version no-undo.
+
+    method public static Version GetInstance():
+        if not valid-object(ver) then
+            ver = new Version().
+        return ver.
+    end method.
+   &endif
 
 	constructor public  Version (  ):
 	   define variable varName    as character no-undo.

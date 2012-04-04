@@ -471,6 +471,9 @@ class com.quarix.service.error.ErrorBase
       end catch.
    end method.
 
+   method public handle GetTmpErrorHandle():
+   end method.
+
    method public void DumpToXml():
    end method.
 

@@ -45,7 +45,9 @@ using com.quarix.web.*.
 &scoped-define req-var-lookup-max-rec   10
 
 
-class com.quarix.data.DataModel inherits DataObject implements iDataModel, iWebObject:
+class com.quarix.data.DataModel 
+    inherits DataObject 
+    implements iDataModel, iWebObject, com.quarix.base.iDisposable:
 
     define protected property EnableCache as logical no-undo
         get.
@@ -111,6 +113,7 @@ class com.quarix.data.DataModel inherits DataObject implements iDataModel, iWebO
     	if not valid-object(DataAccess)
     	then do:
     		ThrowError(100, 'msg_err_data_source_return':u, ?, ?).
+
     		return false.
     	end.
 
@@ -130,11 +133,15 @@ class com.quarix.data.DataModel inherits DataObject implements iDataModel, iWebO
 
         catch appError as Progress.Lang.Error :
             ThrowError(input appError).
+
             delete object appError.
+
             return false.
+
         end catch.
         finally:
-			DataAccess:DetachDataSource().
+        	if valid-object(DataAccess)
+        	then DataAccess:DetachDataSource().
         end finally.
 
     end method.
@@ -268,8 +275,14 @@ class com.quarix.data.DataModel inherits DataObject implements iDataModel, iWebO
     		return false.
     	end.
 
-    	if not BeforeLoadData() or
-			not LoadData()
+		if not BeforeLoadData()
+		then do:
+			restoreDatasetHandle().
+
+            return false.
+		end.
+
+    	if not LoadData()
 		then do:
 			restoreDatasetHandle().
 
@@ -736,7 +749,8 @@ class com.quarix.data.DataModel inherits DataObject implements iDataModel, iWebO
         if not HandleRequestService (ActionName)
         then return false.
 
-        AfterService (ActionName).
+        if not AfterService (ActionName)
+        then return false.
 
         return true.
 
@@ -752,7 +766,8 @@ class com.quarix.data.DataModel inherits DataObject implements iDataModel, iWebO
         return true.
     end method.
 
-    method public void AfterService (actionName as character):
+    method public logical AfterService (actionName as character):
+        return true.
     end method.
 
     method protected logical HandleRequestService (actionName as character):
@@ -1274,6 +1289,30 @@ class com.quarix.data.DataModel inherits DataObject implements iDataModel, iWebO
     method public logical SetSort( input tableName as character, input fieldName as character ):
 		return SetSort(tableName,fieldName, false).
 	end method.
+
+	method public character GetFilterValue (fieldname as character, operName as character):
+        define variable tableName as character no-undo.
+
+        if not valid-handle(datasetHandle) then return ?.
+
+        assign
+            fieldName = DataAccess:getFullFieldName(fieldName)
+            tableName = entry(1, fieldName, '.':u)
+            fieldName = entry(2, fieldName, '.':u)
+            no-error.
+
+        if Util:IsEmpty(fieldName) or Util:IsEmpty(tableName) then
+            return ?.
+
+        return GetFilterValue(tableName, fieldname, operName).
+
+        catch appError as Progress.Lang.Error :
+            ThrowError(input appError).
+            delete object appError.
+            return ?.
+        end catch.
+
+    end method.
 
     method public logical SetFilter (fieldName as character, operName as character, fieldValue as character):
 

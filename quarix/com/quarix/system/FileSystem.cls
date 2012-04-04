@@ -29,9 +29,21 @@
   ----------------------------------------------------------------------*/
 routine-level on error undo, throw.
 
+using com.quarix.system.FileSystem.
+
 class com.quarix.system.FileSystem
         inherits com.quarix.base.BaseObject
         implements com.quarix.base.iSingleton use-widget-pool final:
+
+   &if keyword-all('static':u) ne ? &then
+    define private static variable fileSystem as FileSystem no-undo.
+
+    method public static FileSystem GetInstance():
+        if not valid-object(fileSystem) then
+            fileSystem = new FileSystem().
+        return fileSystem.
+    end method.
+   &endif
 
    method public logical CanRead
       (nodeName as character):

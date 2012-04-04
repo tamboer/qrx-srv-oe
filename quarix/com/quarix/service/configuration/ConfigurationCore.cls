@@ -32,6 +32,7 @@ Notes       :
 routine-level on error undo, throw.
 
 using com.quarix.service.configuration.ConfigurationXml.
+using com.quarix.service.configuration.ConfigurationCore.
 
 class com.quarix.service.configuration.ConfigurationCore
    inherits com.quarix.service.configuration.ConfigurationBase
@@ -52,6 +53,16 @@ class com.quarix.service.configuration.ConfigurationCore
             xmlConfigImp = cast(GetInstance('com.quarix.service.configuration.ConfigurationXml':u), 'com.quarix.service.configuration.ConfigurationXml':u).
          return xmlConfigImp.
       end get.
+
+   &if keyword-all('static':u) ne ? &then
+    define private static variable configurationCore as ConfigurationCore no-undo.
+
+    method public static ConfigurationCore GetInstance():
+        if not valid-object(configurationCore) then
+            configurationCore = new ConfigurationCore().
+        return configurationCore.
+    end method.
+   &endif
 
    constructor public ConfigurationCore ():
    end constructor.

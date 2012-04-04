@@ -32,6 +32,7 @@ Notes       :
 routine-level on error undo, throw.
 
 using com.quarix.data.parser.JsonWriter.
+using com.quarix.service.logging.JsonLogger.
 
 class com.quarix.service.logging.JsonLogger
    inherits com.quarix.service.logging.BaseLogger
@@ -50,6 +51,16 @@ class com.quarix.service.logging.JsonLogger
                                   'com.quarix.data.parser.JsonWriter':u).
          return jsonWriter_.
       end get.
+
+   &if keyword-all('static':u) ne ? &then
+    define private static variable jsonLogger as JsonLogger no-undo.
+
+    method public static JsonLogger GetInstance():
+        if not valid-object(jsonLogger) then
+            jsonLogger = new JsonLogger().
+        return jsonLogger.
+    end method.
+   &endif
 
    constructor public JsonLogger ():
    end constructor.

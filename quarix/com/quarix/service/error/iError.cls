@@ -177,6 +177,8 @@ interface  com.quarix.service.error.iError:
 
     method public void DumpToXml().
 
+    method public handle GetTmpErrorHandle().
+
 end interface.
 
 

@@ -32,6 +32,7 @@ Notes       :
 routine-level on error undo, throw.
 
 using com.quarix.system.FileSystem.
+using com.quarix.service.configuration.ConfigurationXml.
 
 class com.quarix.service.configuration.ConfigurationXml
    inherits com.quarix.service.configuration.ConfigurationBase
@@ -62,6 +63,16 @@ class com.quarix.service.configuration.ConfigurationXml
       for ttSection, ttKey
       data-relation for ttSection, ttKey nested
       relation-fields (sectionName, sectionName).
+
+   &if keyword-all('static':u) ne ? &then
+    define private static variable configurationXml as ConfigurationXml no-undo.
+
+    method public static ConfigurationXml GetInstance():
+        if not valid-object(configurationXml) then
+            configurationXml = new ConfigurationXml().
+        return configurationXml.
+    end method.
+   &endif
 
    constructor public ConfigurationXml():
       assign
