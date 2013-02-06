@@ -33,7 +33,11 @@ using Progress.Lang.Object.
 class com.quarix.base.BaseObject
     implements com.quarix.base.iBaseObject use-widget-pool:
 
-   define private variable currentApp  as character no-undo.
+   &scoped-define log_level   'LogLevel':u
+   &scoped-define log_service 'Logging':u
+
+   define private variable currentApp  as character           no-undo.
+   define private variable thisClass   as Progress.Lang.Class no-undo.
 
    define public property Factory as com.quarix.base.Factory
       get:
@@ -134,13 +138,34 @@ class com.quarix.base.BaseObject
       end get.
       private set.
 
-    define public property dtUtil as com.quarix.service.dtutil.dtUtilBase
+    define public property DtUtilManager as com.quarix.service.dtutil.idtUtil
+        get:
+            if not valid-object(Application) then
+                return ?.
+
+            if not valid-object(DtUtilManager) or Application:Name ne currentApp then
+            do:
+                assign
+                    currentApp = Application:Name
+                    DtUtilManager     = cast(Application:GetService('dtutil':u), 'com.quarix.service.dtutil.idtUtil':u).
+            end.
+
+            return DtUtilManager.
+
+        end get.
+        private set.
+
+    define private property LogLevel as integer
       get:
-         if not valid-object(dtUtil) then
-            dtUtil = cast(GetInstance('com.quarix.service.dtutil.dtUtilBase':u), com.quarix.service.dtutil.dtUtilBase).
-         return dtUtil.
+         if not valid-object(Application) then
+            return ?.
+
+         thisClass = GetClass().
+         LogLevel  = Util:Nvl(Application:GetConfigurationKey({&log_level},{&log_service},thisClass:TypeName),ErrorManager:GetLogLevel()).
+
+         return LogLevel.
       end get.
-      private set.
+      set.
 
 	constructor BaseObject():
 
@@ -256,6 +281,8 @@ class com.quarix.base.BaseObject
       input errorBuffer as character,
       input errorField  as character):
 
+      if LogLevel lt 0 then return.
+
       if valid-object(ErrorManager)
       then ErrorManager:AddError(errorCode, errorText, errorField, errorBuffer).
 
@@ -318,6 +345,8 @@ class com.quarix.base.BaseObject
        input errorRecord as integer,
        input errorTag    as character ):
 
+      if LogLevel lt 1 then return.
+
       if valid-object(ErrorManager)
       then ErrorManager:AddClientError(errorCode, errorType, errorText, errorField, errorBuffer, errorRecord,errorTag).
 
@@ -341,6 +370,8 @@ class com.quarix.base.BaseObject
     define variable errorFile	as character	no-undo.
     define variable errorLine	as integer		no-undo.
     define variable cVal		as character	no-undo.
+
+    if LogLevel lt 0 then return.
 
     /*format the call stack to show only the line where the error raised
     chr(10) = NL - can be defined as a property*/
@@ -408,6 +439,8 @@ class com.quarix.base.BaseObject
       input errorBuffer as character,
       input errorField  as character):
 
+      if LogLevel lt 2 then return.
+
       if valid-object(ErrorManager)
       then ErrorManager:AddWarning(errorCode, errorText, errorField, errorBuffer).
 
@@ -433,6 +466,8 @@ class com.quarix.base.BaseObject
       input errorText   as character,
       input errorBuffer as character,
       input errorField  as character):
+
+      if LogLevel lt 3 then return.
 
       if valid-object(ErrorManager)
       then ErrorManager:AddInfo(errorCode, errorText, errorField, errorBuffer).
@@ -460,7 +495,7 @@ class com.quarix.base.BaseObject
       input errorBuffer as character,
       input errorField  as character):
 
-      define variable thisClass    as Progress.Lang.Class no-undo.
+      if LogLevel lt 4 then return.
 
       if Util:IsEmpty(errorBuffer) then
          assign

@@ -659,7 +659,7 @@ class com.quarix.service.session.SessionBase
 
    method public void Start (sessId as character, sessTimeOut as integer):
       assign
-         LastAccessTime = dtutil:sysNow()
+         LastAccessTime = DtUtilManager:sysNow()
          ID             = Util:Nvl(sessId, guid).
 
       if sessTimeOut ne ? then

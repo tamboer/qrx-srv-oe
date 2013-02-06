@@ -33,7 +33,7 @@ using Progress.Lang.*.
 using com.quarix.base.BaseObject.
 using com.quarix.data.*.
 
-class com.quarix.data.DataContext 
+class com.quarix.data.DataContext
     inherits BaseObject
     implements com.quarix.base.iDisposable:
 
@@ -615,6 +615,9 @@ class com.quarix.data.DataContext
             delete object appError.
             return false.
         end catch.
+        finally:
+        	delete object hdscontext no-error.
+        end finally.
 
     end method.
 
@@ -661,6 +664,13 @@ class com.quarix.data.DataContext
             ttRowId.dbRowId = dbRowid.
             return.
         end.
+
+        find last ttRowid
+            where ttRowId.ttName  eq hBuf:table
+            use-index idxNumRec no-lock no-error.
+
+        if available ttRowid then
+        iNumRec = ttRowid.NumRec.
 
         iNumRec = iNumRec + 1.
 
@@ -1123,7 +1133,9 @@ class com.quarix.data.DataContext
 
 		dataset dscontext:empty-dataset().
 
-		assign lastSortOrder = 0.
+		assign
+			lastSortOrder	= 0
+			iNumRec			= 0.
 
 	end method.
 
@@ -1306,6 +1318,10 @@ class com.quarix.data.DataContext
 
 	method public logical UpdateTtRowId(input tableName as character, input ttRowId as character, input newttRowId as character):
 
+		define buffer BufttRowId for ttRowId.
+
+		define variable iNumRec as integer no-undo.
+
 		find first ttRowId
 			where ttRowId.ttName	= tableName
 			  and ttRowId.ttRowId	= ttRowId
@@ -1314,7 +1330,21 @@ class com.quarix.data.DataContext
 		if not available(ttRowId)
 		then return false.
 
-		ttRowId.ttRowId = newttRowId.
+		find first BufttRowId
+			where BufttRowId.ttName		= tableName
+			  and BufttRowId.ttRowId	= newttRowId
+			no-lock no-error.
+
+		if not available(BufttRowId)
+		then
+			ttRowId.ttRowId = newttRowId.
+		else do:
+			iNumRec = ttRowId.NumRec.
+
+			delete ttRowId.
+
+			BufttRowId.NumRec = iNumRec.
+		end.
 
 		return true.
 
@@ -1521,5 +1551,82 @@ class com.quarix.data.DataContext
         end catch.
 
     end method.
+
+    method public final void SetQueryRepositionFailed(input lQueryRepositionFailed as logical):
+
+    	SetProperty('QueryRepositionFailed':u, string(lQueryRepositionFailed)).
+
+    end method.
+
+    method public final logical GetQueryRepositionFailed():
+
+    	define variable cValue	as character no-undo.
+    	define variable lValue	as logical no-undo.
+
+    	cValue = GetProperty('QueryRepositionFailed':u).
+
+    	if Util:IsEmpty(cValue)
+    	then return false.
+
+    	lValue = logical(cValue) no-error.
+
+    	if lValue = ?
+    	then lValue = false.
+
+    	return lValue.
+
+    	catch appError as Progress.Lang.Error :
+            ThrowError(input appError).
+            delete object appError.
+            return false.
+        end catch.
+
+    end method.
+
+    method public final void SetRepositionToRowFailed(input lRepositionToRowFailed as logical):
+
+    	SetProperty('RepositionToRowFailed':u, string(lRepositionToRowFailed)).
+
+    end method.
+
+    method public final logical GetRepositionToRowFailed():
+
+    	define variable cValue	as character no-undo.
+    	define variable lValue	as logical no-undo.
+
+    	cValue = GetProperty('RepositionToRowFailed':u).
+
+    	if Util:IsEmpty(cValue)
+    	then return false.
+
+    	lValue = logical(cValue) no-error.
+
+    	if lValue = ?
+    	then lValue = false.
+
+    	return lValue.
+
+    	catch appError as Progress.Lang.Error :
+            ThrowError(input appError).
+            delete object appError.
+            return false.
+        end catch.
+
+    end method.
+
+    method public final void ClearTtRowId():
+
+    	empty temp-table ttRowId.
+
+    	iNumRec = 0.
+
+    end method.
+
+    destructor DataContext():
+
+    	if valid-handle(dsContextHandle)
+    	then dsContextHandle:empty-dataset ().
+
+    end destructor.
 
 end class.

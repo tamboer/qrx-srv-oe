@@ -31,7 +31,7 @@ routine-level on error undo, throw.
 
 using Progress.Lang.*.
 
-class com.quarix.data.IdList 
+class com.quarix.data.IdList
     inherits com.quarix.base.BaseObject
     implements com.quarix.base.iDisposable:
 
@@ -172,6 +172,9 @@ class com.quarix.data.IdList
 		define variable hBufferField	as handle		no-undo.
 		define variable rRowid			as rowid		no-undo.
 		define variable iIdListOrder	as integer		no-undo.
+		define variable cKey			as longchar		no-undo.
+		define variable rKey			as raw			no-undo.
+		define variable cHashCode		as character	no-undo.
 
 		if not valid-handle(hbttHandle)	or
 			cKeyFields = '':U			or
@@ -261,7 +264,22 @@ class com.quarix.data.IdList
 
 					SetBufferFieldValue(hBufferField, cFieldValue).
 
+					cKey =	if Util:IsEmpty(cKey)
+							then cFieldValue
+							else cKey + chr(3) + cFieldValue.
+
 				end. /* do iNum = 1 to num-entries(cKeyFields, '|':U) */
+
+				assign hBufferField = hbttHandle:buffer-field ('HashCode':U) no-error.
+
+				if valid-handle(hBufferField)
+				then do:
+					rKey = md5-digest(cKey, 'IDLIST':u).
+
+					cHashCode = hex-encode(rKey).
+
+					SetBufferFieldValue(hBufferField, cHashCode).
+				end.
 
 			end. /* do transaction */
 
@@ -360,6 +378,8 @@ class com.quarix.data.IdList
 
 		if valid-handle(hbttHandle)
 		then do:
+			hbttHandle:table-handle:tracking-changes = false.
+
 			hbttHandle:empty-temp-table().
 
 			htt = hbttHandle:table-handle.

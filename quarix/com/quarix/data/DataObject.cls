@@ -34,7 +34,7 @@ using com.quarix.data.*.
 using com.quarix.web.*.
 
 
-class com.quarix.data.DataObject 
+class com.quarix.data.DataObject
     inherits BaseObject
     implements com.quarix.base.iDisposable:
 
@@ -175,6 +175,8 @@ class com.quarix.data.DataObject
 
 		if valid-handle(datasetHandle)
 		then do:
+			Util:TrackChanges(datasetHandle, false).
+
 			datasetHandle:empty-dataset ().
 
 			do iNumBuf = 1 to datasetHandle:num-buffers:
@@ -535,6 +537,10 @@ class com.quarix.data.DataObject
 
       return false.
 
+      finally:
+      	delete object dsHandle no-error.
+      end finally.
+
    end method.
 
    method public logical dataUpdate ():
@@ -556,6 +562,10 @@ class com.quarix.data.DataObject
 
       return false.
 
+      finally:
+      	delete object dsHandle no-error.
+      end finally.
+
    end method.
 
    method public logical BeforeDataOutput ():
@@ -567,6 +577,9 @@ class com.quarix.data.DataObject
    end method.
 
    method protected void localizeDataset (input dataset-handle dsHandle):
+	finally:
+		delete object dsHandle no-error.
+	end finally.
    end method.
 
 	method public logical SetBatchSizeFromContext ():
@@ -1242,12 +1255,19 @@ class com.quarix.data.DataObject
             delete object appError.
             return false.
         end catch.
+        finally:
+        	delete object hDsDataset no-error.
+        end finally.
 
 	end method.
 
 	method public logical dataFetchIdList(input idlist as com.quarix.data.IdList, output dataset-handle hDsDataset):
 
 		return dataFetchIdList(input idlist, output dataset-handle hDsDataset by-reference, input 'FetchDataByIdList':U).
+
+		finally:
+        	delete object hDsDataset no-error.
+        end finally.
 
 	end method.
 
@@ -1326,6 +1346,7 @@ class com.quarix.data.DataObject
     		DataContext:ClearProperty('FilterUsrID':u).
     		DataContext:ClearProperty('Company':u).
     		DataContext:ClearProperty('CustomerID':u).
+    		DataContext:ClearProperty('EntityType':u).
     	end.
 
     end method.
@@ -1339,37 +1360,44 @@ class com.quarix.data.DataObject
     		ContextManager:SetValue(input 'UsrID':u, input '':u).
     		ContextManager:SetValue(input 'Company':u, input '':u).
     		ContextManager:SetValue(input 'CustomerID':u, input '':u).
+    		ContextManager:SetValue(input 'EntityType':u, input '':u).
     	end.
 
     end method.
 
-    method public void SeSessionSessionID(input cFilterSessionID as character):
+    method public void SetSessionSessionID(input cFilterSessionID as character):
 
     	DataContext:SetProperty('FilterSessionID':u, cFilterSessionID).
 
     end method.
 
-    method public void SeSessionLanguageID(input cFilterLanguageID as character):
+    method public void SetSessionLanguageID(input cFilterLanguageID as character):
 
     	DataContext:SetProperty('FilterLanguageID':u, cFilterLanguageID).
 
     end method.
 
-    method public void SeSessionUsrID(input cFilterUsrID as character):
+    method public void SetSessionUsrID(input cFilterUsrID as character):
 
     	DataContext:SetProperty('FilterUsrID':u, cFilterUsrID).
 
     end method.
 
-    method public void SeSessionCompany(input cFilterCompany as character):
+    method public void SetSessionCompany(input cFilterCompany as character):
 
     	DataContext:SetProperty('Company':u, cFilterCompany).
 
     end method.
 
-    method public void SeSessionCustomer(input cFilterCustomer as character):
+    method public void SetSessionCustomer(input cFilterCustomer as character):
 
     	DataContext:SetProperty('CustomerID':u, cFilterCustomer).
+
+    end method.
+
+    method public void SetSessionEntityType(input cFilterEntityType as character):
+
+    	DataContext:SetProperty('EntityType':u, cFilterEntityType).
 
     end method.
 
@@ -1380,6 +1408,7 @@ class com.quarix.data.DataObject
     	define variable cFilterUsrID		as character	no-undo.
     	define variable cCompany			as character	no-undo.
     	define variable cCustomerID			as character	no-undo.
+    	define variable cEntityType			as character	no-undo.
 
     	ClearContextManagerSessionParameters().
 
@@ -1392,7 +1421,8 @@ class com.quarix.data.DataObject
     		cFilterLanguageID	= DataContext:GetProperty('FilterLanguageID':u)
     		cFilterUsrID		= DataContext:GetProperty('FilterUsrID':u)
     		cCompany			= DataContext:GetProperty('Company':u)
-    		cCustomerID			= DataContext:GetProperty('CustomerID':u).
+    		cCustomerID			= DataContext:GetProperty('CustomerID':u)
+    		cEntityType			= DataContext:GetProperty('EntityType':u).
 
 		ClearSessionParameters().
 
@@ -1401,6 +1431,7 @@ class com.quarix.data.DataObject
     	ContextManager:SetValue(input 'UsrID':u, input cFilterUsrID).
     	ContextManager:SetValue(input 'Company':u, input cCompany).
     	ContextManager:SetValue(input 'CustomerID':u, input cCustomerID).
+    	ContextManager:SetValue(input 'EntityType':u, input cEntityType).
 
         return.
 
@@ -1419,12 +1450,14 @@ class com.quarix.data.DataObject
     	define variable cFilterUsrID		as character	no-undo.
     	define variable cCompany			as character	no-undo.
     	define variable cCustomerID			as character	no-undo.
+    	define variable cEntityType			as character	no-undo.
 
     	ContextManager:GetValue(input 'SessionID':u, output cFilterSessionID).
     	ContextManager:GetValue(input 'LanguageID':u, output cFilterLanguageID).
     	ContextManager:GetValue(input 'UsrID':u, output cFilterUsrID).
     	ContextManager:GetValue(input 'Company':u, output cCompany).
     	ContextManager:GetValue(input 'CustomerID':u, output cCustomerID).
+    	ContextManager:GetValue(input 'EntityType':u, output cEntityType).
 
     	message
     		'------------------------------------------------------------------------------------------------------------------------------':U skip
@@ -1433,6 +1466,7 @@ class com.quarix.data.DataObject
     		'cFilterUsrID' cFilterUsrID skip
     		'cCompany' cCompany skip
     		'cCustomerID' cCustomerID skip
+    		'cEntityType' cEntityType skip
     		'------------------------------------------------------------------------------------------------------------------------------':U skip
 		view-as alert-box.
 

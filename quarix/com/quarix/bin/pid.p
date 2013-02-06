@@ -35,7 +35,7 @@ procedure GetCurrentProcessId external "KERNEL32.DLL":
     define return parameter intProcessHandle as long.
 end procedure.
 
-procedure getpid external "/usr/lib/libc.1" cdecl:
+procedure getpid external "/lib/libc.so.6" cdecl:
     /* has yet to be implemented */
     define return parameter intProcessHandle as long.
 end procedure.

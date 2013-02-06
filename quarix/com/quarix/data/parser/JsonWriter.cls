@@ -78,7 +78,7 @@ class com.quarix.data.parser.JsonWriter
             assign
                saxWriter_:strict   = false
                saxWriter_:fragment = true
-               saxWriter_:encoding = 'utf-8':u.
+               saxWriter_:encoding = session:cpinternal.
          end.
          return saxWriter_.
       end get.
@@ -449,12 +449,14 @@ class com.quarix.data.parser.JsonWriter
 
       httRowid = handle(hTT:private-data) no-error.
 
-      do while hQry:get-next(no-lock):
-             if valid-handle(hRowId) then
-             hRowId:buffer-value () = getTableRowid(hTT, httRowid).
+      if not valid-handle(hTT:after-table) then do:
+          do while hQry:get-next(no-lock):
+                 if valid-handle(hRowId) then
+                 hRowId:buffer-value () = getTableRowid(hTT, httRowid).
 
-             if valid-handle(hRowState) then
-             hRowState:buffer-value () = if httBuf:row-state eq ? then 0 else httBuf:row-state.
+                 if valid-handle(hRowState) then
+                 hRowState:buffer-value () = if httBuf:row-state eq ? then 0 else httBuf:row-state.
+          end.
       end.
 
       extent(hFld) = httBuf:num-fields.

@@ -35,6 +35,8 @@ using com.quarix.base.Util.
 
 class com.quarix.base.Util  implements com.quarix.base.iSingleton use-widget-pool final:
 
+	{com/quarix/data/dsindexinformation.i}
+
   &if keyword-all('static':u) ne ? &then
    define private static variable util as Util no-undo.
 
@@ -226,6 +228,9 @@ class com.quarix.base.Util  implements com.quarix.base.iSingleton use-widget-poo
 			delete object appError.
 			return.
 		end catch.
+		finally:
+			delete object hds no-error.
+		end finally.
 
 	end method.
 
@@ -233,17 +238,19 @@ class com.quarix.base.Util  implements com.quarix.base.iSingleton use-widget-poo
 
 		define variable iBuff		as integer		no-undo.
 		define variable iHandle		as integer		no-undo.
-		define variable cTTHandles	as character	no-undo init ?.
+		define variable cTTHandles	as character	no-undo.
 		define variable hTT			as handle		no-undo.
+		define variable hBuf		as handle		no-undo.
 
 		if not valid-handle(hds)
 		then return.
 
 		do iBuff = 1 to hds:num-buffers:
 
-			if valid-handle(hds:get-buffer-handle(iBuff))
-			then cTTHandles = cTTHandles + ((if cTTHandles <> ? then ',' else '') + string(hds:get-buffer-handle(iBuff))).
+			hBuf = hds:get-buffer-handle(iBuff).
 
+			if valid-handle(hBuf)
+			then cTTHandles = if IsEmpty(cTTHandles) then string(hBuf) else cTTHandles + ',' + string(hBuf).
 		end.
 
 		delete object hds no-error.
@@ -251,15 +258,17 @@ class com.quarix.base.Util  implements com.quarix.base.iSingleton use-widget-poo
 		if not valid-handle(hds)
 		then hds = ?.
 
-		if cTTHandles <> ?
+		if not IsEmpty(cTTHandles)
     	then
-    		do iHandle = 1 to num-entries(cTTHandles):
+    		do iHandle = 1 to num-entries(cTTHandles, ','):
 
-    			hTT = handle(entry(iHandle, cTTHandles)) no-error.
+    			hBuf = handle(entry(iHandle, cTTHandles, ',')) no-error.
 
-    			hTT = hTT:table-handle no-error.
+    			if valid-handle(hBuf)
+    			then
+    				hTT = hBuf:table-handle no-error.
 
-				delete object handle(entry(iHandle, cTTHandles)) no-error.
+				delete object hBuf no-error.
 
 				delete object hTT no-error.
 			end.
@@ -270,6 +279,9 @@ class com.quarix.base.Util  implements com.quarix.base.iSingleton use-widget-poo
 			delete object appError.
 			return.
 		end catch.
+		finally:
+			delete object hds no-error.
+		end finally.
 
 	end method.
 
@@ -308,11 +320,19 @@ class com.quarix.base.Util  implements com.quarix.base.iSingleton use-widget-poo
 
     	LogDataset(input dataset-handle phDataSet by-reference, '':U, no, yes).
 
+    	finally:
+			delete object phDataSet no-error.
+		end finally.
+
     end method.
 
     method public void LogDatasetUnformatted(input dataset-handle phDataSet):
 
     	LogDataset(input dataset-handle phDataSet by-reference, '':U, no, no).
+
+    	finally:
+			delete object phDataSet no-error.
+		end finally.
 
     end method.
 
@@ -320,17 +340,29 @@ class com.quarix.base.Util  implements com.quarix.base.iSingleton use-widget-poo
 
     	LogDataset(input dataset-handle phDataSet by-reference, pcName, no, yes).
 
+    	finally:
+			delete object phDataSet no-error.
+		end finally.
+
     end method.
 
     method public void LogDatasetUnformatted(input dataset-handle phDataSet, input pcName as character):
 
     	LogDataset(input dataset-handle phDataSet by-reference, pcName, no, no).
 
+    	finally:
+			delete object phDataSet no-error.
+		end finally.
+
     end method.
 
     method public void LogDataset(input dataset-handle phDataSet, input plWriteBeforeImage as logical, input plFormatted as logical):
 
     	LogDataset(input dataset-handle phDataSet by-reference, '':U, plWriteBeforeImage, plFormatted).
+
+    	finally:
+			delete object phDataSet no-error.
+		end finally.
 
     end method.
 
@@ -396,6 +428,10 @@ class com.quarix.base.Util  implements com.quarix.base.iSingleton use-widget-poo
 
     	LogTempTable(input phBuffer, ?).
 
+    	finally:
+    		delete object phBuffer no-error.
+    	end finally.
+
     end method.
 
     method public void LogTempTable(input phBuffer as handle, input pcName as character):
@@ -451,6 +487,7 @@ class com.quarix.base.Util  implements com.quarix.base.iSingleton use-widget-poo
          	delete object appError.
 		end catch.
 		finally:
+			delete object phBuffer no-error.
 			delete object phBuffer no-error.
 		end finally.
 
@@ -777,6 +814,9 @@ class com.quarix.base.Util  implements com.quarix.base.iSingleton use-widget-poo
             return ?.
 
         end catch.
+        finally:
+        	delete object hBuf no-error.
+        end finally.
 
 	end method.
 
@@ -825,6 +865,399 @@ class com.quarix.base.Util  implements com.quarix.base.iSingleton use-widget-poo
 
     method public character RemoveString (input cText as character, input cString as character):
         return ReplaceString(cText,cString,'':U).
+    end method.
+
+    method public void TrackChanges(DsDataset as handle, pcOnOff as logical):
+
+        define variable iBuffer as integer no-undo.
+
+        do iBuffer = 1 to Dsdataset:num-buffers:
+            Dsdataset:get-buffer-handle(iBuffer):table-handle:tracking-changes = pcOnOff.
+        end.
+
+        finally:
+        	delete object DsDataset no-error.
+        end finally.
+
+    end method.
+
+    method public logical StoreRawInBuffer(input hBufTtTemp as handle, input rRaw as raw):
+
+        define variable httDummy        as handle       no-undo.
+        define variable hBufttDummy     as handle       no-undo.
+
+        if not valid-handle(hBufTtTemp)
+        then return false.
+
+        create temp-table httDummy.
+
+        httDummy:add-new-field ('rawvalue':U, 'raw':U).
+
+        httDummy:temp-table-prepare ('ttdummy':U).
+
+        hBufttDummy = httDummy:default-buffer-handle.
+
+        hBufttDummy:empty-temp-table ().
+
+        hBufttDummy:buffer-create ().
+
+        hBufttDummy:buffer-field ('rawvalue':U):buffer-value = rRaw.
+
+        do transaction
+            on error undo, throw
+            on stop undo, leave:
+
+            hBufTtTemp:buffer-create ().
+
+            hBufTtTemp:raw-transfer (false, hBufttDummy:buffer-field ('rawvalue':U)).
+
+        end. /* do transaction */
+
+        return true.
+
+        catch appError as Progress.Lang.Error :
+            delete object appError.
+            return false.
+        end catch.
+        finally:
+            delete object httDummy		no-error.
+            delete object hBufTtTemp	no-error.
+        end finally.
+
+    end method.
+
+    method public logical GetIndexInformation(input hBuf as handle, input dataset dsindexinformation):
+
+        define variable hTable          as handle       no-undo.
+        define variable iNumIndex       as integer      no-undo.
+        define variable cIndexInfo      as character    no-undo.
+        define variable cIndexName      as character    no-undo.
+        define variable lUniqueIndex    as logical      no-undo.
+        define variable lPrimaryIndex   as logical      no-undo.
+        define variable lWordIndex      as logical      no-undo.
+        define variable iNumFields      as integer      no-undo.
+        define variable cFiedlName      as character    no-undo.
+        define variable lDescending     as logical      no-undo.
+        define variable iIndexId        as integer      no-undo.
+        define variable cTableName      as character    no-undo.
+
+        if not valid-handle(hBuf)
+        then return false.
+
+        find first ttIndexInformation
+            where ttIndexInformation.BufferHandle = hBuf
+            no-lock no-error.
+
+        if available(ttIndexInformation)
+        then return true.
+
+        for each ttIndexInformation
+            no-lock
+            by ttIndexInformation.IndexId descending:
+
+            iIndexId = ttIndexInformation.IndexId.
+
+            leave.
+        end.
+
+        hTable = hBuf:table-handle no-error.
+
+        iNumIndex = 0.
+
+        do transaction
+            on error undo, throw
+            on stop undo, leave:
+
+            #BufferIndexes:
+            repeat:
+                iNumIndex = iNumIndex + 1.
+
+                cIndexInfo = hBuf:index-information(iNumIndex).
+
+                if IsEmpty(cIndexInfo)
+                then leave #BufferIndexes.
+
+                cIndexName = entry(1, cIndexInfo, ',':U).
+
+                assign
+                    lUniqueIndex    = logical(entry(2, cIndexInfo, ',':U), '1/0':U)
+                    lPrimaryIndex   = logical(entry(3, cIndexInfo, ',':U), '1/0':U)
+                    lWordIndex      = logical(entry(4, cIndexInfo, ',':U), '1/0':U).
+
+                iIndexId = iIndexId + 1.
+
+                if valid-handle(hTable)
+                then assign cTableName = hTable:table no-error.
+
+                create ttIndexInformation.
+
+                assign
+                    ttIndexInformation.IndexId      = iIndexId
+                    ttIndexInformation.TtableHandle = hTable
+                    ttIndexInformation.BufferHandle = hBuf
+                    ttIndexInformation.TableName    = cTableName
+                    ttIndexInformation.BufferName   = hBuf:name
+                    ttIndexInformation.IndexName    = cIndexName
+                    ttIndexInformation.PrimaryIndex = lPrimaryIndex
+                    ttIndexInformation.UniqueIndex  = lUniqueIndex
+                    ttIndexInformation.WordIndex    = lWordIndex.
+
+                do iNumFields = 5 to num-entries(cIndexInfo, ',':U):
+
+                    assign
+                        cFiedlName  = entry(iNumFields, cIndexInfo)
+                        lDescending = logical(entry(iNumFields + 1, cIndexInfo), '1/0':U).
+
+                    create ttIndexFields.
+
+                    assign
+                        ttIndexFields.IndexId           = iIndexId
+                        ttIndexFields.FieldName         = cFiedlName
+                        ttIndexFields.SortDescending    = lDescending.
+
+                    iNumFields = iNumFields + 1.
+
+                end. /* do iNumFields = 5 to num-entries(cIndexInfo, ',':U) */
+
+            end. /* repeat */
+
+        end. /* do transaction */
+
+        return true.
+
+        catch appError as Progress.Lang.Error :
+            delete object appError.
+            return false.
+        end catch.
+        finally:
+        	delete object hBuf no-error.
+        end finally.
+
+    end method.
+
+    method public character GetUniqueIndexFields(input hBuf as handle, input dataset dsindexinformation):
+
+        define variable cRetValue   as character    no-undo.
+        define variable iNumFields  as integer      no-undo.
+        define variable cFieldName  as character    no-undo.
+
+        if not valid-handle(hBuf)
+        then return ?.
+
+        if not GetIndexInformation(hBuf, input dataset dsindexinformation by-reference)
+        then return ?.
+
+        find first ttIndexInformation
+            where ttIndexInformation.BufferHandle = hBuf
+              and ttIndexInformation.PrimaryIndex
+              and ttIndexInformation.UniqueIndex
+            no-lock no-error.
+
+        if not available(ttIndexInformation)
+        then
+            find first ttIndexInformation
+                where ttIndexInformation.BufferHandle = hBuf
+                  and ttIndexInformation.UniqueIndex
+                no-lock no-error.
+
+        if available(ttIndexInformation)
+        then do:
+            for each ttIndexFields
+                where ttIndexFields.IndexId = ttIndexInformation.IndexId
+                no-lock:
+
+                if IsEmpty(cRetValue)
+                then cRetValue = ttIndexFields.FieldName.
+                else cRetValue = substitute('&1|&2':U, cRetValue, ttIndexFields.FieldName).
+            end.
+        end. /* if available(ttIndexInformation) */
+        else do:
+            do iNumFields = 1 to hBuf:num-fields:
+
+                cFieldName = hBuf:buffer-field(iNumFields):name.
+
+                if IsEmpty(cRetValue)
+                then cRetValue = cFieldName.
+                else cRetValue = substitute('&1|&2':U, cRetValue, cFieldName).
+
+            end. /* do iNumFields = 1 to hBuf:num-fields */
+        end.
+
+        return cRetValue.
+
+        catch appError as Progress.Lang.Error :
+            delete object appError.
+            return ?.
+        end catch.
+        finally:
+        	delete object hBuf no-error.
+        end finally.
+
+    end method.
+
+    method public handle CreateTableFromUniqueFields(input hSrcBuf as handle):
+
+        define variable cUniqueFields   as character    no-undo.
+        define variable hTtTemp         as handle       no-undo.
+        define variable iNumFields      as integer      no-undo.
+        define variable cFieldName      as character    no-undo.
+        define variable hField          as handle       no-undo.
+
+        if not valid-handle(hSrcBuf)                or
+            not valid-handle(hSrcBuf:table-handle)  or
+            hSrcBuf:table-handle:type <> 'TEMP-TABLE':U
+        then return ?.
+
+        cUniqueFields = GetUniqueIndexFields(hSrcBuf, input dataset dsindexinformation by-reference).
+
+        if IsEmpty(cUniqueFields)
+        then return ?.
+
+        hField = hSrcBuf:buffer-field('HashCode':u) no-error.
+
+        if valid-handle(hField) and
+        	lookup('HashCode':u, cUniqueFields, '|':u) = 0
+        then cUniqueFields = cUniqueFields + '|':u + 'HashCode':u.
+
+        create temp-table hTtTemp.
+
+        do iNumFields = 1 to num-entries(cUniqueFields, '|':U):
+
+            assign
+                cFieldName  = entry(iNumFields, cUniqueFields, '|':U)
+                hField      = hSrcBuf:buffer-field (cFieldName).
+
+            hTtTemp:add-like-field (cFieldName, hField).
+
+        end. /* do iNumFields = 1 to num-entries(cUniqueFields, '|':U) */
+
+        hTtTemp:temp-table-prepare (hSrcBuf:table-handle:name).
+
+        return hTtTemp.
+
+        catch appError as Progress.Lang.Error :
+
+            delete object hTtTemp	no-error.
+
+            delete object appError.
+            return ?.
+        end catch.
+        finally:
+        	delete object hSrcBuf no-error.
+        end finally.
+
+    end method.
+
+    method public character GetBufferRawValue(input hBuf as handle):
+
+        define variable httDummy        as handle       no-undo.
+        define variable hBufttDummy     as handle       no-undo.
+        define variable cStringValue    as character    no-undo.
+        define variable rRawValue       as raw          no-undo.
+
+        if not valid-handle(hBuf) or
+            not hBuf:available
+        then return ?.
+
+        create temp-table httDummy.
+
+        httDummy:add-new-field ('rawvalue':U, 'raw':U).
+
+        httDummy:temp-table-prepare ('ttdummy':U).
+
+        hBufttDummy = httDummy:default-buffer-handle.
+
+        hBufttDummy:empty-temp-table ().
+
+        hBufttDummy:buffer-create ().
+
+        hBuf:raw-transfer (true, hBufttDummy:buffer-field ('rawvalue':U)).
+
+        rRawValue = hBufttDummy:buffer-field ('rawvalue':U):buffer-value ().
+
+        cStringValue = hex-encode (rRawValue).
+
+        return cStringValue.
+
+        catch appError as Progress.Lang.Error :
+            delete object appError.
+            return ?.
+        end catch.
+        finally:
+            delete object httDummy	no-error.
+            delete object hBuf		no-error.
+        end finally.
+
+    end method.
+
+    method public character GetSourceBufferDbRowIDTempTable(input hSrcBuf as handle):
+
+    	define variable cRowId          as character    no-undo.
+    	define variable cUniqueFields   as character    no-undo.
+        define variable iNumFields      as integer      no-undo.
+        define variable cFieldName      as character    no-undo.
+        define variable hField          as handle       no-undo.
+        define variable hTtTemp         as handle       no-undo.
+        define variable hBufTtTemp      as handle       no-undo.
+        define variable hFieldSrc       as handle       no-undo.
+
+    	if not valid-handle(hSrcBuf)
+        then return ?.
+
+        if hSrcBuf:table-handle:type <> 'TEMP-TABLE':U
+        then return ?.
+
+        if not hSrcBuf:available
+		then return '?':U.
+
+		cUniqueFields = GetUniqueIndexFields(hSrcBuf, input dataset dsindexinformation by-reference).
+
+		if IsEmpty(cUniqueFields)
+		then return ?.
+
+		hFieldSrc = hSrcBuf:buffer-field('HashCode':u) no-error.
+
+		if valid-handle(hFieldSrc) and
+			lookup('HashCode':u, cUniqueFields, '|':u) = 0
+		then cUniqueFields = cUniqueFields + '|':u + 'HashCode':u.
+
+		hTtTemp = CreateTableFromUniqueFields(input hSrcBuf).
+
+		if not valid-handle(hTtTemp)
+		then return ?.
+
+		hBufTtTemp = hTtTemp:default-buffer-handle.
+
+		hBufTtTemp:empty-temp-table ().
+
+		hBufTtTemp:buffer-create().
+
+		do iNumFields = 1 to num-entries(cUniqueFields, '|':U):
+
+			assign
+            	cFieldName          = entry(iNumFields, cUniqueFields, '|':U)
+                hFieldSrc           = hSrcBuf:buffer-field (cFieldName)
+                hField              = hBufTtTemp:buffer-field (cFieldName)
+                hField:buffer-value = hFieldSrc:buffer-value.
+
+		end. /* do iNumFields = 1 to num-entries(cUniqueFields, '|':U) */
+
+		cRowId = GetBufferRawValue(hBufTtTemp).
+
+		if IsEmpty(cRowId)
+		then return ?.
+
+		return cRowId.
+
+		catch appError as Progress.Lang.Error:
+            delete object appError.
+            return ?.
+        end catch.
+        finally:
+            delete object hTtTemp	no-error.
+            delete object hSrcBuf	no-error.
+        end finally.
+
     end method.
 
 end class.
