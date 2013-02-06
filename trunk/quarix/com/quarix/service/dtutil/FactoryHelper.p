@@ -37,15 +37,15 @@ procedure getInstance:
 
    case className:
       /* add custom localization services */
-      when 'dtUtilBase':U then
-         classInstance = new com.quarix.service.dtutil.dtUtilBase().
+      when 'DtutilBase':U then
+         classInstance = new com.quarix.service.dtutil.DtutilBase().
 
       /* default localization service     */
       otherwise
       &if keyword-all('static':u) ne ? &then
-         classInstance = com.quarix.service.dtutil.dtUtilCore:GetInstance().
+         classInstance = com.quarix.service.dtutil.DtutilCore:GetInstance().
       &else
-         classInstance = new com.quarix.service.dtutil.dtUtilCore().
+         classInstance = new com.quarix.service.dtutil.DtutilCore().
       &endif
    end case.
 end procedure.

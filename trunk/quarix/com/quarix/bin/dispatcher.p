@@ -59,6 +59,9 @@ define variable iNum			as integer		no-undo.
 
 cProfilerOut = substitute('&1/&2.&3':u, session:temp-directory, 'profiler':u, 'out':u).
 
+if search('startup_custom.p') <> ?
+then run value('startup_custom.p') no-error.
+
 assign
 	cProfilerOut = replace(cProfilerOut, '~\':u, '~/':u)
 	cProfilerOut = replace(cProfilerOut, '~/~/':u, '~/':u).
@@ -96,24 +99,29 @@ file-info:file-name = '.~/log~/4gl.log':u.
 if file-info:file-type ne ? then
    output to '.~/log~/4gl.log':u append.
 
-/* try to get the reference to the controller from super */
-do superProc = 1 to num-entries(session:super-procedures):
-   startUpHdl = widget-handle(entry(superProc, session:super-procedures)).
-   if startUpHdl:name eq 'com/quarix/bin/startup.p':u then do:
-      run getQuarixController in startUpHdl (output mainController) no-error.
-      leave.
-   end.
-end.
+#GetController:
+do:
+    if not valid-object(mainController) then do
+       on error undo, leave
+       on stop undo, leave:
 
-/* if startup super not already started do it now and set it as session super */
-if not valid-object(mainController) then do
-   on error undo, leave
-   on stop undo, leave:
-   run com/quarix/bin/startup.p persistent set startUpHdl no-error.
-   if valid-handle(startUpHdl) then do:
-      run getQuarixController in startUpHdl (output mainController) no-error.
-      session:add-super-procedure(startUpHdl) no-error.
-   end.
+        /* try to get the reference to the controller from super */
+        do superProc = 1 to num-entries(session:super-procedures):
+           startUpHdl = widget-handle(entry(superProc, session:super-procedures)).
+           if startUpHdl:name eq 'com/quarix/bin/startup.p':u then do:
+              run getQuarixController in startUpHdl (output mainController) no-error.
+              leave #GetController.
+           end.
+        end.
+
+        /* if startup super not already started do it now and set it as session super */
+
+       run com/quarix/bin/startup.p persistent set startUpHdl no-error.
+       if valid-handle(startUpHdl) then do:
+          run getQuarixController in startUpHdl (output mainController) no-error.
+          session:add-super-procedure(startUpHdl) no-error.
+       end.
+    end.
 end.
 
 /* we should have a valid controller by now so run the request on it */
@@ -175,8 +183,9 @@ procedure UnloadInstances:
 
     do while valid-object(obj):
 
-        if not type-of(obj, 'com.quarix.base.iSingleton':u) and
-               type-of(obj, 'com.quarix.base.iDisposable':u)
+        if not type-of(obj, 'com.quarix.base.iSingleton':u)  and
+               type-of(obj, 'com.quarix.base.iDisposable':u) and
+               type-of(obj, 'com.quarix.base.BaseObject':u)
 		then do:
             delObj = obj.
         end.
@@ -186,5 +195,7 @@ procedure UnloadInstances:
         delete object delObj no-error.
 
     end. /* do while valid-object(obj) */
+
+    run com/quarix/bin/debugInfo.p.
 
 end procedure.

@@ -178,7 +178,7 @@ class com.quarix.service.error.ErrorCore
          and (LogLevel = 0 or errorLevel le LogLevel or errorLevel eq ApplicationLevel()) then do:
          create ttError.
          assign
-            ttError.logTime        = dtUtil:sysNow()
+            ttError.logTime        = DtUtilManager:sysNow()
             ttError.errorLevel     = errorLevel
             ttError.errorType      = errorType
             ttError.errorCode      = errorCode
@@ -221,7 +221,7 @@ class com.quarix.service.error.ErrorCore
          and (LogLevel = 0 or errorLevel le LogLevel or errorLevel eq ApplicationLevel()) then do:
          create ttError.
          assign
-            ttError.logTime        = dtutil:sysNow()
+            ttError.logTime        = DtUtilManager:sysNow()
             ttError.errorLevel     = errorLevel
             ttError.errorCode      = errorCode
             ttError.errorMessage   = errorText

@@ -106,7 +106,9 @@ class com.quarix.service.localization.LocalizationBase
    end method.
 
    method public final logical   SetDateFormat (newFormat as character):
-      if DateFormat eq newFormat then
+      if Util:IsEmpty(newFormat)           or
+         (session:date-format eq newFormat and
+          DateFormat eq newFormat) then
          return true.
 
       session:date-format = newFormat.

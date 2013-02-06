@@ -27,19 +27,11 @@
     http://www.gnu.org/licenses/lgpl-2.1.txt
  ----------------------------------------------------------------------*/
 
-using com.quarix.service.dtutil.dtUtilBase.
+using com.quarix.service.dtutil.DtutilBase.
 
-class com.quarix.service.dtutil.dtUtilBase implements com.quarix.base.iSingleton use-widget-pool:
-
-    &if keyword-all('static':u) ne ? &then
-    define private static variable dtUtilBase as dtUtilBase no-undo.
-
-    method public static dtUtilBase GetInstance():
-        if not valid-object(dtUtilBase) then
-            dtUtilBase = new dtUtilBase().
-        return dtUtilBase.
-    end method.
-   &endif
+class com.quarix.service.dtutil.DtutilBase
+    inherits com.quarix.base.BaseObject
+    implements com.quarix.service.dtutil.idtUtil use-widget-pool:
 
     method public datetime-tz sysNow():
         return now.
@@ -59,9 +51,6 @@ class com.quarix.service.dtutil.dtUtilBase implements com.quarix.base.iSingleton
 
     method public integer sysTime():
         return time.
-    end method.
-
-    method public void Reset():
     end method.
 
 end class.

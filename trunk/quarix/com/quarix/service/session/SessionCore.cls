@@ -161,7 +161,7 @@ class com.quarix.service.session.SessionCore
 
       /* clean-up some orphan sessions if session time-out set */
       if MaxInactivityInterval gt 0 then do:
-         dtExpire = dtutil:nowTZ() - MaxInactivityInterval * 1000.
+         dtExpire = DtUtilManager:nowTZ() - MaxInactivityInterval * 1000.
          for each sessPool no-lock
             where sessPool.last_time lt dtExpire
                on error undo, throw:
@@ -174,7 +174,7 @@ class com.quarix.service.session.SessionCore
       for each sessPool exclusive-lock
          where sessPool.sess_id eq ID
             on error undo, throw:
-         assign dzNow = dtutil:nowTZ().
+         assign dzNow = DtUtilManager:nowTZ().
          if sessPool.app_id eq Application:ID and
             dzNow - sessPool.last_time le MaxInactivityInterval * 1000 then
             assign

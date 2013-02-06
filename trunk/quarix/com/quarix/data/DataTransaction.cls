@@ -675,6 +675,9 @@ class com.quarix.data.DataTransaction
         end catch.
         finally:
         	restoreDatasetHandle().
+
+        	delete object dsHandle no-error.
+
         end finally.
 
     end method.
@@ -795,14 +798,14 @@ class com.quarix.data.DataTransaction
         JsonWriter:Out(']').
 
         /* before image, if any */
-        hBiTable = tableHandle:before-table no-error.
-        if valid-handle(hBiTable) and
-           hBiTable:has-records then
-        do:
-            JsonWriter:Out(',"beforeImage":[':u).
-            JsonWriter:Serialize(table-handle hBiTable by-reference, false, ?, '*', ?, true).
-            JsonWriter:Out(']').
-        end.
+/*        hBiTable = tableHandle:before-table no-error.                                        */
+/*        if valid-handle(hBiTable) and                                                        */
+/*           hBiTable:has-records then                                                         */
+/*        do:                                                                                  */
+/*            JsonWriter:Out(',"beforeImage":[':u).                                            */
+/*            JsonWriter:Serialize(table-handle hBiTable by-reference, false, ?, '*', ?, true).*/
+/*            JsonWriter:Out(']').                                                             */
+/*        end.                                                                                 */
 
         JsonWriter:Out(', "info":~{':u).
 
@@ -1053,6 +1056,9 @@ class com.quarix.data.DataTransaction
         end catch.
         finally:
         	restoreDatasetHandle().
+
+        	delete object dsHandle no-error.
+
         end finally.
 
     end method.
@@ -1076,6 +1082,9 @@ class com.quarix.data.DataTransaction
         end catch.
         finally:
         	UnloadInstance(DataAccess).
+
+        	delete object dsHandle no-error.
+
         end finally.
 
     end method.

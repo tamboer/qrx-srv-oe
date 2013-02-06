@@ -140,8 +140,11 @@ class com.quarix.system.Controller
          return.
       end.
 
+
       Request:Initialize(table-handle httRequest by-reference, pstrRequest).
       Response:Initialize(table-handle httResponse by-reference, pstrResponse).
+
+/*      LogData(httRequest,pstrRequest).*/
 
       assign
          prevAppl  = Application:Name
@@ -264,6 +267,8 @@ class com.quarix.system.Controller
       /* send back errors if any */
       logErrors().
 
+/*      LogData(httResponse,pstrResponse).*/
+
       catch appError as Progress.Lang.Error :
           ThrowError(input appError).
           delete object appError.
@@ -283,6 +288,54 @@ class com.quarix.system.Controller
       end.
 
    end method.
+
+    method private void LogData (hTT as handle, mOut as memptr):
+
+      define variable hBuf      as handle    no-undo.
+      define variable hQry      as handle    no-undo.
+      define variable hFldType  as handle    no-undo.
+      define variable hFldName  as handle    no-undo.
+      define variable hFldValue as handle    no-undo.
+      define variable cMsg      as character no-undo.
+      define variable lcValue   as longchar  no-undo.
+
+      hBuf = hTT:default-buffer-handle.
+      hFldType  = hBuf:buffer-field ('fieldType').
+      hFldName  = hBuf:buffer-field ('fieldName').
+      hFldValue = hBuf:buffer-field ('fieldValue').
+
+      ThrowDebug(100,hBuf:name).
+
+      create query hQry.
+      hQry:set-buffers (hBuf).
+      hQry:query-prepare (substitute('for each &1',hBuf:name)).
+
+      hQry:query-open ().
+      do while hQry:get-next (no-lock):
+          if hFldValue:data-type eq 'blob' then
+            copy-lob hFldValue:buffer-value () to lcValue.
+          else
+            lcValue = hFldValue:buffer-value ().
+
+          cMsg = substitute ('&1 &2 &3',hFldType:buffer-value (),hFldName:buffer-value (),lcValue).
+
+          ThrowDebug(100,cMsg).
+      end.
+
+      hQry:query-close ().
+
+      delete object hBuf.
+      delete object hQry.
+      delete object hFldType.
+      delete object hFldName.
+      delete object hFldValue.
+
+      catch appError as Progress.Lang.Error :
+          ThrowError(input appError).
+          delete object appError.
+      end catch.
+
+    end method.
 
 
 	method private Progress.Lang.Object InstantiateWebObject(input objectName as character):

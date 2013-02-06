@@ -229,6 +229,9 @@ class com.quarix.data.DataRequest
       return false.
    &else
    &endif
+   	finally:
+   		delete object hDs no-error.
+   	end finally.
    end method.
 
 	method public logical LoadData (table-handle hTT):

@@ -386,7 +386,7 @@ class com.quarix.web.Response
       if Util:IsEmpty(stPath) and valid-object(Request) then
          stPath = Request:ApplicationPath.
 
-      assign dzNow = dtutil:sysNow().
+      assign dzNow = DtUtilManager:sysNow().
 
       stValue  = substitute('&1&2&3&4&5':u,
          Util:UrlEncode(stValue,'cookie':u),

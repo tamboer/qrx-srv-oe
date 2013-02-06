@@ -34,35 +34,31 @@ using com.quarix.base.*.
 
 
 
-class com.quarix.service.dtutil.dtUtilCore
-    inherits dtUtilBase
+class com.quarix.service.dtutil.DtutilCore
+    inherits DtutilBase
     implements iSingleton use-widget-pool:
 
     &if keyword-all('static':u) ne ? &then
-    define private static variable dtUtilCore as dtUtilCore no-undo.
+    define private static variable DtutilCore as DtutilCore no-undo.
 
-    constructor private dtUtilCore():
-        message 'dtUtilCore'.
+    constructor private DtutilCore():
     end constructor.
 
-/*    method public static dtUtilCore GetInstance(): */
-/*        message 'before ' valid-object(dtUtilCore).*/
-/*        if not valid-object(dtUtilCore) then       */
-/*            dtUtilCore = new dtUtilCore().         */
-/*        message 'after ' valid-object(dtUtilCore). */
-/*        return dtUtilCore.                         */
-/*    end method.                                    */
+    method public static DtutilCore GetInstance():
+        if not valid-object(DtutilCore) then
+            DtutilCore = new DtutilCore().
+        return DtutilCore.
+    end method.
    &else
-    constructor public dtUtilCore():
+    constructor public DtutilCore():
         do on error undo, return error:
             run com/quarix/base/enforceSingleton.p (this-object).
         end.
     end constructor.
    &endif
 
-/*    method public void Reset(  ):*/
-/*        message 'reset'.         */
-/*    end method.                  */
+    method public void Reset(  ):
+    end method.
 
     method override public datetime-tz sysNow(  ):
 

@@ -45,8 +45,8 @@ using com.quarix.web.*.
 &scoped-define req-var-lookup-max-rec   10
 
 
-class com.quarix.data.DataModel 
-    inherits DataObject 
+class com.quarix.data.DataModel
+    inherits DataObject
     implements iDataModel, iWebObject, com.quarix.base.iDisposable:
 
     define protected property EnableCache as logical no-undo
@@ -311,6 +311,9 @@ class com.quarix.data.DataModel
         end catch.
         finally:
         	restoreDatasetHandle().
+
+        	delete object dsHandle no-error.
+
         end finally.
 
     end method.
@@ -366,6 +369,9 @@ class com.quarix.data.DataModel
         end catch.
         finally:
         	restoreDatasetHandle().
+
+        	delete object dsHandle no-error.
+
         end finally.
 
     end method.
@@ -983,13 +989,13 @@ class com.quarix.data.DataModel
         JsonWriter:Out(']').
 
         /* before image, if any */
-        hBiTable = tableHandle:before-table.
-        if valid-handle(hBiTable) and hBiTable:has-records then do:
-            hBiTable:private-data = DataContext:GetPrivateData().
-            JsonWriter:Out(',"beforeImage":[':u).
-            JsonWriter:Serialize(table-handle hBiTable by-reference, false, ?, '*', ?, true).
-            JsonWriter:Out(']').
-        end.
+/*        hBiTable = tableHandle:before-table.                                                 */
+/*        if valid-handle(hBiTable) and hBiTable:has-records then do:                          */
+/*            hBiTable:private-data = DataContext:GetPrivateData().                            */
+/*            JsonWriter:Out(',"beforeImage":[':u).                                            */
+/*            JsonWriter:Serialize(table-handle hBiTable by-reference, false, ?, '*', ?, true).*/
+/*            JsonWriter:Out(']').                                                             */
+/*        end.                                                                                 */
 
         JsonWriter:Out(', "info":~{':u).
 
@@ -1046,6 +1052,9 @@ class com.quarix.data.DataModel
             delete object appError.
             return.
         end catch.
+        finally:
+        	delete object dsHandle no-error.
+        end finally.
 
     end method.
 

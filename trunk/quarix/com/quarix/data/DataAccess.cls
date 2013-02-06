@@ -44,8 +44,8 @@ using com.quarix.web.Response.
 &scoped-define req-var-lookup-filter    'filter':u
 &scoped-define req-var-lookup-max-rec   10
 
-class com.quarix.data.DataAccess 
-    inherits BaseObject 
+class com.quarix.data.DataAccess
+    inherits BaseObject
     implements iDataAccess, com.quarix.base.iDisposable:
 
     {com/quarix/data/dscontext.i &scope=private}
@@ -101,6 +101,8 @@ class com.quarix.data.DataAccess
     destructor public DataAccess():
 
         DetachDataSource().
+
+        delete object hTtTemp no-error.
 
     end destructor.
 
@@ -331,7 +333,22 @@ class com.quarix.data.DataAccess
         else do:
         	repositionRow = abs(repositionRow).
 
-        	hQuery:reposition-to-row(repositionRow). /* the cursor is placed before the record */
+        	lOk = hQuery:reposition-to-row(repositionRow) no-error. /* the cursor is placed before the record */
+
+        	if not lOk
+        	then do:
+        		hQuery:get-first ().
+
+        		hQuery:reposition-backward(1). /* place the cursor before the first record */
+
+        		ThrowWarning(9991, 'Cannot reposition to row, query opened with first batch!':u).
+
+        		DataContext:SetQueryRepositionFailed(true).
+
+        		DataContext:SetRepositionToRowFailed(true).
+
+            	return true.
+        	end.
 
         	/* The cursor is before the record so we have to position the cursor on the record */
         	hQuery:get-next().
@@ -343,7 +360,11 @@ class com.quarix.data.DataAccess
 
         		hQuery:reposition-backward(1). /* place the cursor before the first record */
 
-        		ThrowClientError(9991, 'Cannot reposition to row, query opened with first batch!':u).
+        		ThrowWarning(9991, 'Cannot reposition to row, query opened with first batch!':u).
+
+        		DataContext:SetQueryRepositionFailed(true).
+
+        		DataContext:SetRepositionToRowFailed(true).
 
             	return true.
         	end.
@@ -363,6 +384,29 @@ class com.quarix.data.DataAccess
 
         	if iNumStepBack = 0 /* stay at the current position, nothing to do  */
         	then return true.
+
+        	/* Check if we can do any steps back, maybe we already at the beginning of the query  */
+
+        	hQuery:get-prev().
+
+        	/* If no data is available than we do not have so many records to be able to reposition, we notify the UI about this */
+        	if hQuery:query-off-end
+        	then do:
+        		hQuery:get-first ().
+
+        		hQuery:reposition-backward(1). /* place the cursor before the first record */
+
+        		ThrowWarning(9991, 'Cannot reposition to row, query opened with first batch!':u).
+
+        		DataContext:SetQueryRepositionFailed(true).
+
+            	return true.
+        	end.
+
+        	/* We have another record before the current one, so we have to position the cursor back before the current record where it was */
+        	hQuery:get-prev().
+
+        	hQuery:reposition-forward(1).
 
         	/* Check if we can do enough steps back in the query, if not we reposition at the beginning of the query and notify the UI */
         	#Step:
@@ -435,7 +479,9 @@ class com.quarix.data.DataAccess
             we have to notify the UI about the fact that because of some error
             we are positioned at the beginning of the query */
 
-            ThrowClientError(9991, 'Cannot reposition to row, query opened with first batch!':u).
+            ThrowWarning(9991, 'Cannot reposition to row, query opened with first batch!':u).
+
+            DataContext:SetQueryRepositionFailed(true).
 
             return true.
 
@@ -527,7 +573,11 @@ class com.quarix.data.DataAccess
 
         	hQuery:reposition-backward(1). /* place the cursor before the first record */
 
-        	ThrowClientError(9991, 'Cannot reposition to row, query opened with first batch!':u).
+        	ThrowWarning(9991, 'Cannot reposition to row, query opened with first batch!':u).
+
+        	DataContext:SetQueryRepositionFailed(true).
+
+        	DataContext:SetRepositionToRowFailed(true).
 
         	return true.
         end.
@@ -551,7 +601,22 @@ class com.quarix.data.DataAccess
         if not hQuery:is-open
         then hQuery:query-open().
 
-        hQuery:reposition-to-rowid(posRowid). /* the cursor is placed before the record */
+        lOk = hQuery:reposition-to-rowid(posRowid) no-error. /* the cursor is placed before the record */
+
+        if not lOk
+        then do:
+        	hQuery:get-first ().
+
+        	hQuery:reposition-backward(1). /* place the cursor before the first record */
+
+        	ThrowWarning(9991, 'Cannot reposition to row, query opened with first batch!':u).
+
+        	DataContext:SetQueryRepositionFailed(true).
+
+        	DataContext:SetRepositionToRowFailed(true).
+
+           	return true.
+        end.
 
         /* The cursor is before the record so we have to position the cursor on the record */
 		hQuery:get-next().
@@ -563,7 +628,11 @@ class com.quarix.data.DataAccess
 
         	hQuery:reposition-backward(1). /* place the cursor before the first record */
 
-        	ThrowClientError(9991, 'Cannot reposition to row, query opened with first batch!':u).
+        	ThrowWarning(9991, 'Cannot reposition to row, query opened with first batch!':u).
+
+        	DataContext:SetQueryRepositionFailed(true).
+
+        	DataContext:SetRepositionToRowFailed(true).
 
            	return true.
         end.
@@ -581,6 +650,29 @@ class com.quarix.data.DataAccess
 
         	if iNumStepBack = 0 /* stay at the current position, nothing to do  */
         	then return true.
+
+        	/* Check if we can do any steps back, maybe we already at the beginning of the query  */
+
+        	hQuery:get-prev().
+
+        	/* If no data is available than we do not have so many records to be able to reposition, we notify the UI about this */
+        	if hQuery:query-off-end
+        	then do:
+        		hQuery:get-first ().
+
+        		hQuery:reposition-backward(1). /* place the cursor before the first record */
+
+        		ThrowWarning(9991, 'Cannot reposition to row, query opened with first batch!':u).
+
+        		DataContext:SetQueryRepositionFailed(true).
+
+            	return true.
+        	end.
+
+        	/* We have another record before the current one, so we have to position the cursor back before the current record where it was */
+        	hQuery:get-prev().
+
+        	hQuery:reposition-forward(1).
 
         	/* Check if we can do enough steps back in the query, if not we reposition at the beginning of the query and notify the UI */
         	#Step:
@@ -654,7 +746,9 @@ class com.quarix.data.DataAccess
             we have to notify the UI about the fact that because of some error
             we are positioned at the beginning of the query */
 
-            ThrowClientError(9991, 'Cannot reposition to row, query opened with first batch!':u).
+            ThrowWarning(9991, 'Cannot reposition to row, query opened with first batch!':u).
+
+            DataContext:SetQueryRepositionFailed(true).
 
             return true.
 
@@ -692,7 +786,6 @@ class com.quarix.data.DataAccess
 
     end method.
 
-
     method private logical fillDataSet():
 
         define variable numBuf as integer no-undo.
@@ -702,6 +795,10 @@ class com.quarix.data.DataAccess
 
         if not GetIndexInformation()
         then return false.
+
+        DataContext:SetQueryRepositionFailed(false).
+
+        DataContext:SetRepositionToRowFailed(false).
 
         do numBuf = 1 to datasetHandle:num-top-buffers:
             if not fillBuffer (datasetHandle:get-top-buffer(numBuf))
@@ -737,7 +834,6 @@ class com.quarix.data.DataAccess
         define variable iNum          as integer        no-undo.
         define variable cIndex        as character      no-undo.
         define variable cVal          as character      no-undo.
-
 
         if LogQueryString
         then do:
@@ -1518,6 +1614,8 @@ class com.quarix.data.DataAccess
                             hSrcBuf:buffer-copy(hBuf, roFields, saveMap) no-error.
                             if Util:IsError() then
                             do:
+
+
                                 if error-status:get-number(1) eq 132 then
                                     ThrowError(106, 'msg_err_data_dupe':u, hBuf:name, getDuplicateKeyField(hBuf, hSrcBuf)).
                                 else
@@ -2342,6 +2440,9 @@ class com.quarix.data.DataAccess
             end.
 
         end. /* if not valid-handle(hFldKey) */
+        else do:
+            qryString = substitute ('&1 = &2', keyField, quoter(keyValue)).
+        end.
 
         hFldDesc = hBuffer:buffer-field(lookupField) no-error.
 
@@ -2452,6 +2553,10 @@ class com.quarix.data.DataAccess
     method protected final void AddPersistence(dataset-handle datasetHdl, variableName as character, includeData as logical):
 
         AddPersistence (dataset-handle datasetHdl by-reference, variableName, includeData, ?).
+
+        finally:
+        	delete object datasetHdl no-error.
+        end finally.
 
     end method.
 
@@ -2625,6 +2730,9 @@ class com.quarix.data.DataAccess
             ThrowError(input appError).
             delete object appError.
         end catch.
+        finally:
+        	delete object dsHandle no-error.
+        end finally.
 
     end method.
 
@@ -2711,6 +2819,7 @@ class com.quarix.data.DataAccess
         define variable useIndex      as character no-undo.
         define variable iSrcBuf       as integer   no-undo.
         define variable iIndex        as integer   no-undo.
+        define variable cQueryWhere   as character no-undo.
 
         if not valid-handle(hBuf)
         then return ?.
@@ -2742,6 +2851,7 @@ class com.quarix.data.DataAccess
         if Util:IsEmpty(prepareString)
         then return ?.
 
+
         /* pass through all source buffers and update query on each */
         find first ttFilter where ttFilter.tableName eq hBuf:name no-lock no-error.
 
@@ -2762,7 +2872,7 @@ class com.quarix.data.DataAccess
                     and ttFilter.fieldValue  begins 'outer-join':u
                     on error undo, throw:
 
-                    bufferQuery = substitute('&1 &2', bufferQuery, NormalizeQuery(ttFilter.fieldValue)).
+                    bufferQuery = substitute('&1 &2', bufferQuery, NormalizeQuery(ttFilter.fieldValue, ttFilter.operName)).
                     /* we can only have/use one outer-join... */
                     leave.
                 end.
@@ -2781,9 +2891,9 @@ class com.quarix.data.DataAccess
                         else
                         'and':u,
                         if ttFilter.fieldName eq ? then
-                        NormalizeQuery(ttFilter.fieldValue)
+                        NormalizeQuery(ttFilter.fieldValue, ttFilter.operName)
                         else
-                        DataContext:getFieldFilterCondition(NormalizeQuery(ttFilter.dbFieldName), NormalizeQuery(ttFilter.operName), NormalizeQuery(ttFilter.fieldValue))).
+                        DataContext:getFieldFilterCondition(NormalizeQuery(ttFilter.dbFieldName), NormalizeQuery(ttFilter.operName), NormalizeQuery(ttFilter.fieldValue, ttFilter.operName))).
                 end.
 
                 queryString = substitute('&1 &2 &3':u, queryString, if queryString eq '':u then '':u else ', ':u, bufferQuery).
@@ -2901,113 +3011,6 @@ class com.quarix.data.DataAccess
 
     end method.
 
-    method private logical GetIndexInformation(input hBuf as handle):
-
-        define variable hTable          as handle       no-undo.
-        define variable iNumIndex       as integer      no-undo.
-        define variable cIndexInfo      as character    no-undo.
-        define variable cIndexName      as character    no-undo.
-        define variable lUniqueIndex    as logical      no-undo.
-        define variable lPrimaryIndex   as logical      no-undo.
-        define variable lWordIndex      as logical      no-undo.
-        define variable iNumFields      as integer      no-undo.
-        define variable cFiedlName      as character    no-undo.
-        define variable lDescending     as logical      no-undo.
-        define variable iIndexId        as integer      no-undo.
-        define variable cTableName      as character    no-undo.
-
-        if not valid-handle(hBuf)
-        then return false.
-
-        find first ttIndexInformation
-            where ttIndexInformation.BufferHandle = hBuf
-            no-lock no-error.
-
-        if available(ttIndexInformation)
-        then return true.
-
-        for each ttIndexInformation
-            no-lock
-            by ttIndexInformation.IndexId descending:
-
-            iIndexId = ttIndexInformation.IndexId.
-
-            leave.
-        end.
-
-        hTable = hBuf:table-handle no-error.
-
-        iNumIndex = 0.
-
-        do transaction
-            on error undo, throw
-            on stop undo, leave:
-
-            #BufferIndexes:
-            repeat:
-                iNumIndex = iNumIndex + 1.
-
-                cIndexInfo = hBuf:index-information(iNumIndex).
-
-                if Util:IsEmpty(cIndexInfo)
-                then leave #BufferIndexes.
-
-                cIndexName = entry(1, cIndexInfo, ',':U).
-
-                assign
-                    lUniqueIndex    = logical(entry(2, cIndexInfo, ',':U), '1/0':U)
-                    lPrimaryIndex   = logical(entry(3, cIndexInfo, ',':U), '1/0':U)
-                    lWordIndex      = logical(entry(4, cIndexInfo, ',':U), '1/0':U).
-
-                iIndexId = iIndexId + 1.
-
-                if valid-handle(hTable)
-                then assign cTableName = hTable:table no-error.
-
-                create ttIndexInformation.
-
-                assign
-                    ttIndexInformation.IndexId      = iIndexId
-                    ttIndexInformation.TtableHandle = hTable
-                    ttIndexInformation.BufferHandle = hBuf
-                    ttIndexInformation.TableName    = cTableName
-                    ttIndexInformation.BufferName   = hBuf:name
-                    ttIndexInformation.IndexName    = cIndexName
-                    ttIndexInformation.PrimaryIndex = lPrimaryIndex
-                    ttIndexInformation.UniqueIndex  = lUniqueIndex
-                    ttIndexInformation.WordIndex    = lWordIndex.
-
-                do iNumFields = 5 to num-entries(cIndexInfo, ',':U):
-
-                    assign
-                        cFiedlName  = entry(iNumFields, cIndexInfo)
-                        lDescending = logical(entry(iNumFields + 1, cIndexInfo), '1/0':U).
-
-                    create ttIndexFields.
-
-                    assign
-                        ttIndexFields.IndexId           = iIndexId
-                        ttIndexFields.FieldName         = cFiedlName
-                        ttIndexFields.SortDescending    = lDescending.
-
-                    iNumFields = iNumFields + 1.
-
-                end. /* do iNumFields = 5 to num-entries(cIndexInfo, ',':U) */
-
-            end. /* repeat */
-
-        end. /* do transaction */
-
-        return true.
-
-        catch appError as Progress.Lang.Error :
-            ThrowError(input appError).
-            delete object appError.
-            return false.
-        end catch.
-
-    end method.
-
     method private logical GetIndexInformation():
 
         define variable iNumBuffers     as integer      no-undo.
@@ -3032,7 +3035,7 @@ class com.quarix.data.DataAccess
                 if not needFill(hBuf)
                 then next.
 
-                lRetVal = GetIndexInformation(input hBuf).
+                lRetVal = Util:GetIndexInformation(input hBuf, input dataset dsindexinformation by-reference).
 
                 if not lRetVal
                 then undo #transaction, leave #transaction.
@@ -3054,64 +3057,6 @@ class com.quarix.data.DataAccess
 
     end method.
 
-    method private character GetUniqueIndexFields(input hBuf as handle):
-
-        define variable cRetValue   as character    no-undo.
-        define variable iNumFields  as integer      no-undo.
-        define variable cFieldName  as character    no-undo.
-
-        if not valid-handle(hBuf)
-        then return ?.
-
-        if not GetIndexInformation(hBuf)
-        then return ?.
-
-        find first ttIndexInformation
-            where ttIndexInformation.BufferHandle = hBuf
-              and ttIndexInformation.PrimaryIndex
-              and ttIndexInformation.UniqueIndex
-            no-lock no-error.
-
-        if not available(ttIndexInformation)
-        then
-            find first ttIndexInformation
-                where ttIndexInformation.BufferHandle = hBuf
-                  and ttIndexInformation.UniqueIndex
-                no-lock no-error.
-
-        if available(ttIndexInformation)
-        then do:
-            for each ttIndexFields
-                where ttIndexFields.IndexId = ttIndexInformation.IndexId
-                no-lock:
-
-                if Util:IsEmpty(cRetValue)
-                then cRetValue = ttIndexFields.FieldName.
-                else cRetValue = substitute('&1|&2':U, cRetValue, ttIndexFields.FieldName).
-            end.
-        end. /* if available(ttIndexInformation) */
-        else do:
-            do iNumFields = 1 to hBuf:num-fields:
-
-                cFieldName = hBuf:buffer-field(iNumFields):name.
-
-                if Util:IsEmpty(cRetValue)
-                then cRetValue = cFieldName.
-                else cRetValue = substitute('&1|&2':U, cRetValue, cFieldName).
-
-            end. /* do iNumFields = 1 to hBuf:num-fields */
-        end.
-
-        return cRetValue.
-
-        catch appError as Progress.Lang.Error :
-            ThrowError(input appError).
-            delete object appError.
-            return ?.
-        end catch.
-
-    end method.
-
     method private logical PrepareDynTT (input hBuf as handle):
 
         if not valid-handle(hBuf)                      or
@@ -3128,7 +3073,7 @@ class com.quarix.data.DataAccess
 
         hBufTtTemp = hTtTemp:default-buffer-handle.
 
-        if not GetIndexInformation(hBuf)
+        if not Util:GetIndexInformation(hBuf, input dataset dsindexinformation by-reference)
         then return false.
 
         find first ttIndexInformation
@@ -3220,144 +3165,17 @@ class com.quarix.data.DataAccess
 
     end method.
 
-    method private character GetBufferRawValue(input hBuf as handle):
-
-        define variable httDummy        as handle       no-undo.
-        define variable hBufttDummy     as handle       no-undo.
-        define variable cStringValue    as character    no-undo.
-        define variable rRawValue       as raw          no-undo.
-
-        if not valid-handle(hBuf) or
-            not hBuf:available
-        then return ?.
-
-        create temp-table httDummy.
-
-        httDummy:add-new-field ('rawvalue':U, 'raw':U).
-
-        httDummy:temp-table-prepare ('ttdummy':U).
-
-        hBufttDummy = httDummy:default-buffer-handle.
-
-        hBufttDummy:empty-temp-table ().
-
-        hBufttDummy:buffer-create ().
-
-        hBuf:raw-transfer (true, hBufttDummy:buffer-field ('rawvalue':U)).
-
-        rRawValue = hBufttDummy:buffer-field ('rawvalue':U):buffer-value ().
-
-        cStringValue = hex-encode (rRawValue).
-
-        return cStringValue.
-
-        catch appError as Progress.Lang.Error :
-            ThrowError(input appError).
-            delete object appError.
-            return ?.
-        end catch.
-        finally:
-            delete object httDummy no-error.
-        end finally.
-
-    end method.
-
-    method private handle CreateTableFromUniqueFields(input hSrcBuf as handle):
-
-        define variable cUniqueFields   as character    no-undo.
-        define variable hTtTemp         as handle       no-undo.
-        define variable iNumFields      as integer      no-undo.
-        define variable cFieldName      as character    no-undo.
-        define variable hField          as handle       no-undo.
-
-        if not valid-handle(hSrcBuf)                or
-            not valid-handle(hSrcBuf:table-handle)  or
-            hSrcBuf:table-handle:type <> 'TEMP-TABLE':U
-        then return ?.
-
-        cUniqueFields = GetUniqueIndexFields(hSrcBuf).
-
-        if Util:IsEmpty(cUniqueFields)
-        then return ?.
-
-        create temp-table hTtTemp.
-
-        do iNumFields = 1 to num-entries(cUniqueFields, '|':U):
-
-            assign
-                cFieldName  = entry(iNumFields, cUniqueFields, '|':U)
-                hField      = hSrcBuf:buffer-field (cFieldName).
-
-            hTtTemp:add-like-field (cFieldName, hField).
-
-        end. /* do iNumFields = 1 to num-entries(cUniqueFields, '|':U) */
-
-        hTtTemp:temp-table-prepare (hSrcBuf:table-handle:name).
-
-        return hTtTemp.
-
-        catch appError as Progress.Lang.Error :
-
-            delete object hTtTemp no-error.
-
-            ThrowError(input appError).
-            delete object appError.
-            return ?.
-        end catch.
-
-    end method.
-
     method private character GetSourceBufferDbRowID(input hSrcBuf as handle):
 
-        define variable cRowId          as character    no-undo.
-        define variable cUniqueFields   as character    no-undo.
-        define variable iNumFields      as integer      no-undo.
-        define variable cFieldName      as character    no-undo.
-        define variable hField          as handle       no-undo.
-        define variable hTtTemp         as handle       no-undo.
-        define variable hBufTtTemp      as handle       no-undo.
-        define variable hFieldSrc       as handle       no-undo.
+        define variable cRowId as character no-undo.
 
         if not valid-handle(hSrcBuf)
         then return ?.
 
         if valid-handle(hSrcBuf:table-handle) and
             hSrcBuf:table-handle:type ='TEMP-TABLE':U
-        then do:
-            if not hSrcBuf:available
-            then return '?':U.
-
-            cUniqueFields = GetUniqueIndexFields(hSrcBuf).
-
-            if Util:IsEmpty(cUniqueFields)
-            then return ?.
-
-            hTtTemp = CreateTableFromUniqueFields(input hSrcBuf).
-
-            if not valid-handle(hTtTemp)
-            then return ?.
-
-            hBufTtTemp = hTtTemp:default-buffer-handle.
-
-            hBufTtTemp:empty-temp-table ().
-
-            hBufTtTemp:buffer-create().
-
-            do iNumFields = 1 to num-entries(cUniqueFields, '|':U):
-
-                assign
-                    cFieldName          = entry(iNumFields, cUniqueFields, '|':U)
-                    hFieldSrc           = hSrcBuf:buffer-field (cFieldName)
-                    hField              = hBufTtTemp:buffer-field (cFieldName)
-                    hField:buffer-value = hFieldSrc:buffer-value.
-
-            end. /* do iNumFields = 1 to num-entries(cUniqueFields, '|':U) */
-
-            cRowId = GetBufferRawValue(hBufTtTemp).
-
-            if Util:IsEmpty(cRowId)
-            then return ?.
-        end.
+        then
+        	cRowId = Util:GetSourceBufferDbRowIDTempTable(input hSrcBuf).
         else
             cRowId  =   if hSrcBuf:available
                         then string(hSrcBuf:rowid)
@@ -3370,9 +3188,6 @@ class com.quarix.data.DataAccess
             delete object appError.
             return ?.
         end catch.
-        finally:
-            delete object hTtTemp no-error.
-        end finally.
 
     end method.
 
@@ -3412,51 +3227,6 @@ class com.quarix.data.DataAccess
 
     end method.
 
-    method private logical StoreRawInBuffer(input hBufTtTemp as handle, input rRaw as raw):
-
-        define variable httDummy        as handle       no-undo.
-        define variable hBufttDummy     as handle       no-undo.
-
-        if not valid-handle(hBufTtTemp)
-        then return false.
-
-        create temp-table httDummy.
-
-        httDummy:add-new-field ('rawvalue':U, 'raw':U).
-
-        httDummy:temp-table-prepare ('ttdummy':U).
-
-        hBufttDummy = httDummy:default-buffer-handle.
-
-        hBufttDummy:empty-temp-table ().
-
-        hBufttDummy:buffer-create ().
-
-        hBufttDummy:buffer-field ('rawvalue':U):buffer-value = rRaw.
-
-        do transaction
-            on error undo, throw
-            on stop undo, leave:
-
-            hBufTtTemp:buffer-create ().
-
-            hBufTtTemp:raw-transfer (false, hBufttDummy:buffer-field ('rawvalue':U)).
-
-        end. /* do transaction */
-
-        return true.
-
-        catch appError as Progress.Lang.Error :
-            ThrowError(input appError).
-            delete object appError.
-            return false.
-        end catch.
-        finally:
-            delete object httDummy no-error.
-        end finally.
-
-    end method.
-
     method private character ConvertHexValueToRowId(input hSrcBuf as handle, input cHexVal as character):
 
         define variable rRawValue   as raw          no-undo.
@@ -3477,7 +3247,7 @@ class com.quarix.data.DataAccess
 
         rRawValue = hex-decode(cHexVal).
 
-        hTtTemp = CreateTableFromUniqueFields(input hSrcBuf).
+        hTtTemp = Util:CreateTableFromUniqueFields(input hSrcBuf).
 
         if not valid-handle(hTtTemp)
         then return ?.
@@ -3486,7 +3256,7 @@ class com.quarix.data.DataAccess
 
         hBufTtTemp:empty-temp-table ().
 
-        if not StoreRawInBuffer(input hBufTtTemp, input rRawValue)
+        if not Util:StoreRawInBuffer(input hBufTtTemp, input rRawValue)
         then return ?.
 
         hBufTtTemp:find-first () no-error.
@@ -3594,18 +3364,33 @@ class com.quarix.data.DataAccess
 
     end method.
 
-    method public character NormalizeQuery (input cQueryString as character):
+    method public character NormalizeQuery (input pcQueryString as character):
+
+        return NormalizeQuery (input pcQueryString, '':U).
+
+    end method.
+
+    method public character NormalizeQuery (input pcQueryString as character, input pcOperator as character):
         define variable cExceptList   as character no-undo initial '~~176,~\'.
         define variable cExceptString as character no-undo.
         define variable iNum          as integer   no-undo.
 
-        do iNum = 1 to num-entries(cExceptList):
-            cExceptString = entry(iNum,cExceptList).
-            if index(cQueryString,cExceptString) eq 0 then next.
-            cQueryString = Util:RemoveString(cQueryString,cExceptString).
+        do iNum = 1 to num-entries (cExceptList):
+            cExceptString = entry (iNum, cExceptList).
+            if index (pcQueryString, cExceptString) eq 0 then next.
+            pcQueryString = Util:RemoveString (pcQueryString, cExceptString).
         end.
 
-        return cQueryString.
+        ThrowDebug(100, 'normalizequery').
+        ThrowDebug(100, 'operator ' + pcOperator).
+
+        if pcOperator = 'matches':U then do:
+            pcQueryString = replace (pcQueryString, '.':U, '~~~~.':U).
+            /* pcQueryString = replace (pcQueryString, '*':U, '~~~~*':U). */
+        end.
+
+        return pcQueryString.
+
     end method.
 
 end class.
