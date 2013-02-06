@@ -1,0 +1,21 @@
+-cpinternal UTF-8
+-cpstream UTF-8
+-cpcoll Basic
+-cpcase Basic
+-d dmy
+-E
+-numsep 46
+-numdec 44
+
+-h 12
+-zn
+-mmax 65534
+-inp  10000
+-debugalert
+-D 1000
+-T d:\TVH\QRXEXAMPLE\wrk
+
+-s 1024
+
+-db sports2000.db -N TCP -H localhost -S 11152
+-db quarix.db -N TCP -H localhost -S 11116
