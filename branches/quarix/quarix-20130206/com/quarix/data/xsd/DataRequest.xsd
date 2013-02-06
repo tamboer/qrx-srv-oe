@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--Created with Liquid XML Studio 6.1.18.0 - FREE Community Edition (http://www.liquid-technologies.com)-->
+<xsd:schema xmlns:prodata="urn:schemas-progress-com:xml-prodata:0001" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <xsd:element prodata:proDataSet="true" name="reqMsg">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element minOccurs="1" maxOccurs="1" name="dsMsg">
+          <xsd:complexType>
+            <xsd:sequence>
+              <xsd:element prodata:dataType="prodata:clob" prodata:userOrder="4" name="dataBody" nillable="true" type="xsd:string" />
+            </xsd:sequence>
+            <xsd:attribute prodata:userOrder="1" name="command" use="required">
+              <xsd:simpleType>
+                <xsd:restriction base="xsd:string">
+                  <xsd:whiteSpace value="replace" />
+                  <xsd:pattern value="^(sendRows|submitCommit|[a-zA-Z]{1,})$" />
+                </xsd:restriction>
+              </xsd:simpleType>
+            </xsd:attribute>
+            <xsd:attribute prodata:userOrder="2" name="responseFormat" use="required">
+              <xsd:simpleType>
+                <xsd:restriction base="xsd:string">
+                  <xsd:enumeration value="json" />
+                  <xsd:enumeration value="xml" />
+                </xsd:restriction>
+              </xsd:simpleType>
+            </xsd:attribute>
+            <xsd:attribute prodata:userOrder="3" name="batchSize" type="xsd:int" use="optional" />
+          </xsd:complexType>
+        </xsd:element>
+        <xsd:element minOccurs="0" maxOccurs="unbounded" name="tblMsg">
+          <xsd:complexType>
+            <xsd:sequence>
+              <xsd:element minOccurs="0" maxOccurs="unbounded" name="filter">
+                <xsd:complexType>
+                  <xsd:sequence />
+                  <xsd:attribute prodata:userOrder="1" name="fld" type="xsd:string" use="required" />
+                  <xsd:attribute prodata:userOrder="2" name="op" use="required">
+                    <xsd:simpleType>
+                      <xsd:restriction base="xsd:string">
+                        <xsd:enumeration value="eq" />
+                        <xsd:enumeration value="=" />
+                        <xsd:enumeration value="ne" />
+                        <xsd:enumeration value="&lt;&gt;" />
+                        <xsd:enumeration value="lt" />
+                        <xsd:enumeration value="&lt;" />
+                        <xsd:enumeration value="le" />
+                        <xsd:enumeration value="&lt;=" />
+                        <xsd:enumeration value="gt" />
+                        <xsd:enumeration value="&gt;" />
+                        <xsd:enumeration value="ge" />
+                        <xsd:enumeration value="&gt;=" />
+                        <xsd:enumeration value="begins" />
+                        <xsd:enumeration value="matches" />
+                      </xsd:restriction>
+                    </xsd:simpleType>
+                  </xsd:attribute>
+                  <xsd:attribute prodata:userOrder="3" name="val" type="xsd:string" use="required" />
+                </xsd:complexType>
+              </xsd:element>
+              <xsd:element minOccurs="0" maxOccurs="unbounded" name="sort">
+                <xsd:complexType>
+                  <xsd:sequence />
+                  <xsd:attribute prodata:userOrder="1" name="fld" type="xsd:string" use="required" />
+                  <xsd:attribute prodata:userOrder="2" name="rev" type="xsd:boolean" use="optional" />
+                </xsd:complexType>
+              </xsd:element>
+              <xsd:element minOccurs="0" maxOccurs="unbounded" name="srch">
+                <xsd:complexType>
+                  <xsd:sequence />
+                  <xsd:attribute prodata:userOrder="1" name="fld" type="xsd:string" use="required" />
+                  <xsd:attribute prodata:userOrder="2" name="val" type="xsd:string" use="required" />
+                </xsd:complexType>
+              </xsd:element>
+            </xsd:sequence>
+            <xsd:attribute prodata:userOrder="1" name="id" type="xsd:string" use="required" />
+            <xsd:attribute prodata:userOrder="2" name="startRowId" type="xsd:string" use="optional" />
+            <xsd:attribute prodata:userOrder="3" name="startRow" use="optional">
+              <xsd:simpleType>
+                <xsd:restriction base="xsd:string">
+                  <xsd:pattern value="^(first|last|[0-9]{1,})$" />
+                </xsd:restriction>
+              </xsd:simpleType>
+            </xsd:attribute>
+            <xsd:attribute prodata:userOrder="4" name="batchSize" type="xsd:int" use="optional" />
+            <xsd:attribute prodata:userOrder="5" name="skipRow" type="xsd:boolean" use="optional" />
+            <xsd:attribute prodata:userOrder="6" name="prefetch" type="xsd:boolean" use="optional" />
+          </xsd:complexType>
+        </xsd:element>
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+  <xsd:annotation>
+    <xsd:appinfo>
+      <prodata:index name="pktblMsg" prodata:primaryIndex="true">
+        <prodata:table name="tblMsg" />
+        <prodata:field name="id" />
+      </prodata:index>
+      <prodata:index name="pkdaoFilter" prodata:primaryIndex="true">
+        <prodata:table name="filter" />
+        <prodata:field name="daoId" />
+        <prodata:field name="fld" />
+      </prodata:index>
+      <prodata:index name="pkdaoSort" prodata:primaryIndex="true">
+        <prodata:table name="sort" />
+        <prodata:field name="daoId" />
+        <prodata:field name="fld" />
+      </prodata:index>
+      <prodata:relation name="daoFilter" prodata:nested="true" prodata:parent="tblMsg" prodata:child="filter" prodata:relationFields="id,daoId" />
+      <prodata:relation name="daoSort" prodata:nested="true" prodata:parent="tblMsg" prodata:child="sort" prodata:relationFields="id,daoId" />
+    </xsd:appinfo>
+  </xsd:annotation>
+</xsd:schema>
