@@ -196,6 +196,7 @@ class com.quarix.service.configuration.ConfigurationBase
    end method.
 
    method final public logical OpenEnvironment (input environmentName as character):
+
       define buffer ttEnvironment for ttEnvironment.
 
       if Util:IsEmpty(environmentName) then
@@ -216,6 +217,7 @@ class com.quarix.service.configuration.ConfigurationBase
          Environment               = environmentName
          ttEnvironment.envName     = environmentName
          ttEnvironment.externalEnv = externalEnv.
+
       return true.
 
       catch appError as Progress.Lang.Error :
@@ -223,6 +225,7 @@ class com.quarix.service.configuration.ConfigurationBase
          delete object appError.
          return false.
       end catch.
+
    end method.
 
 

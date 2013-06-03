@@ -75,7 +75,10 @@ class com.quarix.service.localization.LocalizationCore
    &endif
 
    method override protected logical UseResource (input newResource as character):
-   define buffer core_app for core_app.
+      define buffer core_app for core_app.
+      define buffer core_app_alias for core_app_alias.
+
+      define variable cAppName as character no-undo.
 
       if Util:IsEmpty(newResource) then
       do:
@@ -94,10 +97,31 @@ class com.quarix.service.localization.LocalizationCore
          return true.
       end.
 
-      for each core_app no-lock
+      find first core_app
          where core_app.app_name eq newResource
+         no-lock no-error.
+
+      if not available(core_app)
+      then do:
+         find first core_app_alias
+         	where core_app_alias.app_name_alias = newResource
+         	no-lock no-error.
+
+         if not available(core_app_alias)
+         then return false.
+
+         cAppName = core_app_alias.app_name.
+
+      end. /* if not available(core_app) */
+      else
+         cAppName = newResource.
+
+      for each core_app no-lock
+         where core_app.app_name = cAppName
             on error undo, throw:
+
          create ttResourceBundle.
+
          assign
             LastBundleId                = LastBundleId + 1
             ttResourceBundle.bundleId   = LastBundleId
@@ -105,8 +129,10 @@ class com.quarix.service.localization.LocalizationCore
             ttResourceBundle.externalId = core_app.app_id
             ResourceBundleId            = ttResourceBundle.bundleId
             AppId                       = ttResourceBundle.externalId.
+
          return true.
       end.
+
       return false.
 
       catch appError as Progress.Lang.Error :
@@ -114,6 +140,7 @@ class com.quarix.service.localization.LocalizationCore
          delete object appError.
          return false.
       end catch.
+
    end method.
 
    method override public character LocaleValue (input keyName as character):
