@@ -35,9 +35,13 @@ class com.quarix.base.BaseObject
 
    &scoped-define log_level   'LogLevel':u
    &scoped-define log_service 'Logging':u
+   &scoped-define log_app     'Application':u
 
-   define private variable currentApp  as character           no-undo.
-   define private variable thisClass   as Progress.Lang.Class no-undo.
+   define private variable currentAppLocalization   as character no-undo.
+   define private variable currentAppErrorManager   as character no-undo.
+   define private variable currentAppContextManager as character no-undo.
+   define private variable currentAppDtUtilManager  as character no-undo.
+   define private variable thisClass as Progress.Lang.Class no-undo.
 
    define public property Factory as com.quarix.base.Factory
       get:
@@ -94,10 +98,10 @@ class com.quarix.base.BaseObject
          if not valid-object(Application) then
             return ?.
 
-         if not valid-object(Localization) or Application:Name ne currentApp then
+         if not valid-object(Localization) or Application:Name ne currentAppLocalization then
          do:
             assign
-               currentApp = Application:Name
+               currentAppLocalization = Application:Name
                Localization = cast(Application:GetService('localization':u), 'com.quarix.service.localization.iLocalization':u).
          end.
 
@@ -111,10 +115,10 @@ class com.quarix.base.BaseObject
          if not valid-object(Application) then
             return ?.
 
-         if not valid-object(ErrorManager) or Application:Name ne currentApp then
+         if not valid-object(ErrorManager) or Application:Name ne currentAppErrorManager then
          do:
             assign
-               currentApp   = Application:Name
+               currentAppErrorManager = Application:Name
                ErrorManager = cast(Application:GetService('error':u), 'com.quarix.service.error.iError':u) .
          end.
          return ErrorManager.
@@ -126,10 +130,10 @@ class com.quarix.base.BaseObject
          if not valid-object(Application) then
             return ?.
 
-         if not valid-object(ContextManager) or Application:Name ne currentApp then
+         if not valid-object(ContextManager) or Application:Name ne currentAppContextManager then
          do:
             assign
-               currentApp     = Application:Name
+               currentAppContextManager = Application:Name
                ContextManager = cast(Application:GetService('context':u), 'com.quarix.service.context.iContext':u) .
          end.
 
@@ -143,11 +147,11 @@ class com.quarix.base.BaseObject
             if not valid-object(Application) then
                 return ?.
 
-            if not valid-object(DtUtilManager) or Application:Name ne currentApp then
+            if not valid-object(DtUtilManager) or Application:Name ne currentAppDtUtilManager then
             do:
                 assign
-                    currentApp = Application:Name
-                    DtUtilManager     = cast(Application:GetService('dtutil':u), 'com.quarix.service.dtutil.idtUtil':u).
+                    currentAppDtUtilManager = Application:Name
+                    DtUtilManager = cast(Application:GetService('dtutil':u), 'com.quarix.service.dtutil.idtUtil':u).
             end.
 
             return DtUtilManager.
@@ -155,13 +159,22 @@ class com.quarix.base.BaseObject
         end get.
         private set.
 
+    /* Use the loglevel from the application or from the class? */
+    define private property ApplicationLogLevel as logical no-undo init true
+        get.
+        set.
+
     define private property LogLevel as integer
       get:
          if not valid-object(Application) then
             return ?.
 
          thisClass = GetClass().
-         LogLevel  = Util:Nvl(Application:GetConfigurationKey({&log_level},{&log_service},thisClass:TypeName),ErrorManager:GetLogLevel()).
+
+         if ApplicationLogLevel then
+             LogLevel  = Util:Nvl(Application:GetConfigurationKey({&log_level},{&log_app},'':u),ErrorManager:GetLogLevel()).
+         else
+             LogLevel  = Util:Nvl(Application:GetConfigurationKey({&log_level},{&log_service},thisClass:TypeName),ErrorManager:GetLogLevel()).
 
          return LogLevel.
       end get.

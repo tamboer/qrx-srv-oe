@@ -105,10 +105,12 @@ class com.quarix.system.Application
           if appName eq Name then
              return.
           purgeServices().
+
           if loadConfiguration(defaultConfigurationService(), appName) then
              Name = appName.
           else
              Name = ?.
+
        end set.
 
     define public property Theme                as character  no-undo
@@ -178,10 +180,14 @@ class com.quarix.system.Application
     end destructor.
 
     method public final iConfiguration GetConfiguration():
+
        define variable configManager as iConfiguration no-undo.
+
        configManager = cast(GetService('configuration':u), 'com.quarix.service.configuration.iConfiguration':u).
+
        if valid-object(configManager) then
           configManager:OpenEnvironment(Name).
+
        return configManager.
 
        catch appError as Progress.Lang.Error :
@@ -189,6 +195,7 @@ class com.quarix.system.Application
           delete object appError.
           return ?.
        end catch.
+
     end method.
 
     method public final iSession GetSession():
@@ -226,9 +233,13 @@ class com.quarix.system.Application
           where ttService.appId eq ID
             and ttService.serviceName eq serviceName
              on error undo, throw:
+
           if not valid-object(ttService.classObj) then do:
+
              ttService.classObj = GetInstance(ttService.className, lookup(serviceName, 'configuration,error':u) eq 0).
+
              if valid-object(ttService.classObj) then do:
+
                 /* if core configuration service and external configuration manager used, make the switch here */
                 if serviceName eq 'configuration':u and
                    type-of(ttService.classObj, 'com.quarix.service.configuration.iConfiguration':u) and
@@ -250,13 +261,17 @@ class com.quarix.system.Application
                       ttService.isConfigurable = true
                       ttService.isConfigured   = false.
              end.
-          end.
+
+          end. /* if not valid-object(ttService.classObj) */
 
           /* load configuration for services which are configurable */
+
           if valid-object(ttService.classObj) then do:
+
              if ttService.isConfigurable and
                 not ttService.isConfigured and
                 valid-object(Configuration) then do:
+
                 configObj = cast(ttService.classObj, 'com.quarix.service.configuration.iConfigurable':u).
                 configObj:LoadConfiguration(Configuration).
                 ttService.isConfigured = true.
@@ -264,12 +279,24 @@ class com.quarix.system.Application
 
              if type-of(ttService.classObj, 'com.quarix.base.iSingleton':u) then
                 cast(ttService.classObj, 'com.quarix.base.iSingleton':u):Reset().
+
+          end. /* if valid-object(ttService.classObj) */
+          else do:
+             UnloadInstance(ttService.classObj).
+
+             delete ttService.
+
+             ThrowError(300, 'Application service not available':u, '':u, serviceName).
+
+             return ?.
           end.
 
           return ttService.classObj.
-       end.
+
+       end. /* for each ttService */
 
        ThrowError(300, 'Application service not available':u, '':u, serviceName).
+
        return ?.
 
        catch appError as Progress.Lang.Error :
@@ -277,6 +304,7 @@ class com.quarix.system.Application
           delete object appError.
           return ?.
        end catch.
+
     end method.
 
     method public void LoadConfiguration (input configService as com.quarix.service.configuration.iConfiguration):
@@ -292,13 +320,13 @@ class com.quarix.system.Application
        if Util:IsEmpty(appName) then
           return false.
 
-
        if appName eq Name then return true.
 
        ThrowDebug(300, substitute('Application switch from [&1] to [&2]':u, Name, appName), '', '').
 
        for each ttApp where ttApp.appName eq appName
            on error undo, throw:
+
           assign
              ID                   = ttApp.appId
              Version              = ttApp.appVer
@@ -320,11 +348,15 @@ class com.quarix.system.Application
                 on error undo, throw:
                 ttService.isConfigured = false.
           end.
+
           return true.
-       end.
+
+       end. /* for each ttApp */
 
        if valid-object(configService) and configService:OpenEnvironment(appName) then do:
+
           create ttApp.
+
           assign
              ttApp.appVer           = Util:Nvl(configService:GetKey('Version':u, {&config-section-app}), '1.0':u)
              ttApp.appTheme         = lower(configService:GetKey('Theme':u, {&config-section-app}))
@@ -340,10 +372,20 @@ class com.quarix.system.Application
              ttApp.appId            = configService:GetKey('ID':u, {&config-section-app})
              ttApp.appName          = appName.
 
+           release ttApp.
+
           return loadConfiguration(configService, appName).
-       end.
+
+       end. /* if valid-object(configService) */
 
        return false.
+
+       catch appError as Progress.Lang.Error :
+          ThrowError(input appError).
+          delete object appError.
+          return false.
+       end catch.
+
     end method.
 
     method public logical Login (input newUser as com.quarix.system.ApplicationUser, userPasswd as character):
@@ -386,6 +428,7 @@ class com.quarix.system.Application
 
        if valid-object(Configuration) and Configuration:OpenEnvironment(Name) then
           return Configuration:GetKey(keyName, sectionName, objectName).
+
        return ?.
 
        catch appError as Progress.Lang.Error :
@@ -393,6 +436,7 @@ class com.quarix.system.Application
           delete object appError.
           return ?.
        end catch.
+
     end method.
 
     method public character GetConfigurationKey (keyName as character, objectName as character):
@@ -411,6 +455,7 @@ class com.quarix.system.Application
          ThrowDebug (100, substitute('Session start [&1].', sessionId)).
          AppSession:Start(sessionId, sessionTimeOut).
          ThrowDebug (100, substitute('Session load context [&1].', valid-object(ContextManager))).
+
          ContextManager:LoadContext(AppSession).
       end.
 

@@ -125,6 +125,34 @@ ADD INDEX "UQ_core_app_app_name" ON "core_app"
   UNIQUE
   INDEX-FIELD "app_name" ASCENDING 
 
+ADD TABLE "core_app_alias"
+  AREA "Schema Area"
+  DESCRIPTION "Application aliases"
+  DUMP-NAME "core_app_alias"
+
+ADD FIELD "app_name" OF "core_app_alias" AS character 
+  DESCRIPTION "Application name"
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 2
+  MAX-WIDTH 16
+  ORDER 10
+
+ADD FIELD "app_name_alias" OF "core_app_alias" AS character 
+  DESCRIPTION "Application name alias"
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 3
+  MAX-WIDTH 16
+  ORDER 20
+
+ADD INDEX "PK_core_app_alias" ON "core_app_alias" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "app_name" ASCENDING 
+  INDEX-FIELD "app_name_alias" ASCENDING 
+
 ADD TABLE "core_app_theme"
   AREA "repository area"
   DESCRIPTION "Available interface themes"
@@ -341,6 +369,185 @@ ADD INDEX "FK_core_error_core_app" ON "core_error"
   AREA "Schema Area"
   INDEX-FIELD "app_id" ASCENDING 
 
+ADD TABLE "core_role"
+  AREA "repository area"
+  DESCRIPTION "Framework application's roles - can be defined by application administrators. Used for authorization service."
+  DUMP-NAME "core_role"
+
+ADD FIELD "role_id" OF "core_role" AS character 
+  DESCRIPTION "Application role unique identifier."
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 2
+  MAX-WIDTH 16
+  HELP "role_id"
+  ORDER 10
+
+ADD FIELD "app_id" OF "core_role" AS character 
+  DESCRIPTION "Application identifier."
+  FORMAT "x(32)"
+  INITIAL ""
+  LABEL "User"
+  POSITION 3
+  MAX-WIDTH 64
+  HELP "app_id"
+  ORDER 20
+
+ADD FIELD "role_name" OF "core_role" AS character 
+  DESCRIPTION "Role name."
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Deny"
+  POSITION 4
+  MAX-WIDTH 16
+  HELP "role_name"
+  ORDER 30
+
+ADD FIELD "role_desc" OF "core_role" AS character 
+  DESCRIPTION "Role description."
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 5
+  MAX-WIDTH 16
+  HELP "role_desc"
+  ORDER 40
+
+ADD INDEX "PK_core_role" ON "core_role" 
+  AREA "repository area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "role_id" ASCENDING 
+
+ADD INDEX "FK_core_app" ON "core_role" 
+  AREA "repository area"
+  INDEX-FIELD "app_id" ASCENDING 
+
+ADD INDEX "UQ_role_name" ON "core_role" 
+  AREA "repository area"
+  UNIQUE
+  INDEX-FIELD "app_id" ASCENDING 
+  INDEX-FIELD "role_name" ASCENDING 
+
+ADD TABLE "core_role_exclude"
+  AREA "repository area"
+  DESCRIPTION "Framework application's roles - can be defined by application administrators. Used for authorization service."
+  DUMP-NAME "core_role_exclude"
+
+ADD FIELD "first_role" OF "core_role_exclude" AS character 
+  DESCRIPTION "Role identifier of the first component of the mutual exclusive relation."
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 2
+  MAX-WIDTH 16
+  HELP "first_role"
+  ORDER 10
+
+ADD FIELD "second_role" OF "core_role_exclude" AS character 
+  DESCRIPTION "Role identifier of the second component of the mutual exclusive relation."
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 3
+  MAX-WIDTH 16
+  HELP "second_role"
+  ORDER 20
+
+ADD INDEX "FK_second_role" ON "core_role_exclude" 
+  AREA "repository area"
+  PRIMARY
+  INDEX-FIELD "second_role" ASCENDING 
+
+ADD INDEX "FK_first_role" ON "core_role_exclude" 
+  AREA "repository area"
+  INDEX-FIELD "first_role" ASCENDING 
+
+ADD TABLE "core_role_inherit"
+  AREA "repository area"
+  DESCRIPTION "Framework application's roles - can be defined by application administrators. Used for authorization service."
+  DUMP-NAME "core_role_inherit"
+
+ADD FIELD "super_role" OF "core_role_inherit" AS character 
+  DESCRIPTION "Unique identifier of the super role."
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 2
+  MAX-WIDTH 16
+  HELP "super_role"
+  ORDER 10
+
+ADD FIELD "base_role" OF "core_role_inherit" AS character 
+  DESCRIPTION "Unique identifier of the base role."
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 3
+  MAX-WIDTH 16
+  HELP "base_role"
+  ORDER 20
+
+ADD FIELD "with_grant" OF "core_role_inherit" AS logical 
+  DESCRIPTION "With grant option"
+  FORMAT "yes/no"
+  INITIAL "FALSE"
+  POSITION 4
+  MAX-WIDTH 1
+  HELP "with_grant"
+  ORDER 30
+
+ADD INDEX "PK_core_role_inherit" ON "core_role_inherit" 
+  AREA "repository area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "super_role" ASCENDING 
+  INDEX-FIELD "base_role" ASCENDING 
+
+ADD INDEX "FK_base_role" ON "core_role_inherit" 
+  AREA "repository area"
+  INDEX-FIELD "base_role" ASCENDING 
+
+ADD INDEX "FK_super_role" ON "core_role_inherit" 
+  AREA "repository area"
+  INDEX-FIELD "super_role" ASCENDING 
+
+ADD TABLE "core_role_permission"
+  AREA "repository area"
+  DESCRIPTION "Permissions assigned to application role."
+  DUMP-NAME "core_role_permission"
+
+ADD FIELD "permission_id" OF "core_role_permission" AS character 
+  DESCRIPTION "Permission unique identifier"
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 2
+  MAX-WIDTH 16
+  HELP "permission_id"
+  ORDER 10
+
+ADD FIELD "role_id" OF "core_role_permission" AS character 
+  DESCRIPTION "Application role unique identifier."
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 3
+  MAX-WIDTH 16
+  HELP "role_id"
+  ORDER 20
+
+ADD FIELD "with_grant" OF "core_role_permission" AS logical 
+  DESCRIPTION "With grant option"
+  FORMAT "yes/no"
+  INITIAL "FALSE"
+  POSITION 4
+  MAX-WIDTH 1
+  HELP "with_grant"
+  ORDER 30
+
+ADD INDEX "FK_core_role" ON "core_role_permission" 
+  AREA "repository area"
+  PRIMARY
+  INDEX-FIELD "role_id" ASCENDING 
+
+ADD INDEX "FK_rep_permission" ON "core_role_permission" 
+  AREA "repository area"
+  INDEX-FIELD "permission_id" ASCENDING 
+
 ADD TABLE "core_theme"
   AREA "repository area"
   DESCRIPTION "Available interface themes"
@@ -546,6 +753,54 @@ ADD INDEX "UQ_core_user_user_login" ON "core_user"
   AREA "Schema Area"
   UNIQUE
   INDEX-FIELD "user_login" ASCENDING 
+
+ADD TABLE "core_user_role"
+  AREA "repository area"
+  DESCRIPTION "User available applications default settings."
+  DUMP-NAME "core_user_role"
+
+ADD FIELD "user_id" OF "core_user_role" AS character 
+  DESCRIPTION "User identifier, surrogate key."
+  FORMAT "x(32)"
+  INITIAL ""
+  POSITION 2
+  MAX-WIDTH 64
+  HELP "user_id"
+  ORDER 10
+
+ADD FIELD "role_id" OF "core_user_role" AS character 
+  DESCRIPTION "Role unique identifier."
+  FORMAT "x(32)"
+  INITIAL ""
+  LABEL "Object"
+  POSITION 3
+  MAX-WIDTH 64
+  HELP "role_id"
+  ORDER 20
+
+ADD FIELD "is_immobile" OF "core_user_role" AS logical 
+  DESCRIPTION "Immobile role grant"
+  FORMAT "yes/no"
+  INITIAL "FALSE"
+  POSITION 4
+  MAX-WIDTH 1
+  HELP "is_immobile"
+  ORDER 30
+
+ADD INDEX "PK_core_user_role" ON "core_user_role" 
+  AREA "repository area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "user_id" ASCENDING 
+  INDEX-FIELD "role_id" ASCENDING 
+
+ADD INDEX "FK_core_role" ON "core_user_role" 
+  AREA "repository area"
+  INDEX-FIELD "role_id" ASCENDING 
+
+ADD INDEX "FK_core_user" ON "core_user_role" 
+  AREA "repository area"
+  INDEX-FIELD "user_id" ASCENDING 
 
 ADD TABLE "core_usr_auth"
   AREA "repository area"
@@ -1191,6 +1446,121 @@ ADD INDEX "PK_rep_obj_attr_prop" ON "rep_obj_attr_prop"
   PRIMARY
   INDEX-FIELD "attr_id" ASCENDING 
   INDEX-FIELD "prop_id" ASCENDING 
+
+ADD TABLE "rep_obj_check"
+  AREA "repository area"
+  LABEL "rep_obj_check"
+  DESCRIPTION "Objects that have been checked out"
+  DUMP-NAME "rep_obj_check"
+
+ADD FIELD "obj_id" OF "rep_obj_check" AS character 
+  DESCRIPTION "Repository object unique identifier."
+  FORMAT "x(32)"
+  INITIAL ""
+  LABEL "obj_id"
+  POSITION 2
+  MAX-WIDTH 64
+  HELP "obj_id"
+  ORDER 20
+
+ADD FIELD "user_id" OF "rep_obj_check" AS character 
+  DESCRIPTION "User identifier, surrogate key."
+  FORMAT "x(32)"
+  INITIAL ""
+  POSITION 3
+  MAX-WIDTH 64
+  HELP "user_id"
+  ORDER 30
+
+ADD FIELD "check_date" OF "rep_obj_check" AS datetime 
+  DESCRIPTION "Data when the object was checked."
+  FORMAT "99/99/9999 HH:MM:SS.SSS"
+  INITIAL ?
+  LABEL "check_data"
+  POSITION 4
+  MAX-WIDTH 8
+  HELP "check_data"
+  ORDER 40
+
+ADD INDEX "PK_rep_obj_check" ON "rep_obj_check" 
+  AREA "repository area"
+  PRIMARY
+  INDEX-FIELD "obj_id" ASCENDING 
+
+ADD TABLE "rep_obj_history"
+  AREA "repository area"
+  LABEL "rep_obj_history"
+  DESCRIPTION "Object history"
+  DUMP-NAME "rep_obj_history"
+
+ADD FIELD "obj_data" OF "rep_obj_history" AS clob 
+  DESCRIPTION "Data information contained by the class."
+  FORMAT "x(8)"
+  INITIAL ?
+  POSITION 2
+  LOB-AREA "repository area"
+  LOB-BYTES 104857600
+  LOB-SIZE ?
+  CLOB-CODEPAGE "iso8859-1"
+  CLOB-COLLATION "basic"
+  CLOB-TYPE 0
+  ORDER 10
+
+ADD FIELD "obj_id" OF "rep_obj_history" AS character 
+  DESCRIPTION "Repository object unique identifier."
+  FORMAT "x(32)"
+  INITIAL ""
+  LABEL "obj_id"
+  POSITION 3
+  MAX-WIDTH 64
+  HELP "obj_id"
+  ORDER 20
+
+ADD FIELD "obj_ver" OF "rep_obj_history" AS integer 
+  DESCRIPTION "Object version"
+  FORMAT ">>>9"
+  INITIAL "0"
+  LABEL "obj_ver"
+  POSITION 4
+  MAX-WIDTH 4
+  HELP "obj_ver"
+  ORDER 30
+
+ADD FIELD "user_comment" OF "rep_obj_history" AS character 
+  DESCRIPTION "Version comment"
+  FORMAT "x(500)"
+  INITIAL ""
+  LABEL "user_comment"
+  POSITION 5
+  MAX-WIDTH 1000
+  HELP "user_comment"
+  ORDER 40
+
+ADD FIELD "user_id" OF "rep_obj_history" AS character 
+  DESCRIPTION "User identifier, surrogate key."
+  FORMAT "x(32)"
+  INITIAL ""
+  POSITION 6
+  MAX-WIDTH 64
+  HELP "user_id"
+  ORDER 50
+
+ADD FIELD "version_date" OF "rep_obj_history" AS datetime 
+  DESCRIPTION "Data of the current object version."
+  FORMAT "99/99/9999 HH:MM:SS.SSS"
+  INITIAL ?
+  LABEL "obj_data"
+  POSITION 7
+  MAX-WIDTH 8
+  HELP "obj_data"
+  ORDER 60
+
+ADD INDEX "PK_rep_obj_history" ON "rep_obj_history" 
+  AREA "repository area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "obj_id" ASCENDING 
+  INDEX-FIELD "obj_ver" ASCENDING 
 
 ADD TABLE "rep_obj_link"
   AREA "repository area"
@@ -2247,309 +2617,8 @@ ADD INDEX "UQ_sys_technology_tech_name" ON "sys_technology"
   UNIQUE
   INDEX-FIELD "tech_name" ASCENDING 
 
-ADD TABLE "rep_obj_check"
-  AREA "repository area"
-  LABEL "rep_obj_check"
-  DESCRIPTION "Objects that have been checked out"
-  DUMP-NAME "rep_obj_check"
-
-ADD FIELD "obj_id" OF "rep_obj_check" AS character 
-  DESCRIPTION "Repository object unique identifier."
-  FORMAT "x(32)"
-  INITIAL ""
-  LABEL "obj_id"
-  POSITION 2
-  MAX-WIDTH 64
-  HELP "obj_id"
-  ORDER 20
-
-ADD FIELD "user_id" OF "rep_obj_check" AS character 
-  DESCRIPTION "User identifier, surrogate key."
-  FORMAT "x(32)"
-  INITIAL ""
-  POSITION 3
-  MAX-WIDTH 64
-  HELP "user_id"
-  ORDER 30
-
-ADD FIELD "check_date" OF "rep_obj_check" AS datetime 
-  DESCRIPTION "Data when the object was checked."
-  FORMAT "99/99/9999 HH:MM:SS.SSS"
-  INITIAL ?
-  LABEL "check_data"
-  POSITION 4
-  MAX-WIDTH 8
-  HELP "check_data"
-  ORDER 40
-
-ADD INDEX "PK_rep_obj_check" ON "rep_obj_check" 
-  AREA "repository area"
-  PRIMARY
-  INDEX-FIELD "obj_id" ASCENDING 
-
-ADD TABLE "rep_obj_history"
-  AREA "repository area"
-  LABEL "rep_obj_history"
-  DESCRIPTION "Object history"
-  DUMP-NAME "rep_obj_history"
-
-ADD FIELD "obj_data" OF "rep_obj_history" AS clob 
-  DESCRIPTION "Data information contained by the class."
-  FORMAT "x(8)"
-  INITIAL ?
-  POSITION 2
-  LOB-AREA "repository area"
-  LOB-BYTES 104857600
-  LOB-SIZE ?
-  CLOB-CODEPAGE "iso8859-1"
-  CLOB-COLLATION "basic"
-  CLOB-TYPE 0
-  ORDER 10
-
-ADD FIELD "obj_id" OF "rep_obj_history" AS character 
-  DESCRIPTION "Repository object unique identifier."
-  FORMAT "x(32)"
-  INITIAL ""
-  LABEL "obj_id"
-  POSITION 3
-  MAX-WIDTH 64
-  HELP "obj_id"
-  ORDER 20
-
-ADD FIELD "obj_ver" OF "rep_obj_history" AS integer 
-  DESCRIPTION "Object version"
-  FORMAT ">>>9"
-  INITIAL "0"
-  LABEL "obj_ver"
-  POSITION 4
-  MAX-WIDTH 4
-  HELP "obj_ver"
-  ORDER 30
-
-ADD FIELD "user_comment" OF "rep_obj_history" AS character 
-  DESCRIPTION "Version comment"
-  FORMAT "x(500)"
-  INITIAL ""
-  LABEL "user_comment"
-  POSITION 5
-  MAX-WIDTH 1000
-  HELP "user_comment"
-  ORDER 40
-
-ADD FIELD "user_id" OF "rep_obj_history" AS character 
-  DESCRIPTION "User identifier, surrogate key."
-  FORMAT "x(32)"
-  INITIAL ""
-  POSITION 6
-  MAX-WIDTH 64
-  HELP "user_id"
-  ORDER 50
-
-ADD FIELD "version_date" OF "rep_obj_history" AS datetime 
-  DESCRIPTION "Data of the current object version."
-  FORMAT "99/99/9999 HH:MM:SS.SSS"
-  INITIAL ?
-  LABEL "obj_data"
-  POSITION 7
-  MAX-WIDTH 8
-  HELP "obj_data"
-  ORDER 60
-
-ADD INDEX "PK_rep_obj_history" ON "rep_obj_history" 
-  AREA "repository area"
-  UNIQUE
-  PRIMARY
-  INDEX-FIELD "obj_id" ASCENDING 
-  INDEX-FIELD "obj_ver" ASCENDING
-
-ADD TABLE "core_role"
-  AREA "repository area"
-  Description "Framework application's roles - can be defined by application administrators. Used for authorization service."
-  DUMP-NAME "core_role"
-
-ADD FIELD "role_id" OF "core_role" AS character
-  Description "Application role unique identifier."
-  FORMAT "x(8)"
-  HELP "role_id"
-  Order 10
-
-ADD FIELD "app_id" OF "core_role" AS character
-  Description "Application identifier."
-  FORMAT "x(32)"
-  LABEL "User"
-  HELP "app_id"
-  Order 20
-
-ADD FIELD "role_name" OF "core_role" AS character
-  Description "Role name."
-  FORMAT "x(8)"
-  LABEL "Deny"
-  HELP "role_name"
-  Order 30
-
-ADD FIELD "role_desc" OF "core_role" AS character
-  Description "Role description."
-  FORMAT "x(8)"
-  HELP "role_desc"
-  Order 40
-
-ADD INDEX "PK_core_role" ON "core_role"
-  AREA "repository area"
-  PRIMARY
-  UNIQUE
-  INDEX-FIELD "role_id" ASCENDING
-
-ADD INDEX "UQ_role_name" ON "core_role"
-  AREA "repository area"
-  UNIQUE
-  INDEX-FIELD "app_id" ASCENDING
-  INDEX-FIELD "role_name" ASCENDING
-
-ADD INDEX "FK_core_app" ON "core_role"
-  AREA "repository area"
-  INDEX-FIELD "app_id" ASCENDING
-  
-ADD TABLE "core_role_exclude"
-  AREA "repository area"
-  Description "Framework application's roles - can be defined by application administrators. Used for authorization service."
-  DUMP-NAME "core_role_exclude"
-
-ADD FIELD "first_role" OF "core_role_exclude" AS character
-  Description "Role identifier of the first component of the mutual exclusive relation."
-  FORMAT "x(8)"
-  HELP "first_role"
-  Order 10
-
-ADD FIELD "second_role" OF "core_role_exclude" AS character
-  Description "Role identifier of the second component of the mutual exclusive relation."
-  FORMAT "x(8)"
-  HELP "second_role"
-  Order 20
-
-ADD INDEX "FK_second_role" ON "core_role_exclude"
-  AREA "repository area"
-  INDEX-FIELD "second_role" ASCENDING
-
-ADD INDEX "FK_first_role" ON "core_role_exclude"
-  AREA "repository area"
-  INDEX-FIELD "first_role" ASCENDING
-  
-
-ADD TABLE "core_role_inherit"
-  AREA "repository area"
-  Description "Framework application's roles - can be defined by application administrators. Used for authorization service."
-  DUMP-NAME "core_role_inherit"
-
-ADD FIELD "super_role" OF "core_role_inherit" AS character
-  Description "Unique identifier of the super role."
-  FORMAT "x(8)"
-  HELP "super_role"
-  Order 10
-
-ADD FIELD "base_role" OF "core_role_inherit" AS character
-  Description "Unique identifier of the base role."
-  FORMAT "x(8)"
-  HELP "base_role"
-  Order 20
-
-ADD FIELD "with_grant" OF "core_role_inherit" AS logical
-  Description "With grant option"
-  FORMAT "yes/no"
-  INITIAL "FALSE"
-  HELP "with_grant"
-  Order 30
-
-ADD INDEX "PK_core_role_inherit" ON "core_role_inherit"
-  AREA "repository area"
-  PRIMARY
-  UNIQUE
-  INDEX-FIELD "super_role" ASCENDING
-  INDEX-FIELD "base_role" ASCENDING
-
-ADD INDEX "FK_super_role" ON "core_role_inherit"
-  AREA "repository area"
-  INDEX-FIELD "super_role" ASCENDING
-
-ADD INDEX "FK_base_role" ON "core_role_inherit"
-  AREA "repository area"
-  INDEX-FIELD "base_role" ASCENDING
-
-
-ADD TABLE "core_role_permission"
-  AREA "repository area"
-  Description "Permissions assigned to application role."
-  DUMP-NAME "core_role_permission"
-
-ADD FIELD "permission_id" OF "core_role_permission" AS character
-  Description "Permission unique identifier"
-  FORMAT "x(8)"
-  HELP "permission_id"
-  Order 10
-
-ADD FIELD "role_id" OF "core_role_permission" AS character
-  Description "Application role unique identifier."
-  FORMAT "x(8)"
-  HELP "role_id"
-  Order 20
-
-ADD FIELD "with_grant" OF "core_role_permission" AS logical
-  Description "With grant option"
-  FORMAT "yes/no"
-  INITIAL "FALSE"
-  HELP "with_grant"
-  Order 30
-
-ADD INDEX "FK_core_role" ON "core_role_permission"
-  AREA "repository area"
-  INDEX-FIELD "role_id" ASCENDING
-
-ADD INDEX "FK_rep_permission" ON "core_role_permission"
-  AREA "repository area"
-  INDEX-FIELD "permission_id" ASCENDING
-
-
-ADD TABLE "core_user_role"
-  AREA "repository area"
-  Description "User available applications default settings."
-  DUMP-NAME "core_user_role"
-
-ADD FIELD "user_id" OF "core_user_role" AS character
-  Description "User identifier, surrogate key."
-  FORMAT "x(32)"
-  HELP "user_id"
-  Order 10
-
-ADD FIELD "role_id" OF "core_user_role" AS character
-  Description "Role unique identifier."
-  FORMAT "x(32)"
-  LABEL "Object"
-  HELP "role_id"
-  Order 20
-
-ADD FIELD "is_immobile" OF "core_user_role" AS logical
-  Description "Immobile role grant"
-  FORMAT "yes/no"
-  INITIAL "FALSE"
-  HELP "is_immobile"
-  Order 30
-
-ADD INDEX "PK_core_user_role" ON "core_user_role"
-  AREA "repository area"
-  PRIMARY
-  UNIQUE
-  INDEX-FIELD "user_id" ASCENDING
-  INDEX-FIELD "role_id" ASCENDING
-
-ADD INDEX "FK_core_role" ON "core_user_role"
-  AREA "repository area"
-  INDEX-FIELD "role_id" ASCENDING
-
-ADD INDEX "FK_core_user" ON "core_user_role"
-  AREA "repository area"
-  INDEX-FIELD "user_id" ASCENDING
-
 .
 PSC
-cpstream=ISO8859-1
+cpstream=UTF-8
 .
-0000052335
+0000061372

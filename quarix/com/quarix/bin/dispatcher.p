@@ -47,8 +47,6 @@ define output parameter table         for ttResponse.
 define output parameter pstrResponse  as memptr    no-undo.
 
 define variable mainController	as Controller	no-undo.
-define variable startUpHdl		as handle		no-undo.
-define variable superProc		as integer		no-undo.
 define variable iStartTime		as integer		no-undo.
 define variable iCallDuration	as integer		no-undo.
 
@@ -92,37 +90,13 @@ create widget-pool.
 
 session:error-stack-trace = true.
 
-
 set-size(pstrResponse) = 0.
 
 file-info:file-name = '.~/log~/4gl.log':u.
 if file-info:file-type ne ? then
    output to '.~/log~/4gl.log':u append.
 
-#GetController:
-do:
-    if not valid-object(mainController) then do
-       on error undo, leave
-       on stop undo, leave:
-
-        /* try to get the reference to the controller from super */
-        do superProc = 1 to num-entries(session:super-procedures):
-           startUpHdl = widget-handle(entry(superProc, session:super-procedures)).
-           if startUpHdl:name eq 'com/quarix/bin/startup.p':u then do:
-              run getQuarixController in startUpHdl (output mainController) no-error.
-              leave #GetController.
-           end.
-        end.
-
-        /* if startup super not already started do it now and set it as session super */
-
-       run com/quarix/bin/startup.p persistent set startUpHdl no-error.
-       if valid-handle(startUpHdl) then do:
-          run getQuarixController in startUpHdl (output mainController) no-error.
-          session:add-super-procedure(startUpHdl) no-error.
-       end.
-    end.
-end.
+run com/quarix/bin/getcontroller.p(output mainController).
 
 /* we should have a valid controller by now so run the request on it */
 if valid-object(mainController) then do

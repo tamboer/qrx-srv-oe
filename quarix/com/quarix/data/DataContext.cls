@@ -516,7 +516,7 @@ class com.quarix.data.DataContext
 
     end method.
 
-    method private logical CreateRowId(input tableName as character, input ttRowId as character, input dbRowId as character):
+    method public logical CreateRowId(input tableName as character, input ttRowId as character, input dbRowId as character):
 
     	find first ttRowId
     		where ttRowId.ttName	= tableName

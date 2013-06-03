@@ -79,24 +79,26 @@ class com.quarix.data.DataAccess
         get.
         set.
 
-    define private variable dataModel as DataModel no-undo.
+    define private variable dataModel  as DataModel no-undo.
 
-    define private variable iSortOrder as integer no-undo.
+    define private variable iSortOrder as integer   no-undo.
 
     define public property LogQueryString as logical no-undo initial false
         get.
         set.
 
-    define private variable hTtTemp     as handle       no-undo.
-    define private variable hBufTtTemp  as handle       no-undo.
-    define private variable fieldMap    as character    no-undo extent 16.
+    define private variable hTtTemp    as handle    no-undo.
+    define private variable hBufTtTemp as handle    no-undo.
+    define private variable fieldMap   as character no-undo extent 16.
 
     constructor public DataAccess():
-        super().
-        if Application:LogLevel ge 4 then
-        EnableDebugQuery().
-    end constructor.
 
+        super().
+
+        if Application:LogLevel ge 4
+        then LogQueryString = true.
+
+    end constructor.
 
     destructor public DataAccess():
 
@@ -267,14 +269,14 @@ class com.quarix.data.DataAccess
     method protected logical RepositionToRow (  bufferName as character, repositionRow   as integer,
         goBackward as logical,   skipRecord      as logical):
 
-        define variable hDatasource		as handle		no-undo.
-        define variable hBuf			as handle		no-undo.
-        define variable hQuery			as handle		no-undo.
-        define variable iBuf			as integer		no-undo.
-        define variable lOk				as logical		no-undo.
+        define variable hDatasource		as handle    no-undo.
+        define variable hBuf         as handle    no-undo.
+        define variable hQuery       as handle    no-undo.
+        define variable iBuf         as integer   no-undo.
+        define variable lOk          as logical   no-undo.
         define variable cPrepString		as character	no-undo.
-        define variable iNumStepBack	as integer		no-undo.
-        define variable iNum			as integer		no-undo.
+        define variable iNumStepBack	as integer   no-undo.
+        define variable iNum         as integer   no-undo.
 
         if Util:IsEmpty(bufferName)
         then return false.
@@ -502,16 +504,16 @@ class com.quarix.data.DataAccess
     method protected logical RepositionToRow (  bufferName as character, repositionRowid as character,
         goBackward as logical,   skipRecord      as logical):
 
-        define variable hDatasource		as handle       no-undo.
-        define variable hQuery			as handle       no-undo.
-        define variable hBuf			as handle       no-undo.
-        define variable iBuf			as integer      no-undo.
-        define variable posRowid		as rowid        no-undo extent 18.
-        define variable cQuery			as character    no-undo.
-        define variable lOk				as logical      no-undo.
-        define variable cPrepString		as character    no-undo.
-        define variable iNumStepBack	as integer		no-undo.
-        define variable iNum			as integer		no-undo.
+        define variable hDatasource		as handle    no-undo.
+        define variable hQuery       as handle    no-undo.
+        define variable hBuf         as handle    no-undo.
+        define variable iBuf         as integer   no-undo.
+        define variable posRowid     as rowid     no-undo extent 18.
+        define variable cQuery       as character no-undo.
+        define variable lOk          as logical   no-undo.
+        define variable cPrepString		as character no-undo.
+        define variable iNumStepBack	as integer   no-undo.
+        define variable iNum         as integer   no-undo.
 
         if Util:IsEmpty(bufferName)
         then return false.
@@ -828,12 +830,12 @@ class com.quarix.data.DataAccess
 
     method private logical prepareQuery(input hBuf as handle, input qryString as character):
 
-        define variable hQry          as handle   no-undo.
-        define variable lPrepareOk    as logical  no-undo.
+        define variable hQry       as handle    no-undo.
+        define variable lPrepareOk as logical   no-undo.
 
-        define variable iNum          as integer        no-undo.
-        define variable cIndex        as character      no-undo.
-        define variable cVal          as character      no-undo.
+        define variable iNum       as integer   no-undo.
+        define variable cIndex     as character no-undo.
+        define variable cVal       as character no-undo.
 
         if LogQueryString
         then do:
@@ -890,23 +892,23 @@ class com.quarix.data.DataAccess
 
     method private logical fillBuffer(hBuf as handle, useSearchFilter as logical):
 
-        define variable numRel      		as integer   	no-undo.
-        define variable numKey      		as integer   	no-undo.
-        define variable numRec      		as integer   	no-undo.
-        define variable keyName     		as character 	no-undo.
-        define variable dsQuery     		as character 	no-undo.
-        define variable qryString   		as character 	no-undo.
-        define variable startRowid  		as character 	no-undo.
-        define variable startRow    		as integer   	no-undo initial ?.
-        define variable startTime   		as integer   	no-undo.
-        define variable queryTime   		as integer   	no-undo.
-        define variable hTT         		as handle    	no-undo.
-        define variable hQry        		as handle    	no-undo.
-        define variable hParentBuf			as handle    	no-undo.
-        define variable firstBatch			as logical   	no-undo.
-        define variable lastBatch			as logical   	no-undo.
-        define variable isSearchReq			as logical   	no-undo.
-        define variable hdsContextHandle	as handle		no-undo.
+        define variable numRel           as integer   no-undo.
+        define variable numKey           as integer   no-undo.
+        define variable numRec           as integer   no-undo.
+        define variable keyName          as character no-undo.
+        define variable dsQuery          as character no-undo.
+        define variable qryString        as character no-undo.
+        define variable startRowid       as character no-undo.
+        define variable startRow         as integer   no-undo initial ?.
+        define variable startTime        as integer   no-undo.
+        define variable queryTime        as integer   no-undo.
+        define variable hTT              as handle    no-undo.
+        define variable hQry             as handle    no-undo.
+        define variable hParentBuf       as handle    no-undo.
+        define variable firstBatch       as logical   no-undo.
+        define variable lastBatch        as logical   no-undo.
+        define variable isSearchReq      as logical   no-undo.
+        define variable hdsContextHandle	as handle    no-undo.
 
         if LogQueryString then
         startTime = etime.
@@ -951,6 +953,9 @@ class com.quarix.data.DataAccess
         hdsContextHandle = DataContext:dsContextHandle.
 
         qryString = updateDataSourceQuery(hBuf, input dataset-handle hdsContextHandle by-reference).
+
+        if LogQueryString then
+            message qryString.
 
         if Util:IsEmpty(qryString)
         then return false.
@@ -1183,18 +1188,18 @@ class com.quarix.data.DataAccess
 
     method private logical IsFirstRecord(hBuf as handle, lastBatch as logical, numRecords as integer):
 
-        define variable hQry				as handle       no-undo.
-        define variable qryString			as character    no-undo.
-        define variable dsQuery				as character    no-undo.
-        define variable oldRowid			as rowid        no-undo.
-        define variable newRowid			as rowid        no-undo.
-        define variable hTT					as handle       no-undo.
-        define variable fieldName			as character    no-undo.
-        define variable fieldValue			as character    no-undo.
-        define variable tableName			as character    no-undo.
-        define variable operName			as character    no-undo.
-        define variable lPrepareOk			as logical      no-undo.
-        define variable hdsContextHandle	as handle		no-undo.
+        define variable hQry             as handle    no-undo.
+        define variable qryString        as character no-undo.
+        define variable dsQuery          as character no-undo.
+        define variable oldRowid         as rowid     no-undo.
+        define variable newRowid         as rowid     no-undo.
+        define variable hTT              as handle    no-undo.
+        define variable fieldName        as character no-undo.
+        define variable fieldValue       as character no-undo.
+        define variable tableName        as character no-undo.
+        define variable operName         as character no-undo.
+        define variable lPrepareOk       as logical   no-undo.
+        define variable hdsContextHandle	as handle    no-undo.
 
         if not valid-handle(hBuf)
         then return ?.
@@ -1328,12 +1333,12 @@ class com.quarix.data.DataAccess
 
     method private integer fillBuffer(hBuf as handle, hQry as handle, batchSize as integer):
 
-        define variable recRowid    as character    no-undo.
-        define variable numRec      as integer      no-undo.
-        define variable numBuf      as integer      no-undo.
-        define variable hSrcBuf     as handle       no-undo.
-        define variable isPrefetch  as logical      no-undo.
-        define variable lRetValue   as logical      no-undo.
+        define variable recRowid   as character no-undo.
+        define variable numRec     as integer   no-undo.
+        define variable numBuf     as integer   no-undo.
+        define variable hSrcBuf    as handle    no-undo.
+        define variable isPrefetch as logical   no-undo.
+        define variable lRetValue  as logical   no-undo.
 
         if not valid-handle(hBuf) or
             not valid-handle(hQry) or
@@ -1499,6 +1504,29 @@ class com.quarix.data.DataAccess
 
     end method.
 
+    method private character GetModifiedFields (input phSource as handle, input phTarget as handle):
+
+        define variable i            as integer   no-undo.
+        define variable cDiff        as character no-undo.
+        define variable hSourceField as handle    no-undo.
+        define variable hTargetField as handle    no-undo.
+
+        if valid-handle (phSource) and valid-handle (phTarget) then do:
+            repeat i = 1 to phSource:num-fields:
+                hSourceField = phSource:buffer-field (i).
+                hTargetField = phTarget:buffer-field (hSourceField:name) no-error.
+                if valid-handle (hTargetField) and hSourceField:buffer-value <> hTargetField:buffer-value then
+                    cDiff = cDiff + ',' + phSource:name + '.':U + hSourceField:name
+                        + ' (' + (if hSourceField:buffer-value = ? then '?' else hSourceField:buffer-value)
+                        + ' - ' + (if hTargetField:buffer-value = ? then '?' else hTargetField:buffer-value)
+                        + ')'.
+            end.
+            cDiff = substring (cDiff, 2).
+        end.
+
+        return cDiff.
+
+    end method.
 
     method private logical saveTable (input hBuf as handle):
 
@@ -1691,7 +1719,7 @@ class com.quarix.data.DataAccess
                             /* compare before-image with 'current' data */
                             if retVal eq false then
                             do:
-                                ThrowError(105, 'msg_err_data_compare':u, hBuf:name, ?).
+                                ThrowError(105, 'msg_err_data_compare':u, hBuf:name, GetModifiedFields (hSrcBuf, hBi)).
                                 leave update_block.
                             end.
 
@@ -1849,7 +1877,7 @@ class com.quarix.data.DataAccess
 
     method public final character GetPhysicalFieldName (logicalName as character):
 
-        define variable hBuf       as handle    no-undo.
+        define variable hBuf      as handle    no-undo.
         define variable fieldName as character no-undo.
         define variable bufNum    as integer   no-undo.
 
@@ -1983,18 +2011,18 @@ class com.quarix.data.DataAccess
 
 
     method public final logical AddDataSource (pcTable as character, pcBuffer as character):
-        return AddDataSource (pcTable, pcBuffer, ?).
+        return AddDataSource (pcTable, pcBuffer, ?, ?, ?, ?, ?, ?, false).
     end method.
 
     method public final logical AddDataSource (pcTable as character, pcBuffer as character, pcKeyFields as character):
-        return AddDataSource (pcTable, pcBuffer, pcKeyFields, ?).
+        return AddDataSource (pcTable, pcBuffer, pcKeyFields, ?, ?, ?, ?, ?, false).
     end method.
 
     method public final logical AddDataSource
         (pcTable    as character, pcBuffer    as character,
         pcKeyFields as character, pcWhere     as character):
 
-        return AddDataSource (pcTable, pcBuffer, pcKeyFields, pcWhere, ?).
+        return AddDataSource (pcTable, pcBuffer, pcKeyFields, pcWhere, ?, ?, ?, ?, false).
 
     end method.
 
@@ -2003,7 +2031,7 @@ class com.quarix.data.DataAccess
         pcKeyFields as character, pcWhere     as character,
         pcFieldsMap as character):
 
-        return AddDataSource (pcTable, pcBuffer, pcKeyFields, pcWhere, pcFieldsMap, ?).
+        return AddDataSource (pcTable, pcBuffer, pcKeyFields, pcWhere, pcFieldsMap, ?, ?, ?, false).
 
     end method.
 
@@ -2013,7 +2041,7 @@ class com.quarix.data.DataAccess
         pcKeyFields as character, pcWhere       as character,
         pcFieldsMap as character, excludeFields as character):
 
-        return AddDataSource (pcTable, pcBuffer, pcKeyFields, pcWhere, pcFieldsMap, excludeFields, ?).
+        return AddDataSource (pcTable, pcBuffer, pcKeyFields, pcWhere, pcFieldsMap, excludeFields, ?, ?, false).
 
     end method.
 
@@ -2023,7 +2051,7 @@ class com.quarix.data.DataAccess
         pcKeyFields as character, pcWhere       as character,
         pcFieldsMap as character, excludeFields as character, includeFields as character):
 
-        return AddDataSource (pcTable, pcBuffer, pcKeyFields, pcWhere, pcFieldsMap, excludeFields, includeFields, ?).
+        return AddDataSource (pcTable, pcBuffer, pcKeyFields, pcWhere, pcFieldsMap, excludeFields, includeFields, ?, false).
 
     end method.
 
@@ -2049,13 +2077,13 @@ class com.quarix.data.DataAccess
         joinClause		as character,
         joinType		as logical):
 
-        define variable hBuffer     as handle       no-undo.
-        define variable hSrcBuffer  as handle       no-undo.
-        define variable hDataSource as handle       no-undo.
-        define variable hQuery      as handle       no-undo.
-        define variable numBuf      as integer      no-undo.
-        define variable cQryString  as character    no-undo.
-        define variable lPrepareOk  as logical      no-undo.
+        define variable hBuffer     as handle    no-undo.
+        define variable hSrcBuffer  as handle    no-undo.
+        define variable hDataSource as handle    no-undo.
+        define variable hQuery      as handle    no-undo.
+        define variable numBuf      as integer   no-undo.
+        define variable cQryString  as character no-undo.
+        define variable lPrepareOk  as logical   no-undo.
 
         hSrcBuffer = phBuffer.
 
@@ -2263,8 +2291,8 @@ class com.quarix.data.DataAccess
 
     method public void DetachDataSource ():
 
-        define variable numBuf  as integer  no-undo.
-        define variable hBuf    as handle   no-undo.
+        define variable numBuf as integer no-undo.
+        define variable hBuf   as handle  no-undo.
 
         if not valid-handle(datasetHandle)
         then return.
@@ -2499,9 +2527,9 @@ class com.quarix.data.DataAccess
             tableName = datasetHandle:get-buffer-handle(1):table.
 
         assign
-            hBuf     = datasetHandle:get-buffer-handle(tableName)
-            hBuffer  = hBuf:data-source:get-source-buffer(1)
-            hFld     = hBuffer:buffer-field(keyField) .
+            hBuf    = datasetHandle:get-buffer-handle(tableName)
+            hBuffer = hBuf:data-source:get-source-buffer(1)
+            hFld    = hBuffer:buffer-field(keyField) .
 
         if not valid-handle(hFld) then
             assign
@@ -2963,8 +2991,8 @@ class com.quarix.data.DataAccess
                 end.
                 else
                     assign
-                        iNumChar    = 0
-                        iBufPos     = indexPos.
+                        iNumChar = 0
+                        iBufPos  = indexPos.
             end.
 
             if not escapeNext and index('~'"', thisChar) gt 0 then
@@ -3013,9 +3041,9 @@ class com.quarix.data.DataAccess
 
     method private logical GetIndexInformation():
 
-        define variable iNumBuffers     as integer      no-undo.
-        define variable hBuf            as handle       no-undo.
-        define variable lRetVal         as logical      no-undo.
+        define variable iNumBuffers as integer no-undo.
+        define variable hBuf        as handle  no-undo.
+        define variable lRetVal     as logical no-undo.
 
         if not valid-handle(datasetHandle)
         then return false.
@@ -3089,13 +3117,13 @@ class com.quarix.data.DataAccess
 
     method private logical CheckIfRecordAvailable(input hBuf as handle):
 
-        define variable iNumBuf         as integer      no-undo.
-        define variable hSrcBuf         as handle       no-undo.
-        define variable hFieldTtTemp    as handle       no-undo.
-        define variable cCondition      as character    no-undo.
-        define variable cFieldValue     as character    no-undo.
-        define variable cWhere          as character    no-undo.
-        define variable lAvailable      as logical      no-undo.
+        define variable iNumBuf      as integer   no-undo.
+        define variable hSrcBuf      as handle    no-undo.
+        define variable hFieldTtTemp as handle    no-undo.
+        define variable cCondition   as character no-undo.
+        define variable cFieldValue  as character no-undo.
+        define variable cWhere       as character no-undo.
+        define variable lAvailable   as logical   no-undo.
 
         if not valid-handle(hBuf)       or
            not valid-handle(hBufTtTemp) or
@@ -3107,7 +3135,7 @@ class com.quarix.data.DataAccess
 
         /* get field map for each data source buffers */
         do iNumBuf = 1 to hBuf:data-source:num-source-buffers:
-            assign hSrcBuf  = hBuf:data-source:get-source-buffer(iNumBuf).
+            assign hSrcBuf = hBuf:data-source:get-source-buffer(iNumBuf).
 
             /* exclude fields list are set on source's buffer private-data */
             if hSrcBuf:available
@@ -3193,10 +3221,10 @@ class com.quarix.data.DataAccess
 
     method private character GetRecordDbRowId(input hBuf as handle):
 
-        define variable iNumBuf     as integer      no-undo.
-        define variable recRowid    as character    no-undo.
-        define variable hSrcBuf     as handle       no-undo.
-        define variable cRowId      as character    no-undo.
+        define variable iNumBuf  as integer   no-undo.
+        define variable recRowid as character no-undo.
+        define variable hSrcBuf  as handle    no-undo.
+        define variable cRowId   as character no-undo.
 
         if not valid-handle(hBuf) or
             not valid-handle(hBuf:data-source)
@@ -3204,7 +3232,7 @@ class com.quarix.data.DataAccess
 
         do iNumBuf = 1 to hBuf:data-source:num-source-buffers:
 
-            assign hSrcBuf  = hBuf:data-source:get-source-buffer(iNumBuf).
+            assign hSrcBuf = hBuf:data-source:get-source-buffer(iNumBuf).
 
             cRowId = GetSourceBufferDbRowID(hSrcBuf).
 
@@ -3229,15 +3257,15 @@ class com.quarix.data.DataAccess
 
     method private character ConvertHexValueToRowId(input hSrcBuf as handle, input cHexVal as character):
 
-        define variable rRawValue   as raw          no-undo.
-        define variable hTtTemp     as handle       no-undo.
-        define variable hBufTtTemp  as handle       no-undo.
-        define variable iNumFields  as integer      no-undo.
-        define variable hField      as handle       no-undo.
-        define variable cFieldVal   as character    no-undo.
-        define variable cCondition  as character    no-undo.
-        define variable cWhere      as character    no-undo.
-        define variable cRowId      as character    no-undo.
+        define variable rRawValue  as raw       no-undo.
+        define variable hTtTemp    as handle    no-undo.
+        define variable hBufTtTemp as handle    no-undo.
+        define variable iNumFields as integer   no-undo.
+        define variable hField     as handle    no-undo.
+        define variable cFieldVal  as character no-undo.
+        define variable cCondition as character no-undo.
+        define variable cWhere     as character no-undo.
+        define variable cRowId     as character no-undo.
 
         if not valid-handle(hSrcBuf)                    or
             not valid-handle(hSrcBuf:table-handle)      or
@@ -3272,8 +3300,8 @@ class com.quarix.data.DataAccess
             then cFieldVal = '?':U.
             else
                 assign
-                    cFieldVal   = string(hField:buffer-value())
-                    cFieldVal   = quoter(cFieldVal).
+                    cFieldVal = string(hField:buffer-value())
+                    cFieldVal = quoter(cFieldVal).
 
             cCondition = substitute('&1.&2 = &3':U, hSrcBuf:name, hField:name, cFieldVal).
 
@@ -3307,10 +3335,10 @@ class com.quarix.data.DataAccess
 
     method private character ConvertDataToDbRowId(input hBuf as handle, input repositionRowid as character):
 
-        define variable iNumBuf     as integer      no-undo.
-        define variable hSrcBuf     as handle       no-undo.
-        define variable cRowId      as character    no-undo.
-        define variable recRowid    as character    no-undo.
+        define variable iNumBuf  as integer   no-undo.
+        define variable hSrcBuf  as handle    no-undo.
+        define variable cRowId   as character no-undo.
+        define variable recRowid as character no-undo.
 
         if not valid-handle(hBuf)               or
             not valid-handle(hBuf:data-source)  or

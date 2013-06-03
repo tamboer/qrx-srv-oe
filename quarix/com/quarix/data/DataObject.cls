@@ -1343,10 +1343,11 @@ class com.quarix.data.DataObject
     	then do:
     		DataContext:ClearProperty('FilterSessionID':u).
     		DataContext:ClearProperty('FilterLanguageID':u).
+    		DataContext:ClearProperty('FilterDefaultLanguageID':u).
     		DataContext:ClearProperty('FilterUsrID':u).
     		DataContext:ClearProperty('Company':u).
     		DataContext:ClearProperty('CustomerID':u).
-    		DataContext:ClearProperty('EntityType':u).
+    		DataContext:ClearProperty('FilterEntityType':u).
     	end.
 
     end method.
@@ -1357,6 +1358,7 @@ class com.quarix.data.DataObject
     	then do:
     		ContextManager:SetValue(input 'SessionID':u, input '':u).
 	    	ContextManager:SetValue(input 'LanguageID':u, input '':u).
+	    	ContextManager:SetValue(input 'DefaultLanguageID':u, input '':u).
     		ContextManager:SetValue(input 'UsrID':u, input '':u).
     		ContextManager:SetValue(input 'Company':u, input '':u).
     		ContextManager:SetValue(input 'CustomerID':u, input '':u).
@@ -1374,6 +1376,12 @@ class com.quarix.data.DataObject
     method public void SetSessionLanguageID(input cFilterLanguageID as character):
 
     	DataContext:SetProperty('FilterLanguageID':u, cFilterLanguageID).
+
+    end method.
+
+    method public void SetSessionDefaultLanguageID(input cFilterLanguageID as character):
+
+    	DataContext:SetProperty('FilterDefaultLanguageID':u, cFilterLanguageID).
 
     end method.
 
@@ -1397,63 +1405,68 @@ class com.quarix.data.DataObject
 
     method public void SetSessionEntityType(input cFilterEntityType as character):
 
-    	DataContext:SetProperty('EntityType':u, cFilterEntityType).
+    	DataContext:SetProperty('FilterEntityType':u, cFilterEntityType).
 
     end method.
 
-    method public void SetSessionParameters():
+    method public logical SetSessionParameters():
 
-    	define variable cFilterSessionID	as character	no-undo.
-    	define variable cFilterLanguageID	as character	no-undo.
-    	define variable cFilterUsrID		as character	no-undo.
-    	define variable cCompany			as character	no-undo.
-    	define variable cCustomerID			as character	no-undo.
-    	define variable cEntityType			as character	no-undo.
+    	define variable cFilterSessionID			as character	no-undo.
+    	define variable cFilterLanguageID			as character	no-undo.
+    	define variable cFilterDefaultLanguageID	as character	no-undo.
+    	define variable cFilterUsrID				as character	no-undo.
+    	define variable cCompany					as character	no-undo.
+    	define variable cCustomerID					as character	no-undo.
+    	define variable cEntityType					as character	no-undo.
 
     	ClearContextManagerSessionParameters().
 
     	if not valid-object(DataContext) or
     		not valid-object(ContextManager)
-    	then return.
+    	then return false.
 
     	assign
-    		cFilterSessionID	= DataContext:GetProperty('FilterSessionID':u)
-    		cFilterLanguageID	= DataContext:GetProperty('FilterLanguageID':u)
-    		cFilterUsrID		= DataContext:GetProperty('FilterUsrID':u)
-    		cCompany			= DataContext:GetProperty('Company':u)
-    		cCustomerID			= DataContext:GetProperty('CustomerID':u)
-    		cEntityType			= DataContext:GetProperty('EntityType':u).
+    		cFilterSessionID			= DataContext:GetProperty('FilterSessionID':u)
+    		cFilterLanguageID			= DataContext:GetProperty('FilterLanguageID':u)
+    		cFilterDefaultLanguageID	= DataContext:GetProperty('FilterDefaultLanguageID':u)
+    		cFilterUsrID				= DataContext:GetProperty('FilterUsrID':u)
+    		cCompany					= DataContext:GetProperty('Company':u)
+    		cCustomerID					= DataContext:GetProperty('CustomerID':u)
+    		cEntityType					= DataContext:GetProperty('FilterEntityType':u).
 
 		ClearSessionParameters().
 
     	ContextManager:SetValue(input 'SessionID':u, input cFilterSessionID).
     	ContextManager:SetValue(input 'LanguageID':u, input cFilterLanguageID).
+    	ContextManager:SetValue(input 'DefaultLanguageID':u, input cFilterDefaultLanguageID).
     	ContextManager:SetValue(input 'UsrID':u, input cFilterUsrID).
     	ContextManager:SetValue(input 'Company':u, input cCompany).
     	ContextManager:SetValue(input 'CustomerID':u, input cCustomerID).
     	ContextManager:SetValue(input 'EntityType':u, input cEntityType).
 
-        return.
+        return true.
 
         catch appError as Progress.Lang.Error :
             ThrowError(input appError).
             delete object appError.
-            return.
+            return false.
         end catch.
 
     end method.
 
     method public void DisplaySessionParameters():
 
-    	define variable cFilterSessionID	as character	no-undo.
-    	define variable cFilterLanguageID	as character	no-undo.
-    	define variable cFilterUsrID		as character	no-undo.
-    	define variable cCompany			as character	no-undo.
-    	define variable cCustomerID			as character	no-undo.
-    	define variable cEntityType			as character	no-undo.
+    	define variable cFilterSessionID			as character	no-undo.
+    	define variable cFilterLanguageID			as character	no-undo.
+    	define variable cFilterDefaultLanguageID	as character	no-undo.
+    	define variable cFilterUsrID				as character	no-undo.
+    	define variable cCompany					as character	no-undo.
+    	define variable cCustomerID					as character	no-undo.
+    	define variable cEntityType					as character	no-undo.
 
     	ContextManager:GetValue(input 'SessionID':u, output cFilterSessionID).
     	ContextManager:GetValue(input 'LanguageID':u, output cFilterLanguageID).
+    	ContextManager:GetValue(input 'DefaultLanguageID':u, output cFilterDefaultLanguageID).
     	ContextManager:GetValue(input 'UsrID':u, output cFilterUsrID).
     	ContextManager:GetValue(input 'Company':u, output cCompany).
     	ContextManager:GetValue(input 'CustomerID':u, output cCustomerID).
@@ -1463,6 +1476,7 @@ class com.quarix.data.DataObject
     		'------------------------------------------------------------------------------------------------------------------------------':U skip
     		'cFilterSessionID' cFilterSessionID skip
     		'cFilterLanguageID' cFilterLanguageID skip
+    		'cFilterDefaultLanguageID' cFilterDefaultLanguageID skip
     		'cFilterUsrID' cFilterUsrID skip
     		'cCompany' cCompany skip
     		'cCustomerID' cCustomerID skip

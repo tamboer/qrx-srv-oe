@@ -179,6 +179,8 @@ interface  com.quarix.service.error.iError:
 
     method public handle GetTmpErrorHandle().
 
+    method public void UpdateErrorNum().
+
 end interface.
 
 

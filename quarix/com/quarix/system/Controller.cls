@@ -149,8 +149,11 @@ class com.quarix.system.Controller
       assign
          prevAppl  = Application:Name
          reqModule = Request:ModuleName
-         reqMethod = Request:ModuleMethod
-         sessionId = Util:Nvl(Request:GetCgi({&res-sess-id}), guid).
+         reqMethod = Request:ModuleMethod.
+
+      if Util:IsEmpty(Request:GetCgi({&res-sess-id}))
+      then sessionId = guid.
+      else sessionId = Request:GetCgi({&res-sess-id}) + '.' + guid.
 
       if prevAppl ne Request:ApplicationName then do:
          ThrowDebug (100, substitute('Application switch: [&1]->[&2].', prevAppl, Request:ApplicationName)).

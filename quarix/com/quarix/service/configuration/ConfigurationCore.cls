@@ -77,14 +77,38 @@ class com.quarix.service.configuration.ConfigurationCore
    end destructor.
 
    method override protected logical LoadEnvironment (input environmentName as character):
-      define buffer appBuf    for core_app.
+
+      define buffer appBuf		for core_app.
+      define buffer appAliasBuf	for core_app_alias.
+
+      define variable cAppName as character no-undo.
+
+      find first appBuf
+         where appBuf.app_name = environmentName
+         no-lock no-error.
+
+      if not available(appBuf)
+      then do:
+         find first appAliasBuf
+            where appAliasBuf.app_name_alias = environmentName
+            no-lock no-error.
+
+         if available(appAliasBuf)
+         then cAppName = appAliasBuf.app_name.
+      end.
+      else
+         cAppName = environmentName.
 
       for each appBuf no-lock
-         where appBuf.app_name eq environmentName
+         where appBuf.app_name eq cAppName
             on error undo, throw:
+
          OpenXmlEnvironment(environmentName).
+
          return true.
+
       end.
+
       return OpenXmlEnvironment(environmentName).
 
       catch appError as Progress.Lang.Error :
@@ -95,15 +119,38 @@ class com.quarix.service.configuration.ConfigurationCore
    end method.
 
    method override public logical SaveEnvironment (input environmentName as character):
-      define buffer appBuf    for core_app.
+
+      define buffer appBuf		for core_app.
+      define buffer appAliasBuf	for core_app_alias.
+
+      define variable cAppName as character no-undo.
+
+      find first appBuf
+         where appBuf.app_name = environmentName
+         no-lock no-error.
+
+      if not available(appBuf)
+      then do:
+         find first appAliasBuf
+            where appAliasBuf.app_name_alias = environmentName
+            no-lock no-error.
+
+         if available(appAliasBuf)
+         then cAppName = appAliasBuf.app_name.
+      end.
+      else
+         cAppName = environmentName.
 
       for each appBuf no-lock
-         where appBuf.app_name eq environmentName
+         where appBuf.app_name eq cAppName
             on error undo, throw:
+
          return super:SaveEnvironment(environmentName).
       end.
+
       if OpenXmlEnvironment(environmentName) then
          return xmlConfig:SaveEnvironment().
+
       return false.
 
       catch appError as Progress.Lang.Error :
@@ -155,11 +202,32 @@ class com.quarix.service.configuration.ConfigurationCore
    end method.
 
    method protected override logical SaveKey (input keyName as character, input keyValue as character, input sectionName as character, input objectName as character):
-      define buffer appBuf for core_app.
+
+      define buffer appBuf		for core_app.
+      define buffer appAliasBuf	for core_app_alias.
+
+      define variable cAppName as character no-undo.
+
+      find first appBuf
+         where appBuf.app_name = Environment
+         no-lock no-error.
+
+      if not available(appBuf)
+      then do:
+         find first appAliasBuf
+            where appAliasBuf.app_name_alias = Environment
+            no-lock no-error.
+
+         if available(appAliasBuf)
+         then cAppName = appAliasBuf.app_name.
+      end.
+      else
+         cAppName = Environment.
 
       for each appBuf no-lock
-         where appBuf.app_name eq Environment
+         where appBuf.app_name eq cAppName
             on error undo, throw:
+
          case sectionName:
             when {&section_app} then
                return SaveApplicationKey(keyName, keyValue, objectName).
@@ -169,8 +237,10 @@ class com.quarix.service.configuration.ConfigurationCore
                return SaveConfigKey(keyName, keyValue, sectionName, objectName).
          end case.
       end.
+
       if OpenXmlEnvironment(Environment) then
          return xmlConfig:SetKey(keyName, keyValue, sectionName, objectName).
+
       return false.
 
       catch appError as Progress.Lang.Error :
@@ -181,11 +251,32 @@ class com.quarix.service.configuration.ConfigurationCore
    end method.
 
    method protected override logical RemoveKey (input keyName as character, input sectionName as character, input objectName as character):
-      define buffer appBuf for core_app.
+
+      define buffer appBuf		for core_app.
+      define buffer appAliasBuf	for core_app_alias.
+
+      define variable cAppName as character no-undo.
+
+      find first appBuf
+         where appBuf.app_name = Environment
+         no-lock no-error.
+
+      if not available(appBuf)
+      then do:
+         find first appAliasBuf
+            where appAliasBuf.app_name_alias = Environment
+            no-lock no-error.
+
+         if available(appAliasBuf)
+         then cAppName = appAliasBuf.app_name.
+      end.
+      else
+         cAppName = Environment.
 
       for each appBuf no-lock
-         where appBuf.app_name eq Environment
+         where appBuf.app_name eq cAppName
             on error undo, throw:
+
          case sectionName:
             when {&section_app} then
                return RemoveApplicationKey(keyName, objectName).
@@ -198,6 +289,7 @@ class com.quarix.service.configuration.ConfigurationCore
 
       if OpenXmlEnvironment(Environment) then
          return xmlConfig:DeleteKey(keyName, sectionName, objectName).
+
       return false.
 
       catch appError as Progress.Lang.Error :
@@ -208,11 +300,32 @@ class com.quarix.service.configuration.ConfigurationCore
    end method.
 
    method private logical RemoveApplicationKey (input keyName as character, input objectName as character):
-      define buffer appBuf    for core_app.
+
+      define buffer appBuf		for core_app.
+      define buffer appAliasBuf	for core_app_alias.
+
+      define variable cAppName as character no-undo.
+
+      find first appBuf
+         where appBuf.app_name = Environment
+         no-lock no-error.
+
+      if not available(appBuf)
+      then do:
+         find first appAliasBuf
+            where appAliasBuf.app_name_alias = Environment
+            no-lock no-error.
+
+         if available(appAliasBuf)
+         then cAppName = appAliasBuf.app_name.
+      end.
+      else
+         cAppName = Environment.
 
       for each appBuf no-lock
-         where appBuf.app_name eq Environment
+         where appBuf.app_name eq cAppName
             on error undo, throw:
+
          case keyName:
             when 'Description':u then
                appBuf.app_desc = ?.
@@ -238,12 +351,33 @@ class com.quarix.service.configuration.ConfigurationCore
    end method.
 
    method private logical RemoveConfigKey (input keyName as character, input sectionName as character, input objectName as character):
-      define buffer appBuf    for core_app.
-      define buffer confBuf   for core_config.
+
+      define buffer appBuf		for core_app.
+      define buffer confBuf		for core_config.
+      define buffer appAliasBuf	for core_app_alias.
+
+      define variable cAppName as character no-undo.
+
+      find first appBuf
+         where appBuf.app_name = Environment
+         no-lock no-error.
+
+      if not available(appBuf)
+      then do:
+         find first appAliasBuf
+            where appAliasBuf.app_name_alias = Environment
+            no-lock no-error.
+
+         if available(appAliasBuf)
+         then cAppName = appAliasBuf.app_name.
+      end.
+      else
+         cAppName = Environment.
 
       for each appBuf no-lock
-         where appBuf.app_name eq Environment,
-         each confBuf exclusive-lock
+         where appBuf.app_name eq cAppName,
+         each confBuf
+         exclusive-lock
          where confBuf.app_id       eq appBuf.app_id
            and confBuf.section_name eq sectionName
            and confBuf.object_name  eq objectName
@@ -252,15 +386,38 @@ class com.quarix.service.configuration.ConfigurationCore
            delete confBuf.
            return true.
       end.
+
       return false.
+
    end method.
 
    method private character LoadApplicationKey (input keyName as character, input objectName as character):
-      define buffer appBuf    for core_app.
+
+      define buffer appBuf		for core_app.
+      define buffer appAliasBuf	for core_app_alias.
+
+      define variable cAppName as character no-undo.
+
+      find first appBuf
+         where appBuf.app_name = Environment
+         no-lock no-error.
+
+      if not available(appBuf)
+      then do:
+         find first appAliasBuf
+            where appAliasBuf.app_name_alias = Environment
+            no-lock no-error.
+
+         if available(appAliasBuf)
+         then cAppName = appAliasBuf.app_name.
+      end.
+      else
+         cAppName = Environment.
 
       for each appBuf no-lock
-         where appBuf.app_name eq Environment
+         where appBuf.app_name eq cAppName
             on error undo, throw:
+
          case keyName:
            when 'Id':u                   then return appBuf.app_id.
            when 'Description':u          then return appBuf.app_desc.
@@ -276,14 +433,36 @@ class com.quarix.service.configuration.ConfigurationCore
       end.
 
       return ?.
+
    end method.
 
    method private logical SaveApplicationKey (input keyName as character, keyValue as character, input objectName as character):
-      define buffer appBuf for core_app.
+
+      define buffer appBuf		for core_app.
+      define buffer appAliasBuf	for core_app_alias.
+
+      define variable cAppName as character no-undo.
+
+      find first appBuf
+         where appBuf.app_name = Environment
+         no-lock no-error.
+
+      if not available(appBuf)
+      then do:
+         find first appAliasBuf
+            where appAliasBuf.app_name_alias = Environment
+            no-lock no-error.
+
+         if available(appAliasBuf)
+         then cAppName = appAliasBuf.app_name.
+      end.
+      else
+         cAppName = Environment.
 
       for each appBuf exclusive-lock
-         where appBuf.app_name eq Environment
+         where appBuf.app_name eq cAppName
             on error undo, throw:
+
          case keyName:
            when 'Description':u           then appBuf.app_desc = keyValue.
            when 'Version':u               then appBuf.app_version = keyValue.
@@ -295,19 +474,42 @@ class com.quarix.service.configuration.ConfigurationCore
            when 'ThemeCode':u             then appBuf.theme_code = keyValue.
            otherwise return SaveConfigKey(keyName, keyValue, {&section_app}, objectName).
          end case.
+
          return true.
+
       end.
 
       return false.
+
    end method.
 
    method private character LoadConfigKey
       (keyName as character, sectionName as character, objectName as character):
-      define buffer appBuf    for core_app.
-      define buffer confBuf   for core_config.
+
+      define buffer appBuf		for core_app.
+      define buffer confBuf		for core_config.
+      define buffer appAliasBuf	for core_app_alias.
+
+      define variable cAppName as character no-undo.
+
+      find first appBuf
+         where appBuf.app_name = Environment
+         no-lock no-error.
+
+      if not available(appBuf)
+      then do:
+         find first appAliasBuf
+            where appAliasBuf.app_name_alias = Environment
+            no-lock no-error.
+
+         if available(appAliasBuf)
+         then cAppName = appAliasBuf.app_name.
+      end.
+      else
+         cAppName = Environment.
 
       for each appBuf no-lock
-         where appBuf.app_name eq Environment,
+         where appBuf.app_name eq cAppName,
          each confBuf no-lock
          where confBuf.app_id       eq appBuf.app_id
            and confBuf.section_name eq sectionName
@@ -315,20 +517,44 @@ class com.quarix.service.configuration.ConfigurationCore
            and confBuf.var_name     eq keyName:
            return confBuf.var_value.
       end.
+
       return ?.
+
    end method.
 
    method private logical SaveConfigKey
       (keyName as character, keyValue as character,
        sectionName as character, objectName as character):
-      define buffer appBuf  for core_app.
-      define buffer confBuf for core_config.
+
+      define buffer appBuf		for core_app.
+      define buffer confBuf		for core_config.
+      define buffer appAliasBuf	for core_app_alias.
+
+      define variable cAppName as character no-undo.
+
+      find first appBuf
+         where appBuf.app_name = Environment
+         no-lock no-error.
+
+      if not available(appBuf)
+      then do:
+         find first appAliasBuf
+            where appAliasBuf.app_name_alias = Environment
+            no-lock no-error.
+
+         if available(appAliasBuf)
+         then cAppName = appAliasBuf.app_name.
+      end.
+      else
+         cAppName = Environment.
 
       for each appBuf no-lock
-         where appBuf.app_name eq Environment
+         where appBuf.app_name eq cAppName
             on error undo, throw:
+
          do transaction
             on error undo, throw:
+
             for each confBuf exclusive-lock
                where confBuf.app_id       eq appBuf.app_id
                  and confBuf.section_name eq sectionName
@@ -336,18 +562,24 @@ class com.quarix.service.configuration.ConfigurationCore
                  and confBuf.var_name     eq keyName
                     on error undo, throw:
                  confBuf.var_value = keyValue.
+
                  return true.
             end.
+
             create confBuf.
+
             assign confBuf.app_id       = appBuf.app_id
                    confBuf.section_name = sectionName
                    confBuf.object_name  = objectName
                    confBuf.var_name     = keyName
                    confBuf.var_value    = keyValue.
+
             return true.
          end.
       end.
+
       return false.
+
    end method.
 
    method private character LoadUserKey (input keyName as character, input objectName as character):
@@ -370,6 +602,7 @@ class com.quarix.service.configuration.ConfigurationCore
             xmlConfig:OpenEnvironment(substitute('&1~/&2':u, lower(environmentName), {&application-conf-file})).
 
       return false.
+
    end method.
 
    method public void Reset():

@@ -227,7 +227,8 @@ class com.quarix.data.DataTransaction
 
             /* Load some session parameters from DataContext into ContextManager */
 
-            SetSessionParameters().
+            if not SetSessionParameters()
+            then return false.
 
             /* Store different sort options into DataContext */
 
