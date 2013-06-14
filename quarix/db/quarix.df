@@ -146,10 +146,15 @@ ADD FIELD "app_name_alias" OF "core_app_alias" AS character
   MAX-WIDTH 16
   ORDER 20
 
-ADD INDEX "PK_core_app_alias" ON "core_app_alias" 
+ADD INDEX "idx_alias" ON "core_app_alias" 
   AREA "Schema Area"
   UNIQUE
   PRIMARY
+  INDEX-FIELD "app_name_alias" ASCENDING 
+
+ADD INDEX "idx_core_app_alias" ON "core_app_alias" 
+  AREA "Schema Area"
+  UNIQUE
   INDEX-FIELD "app_name" ASCENDING 
   INDEX-FIELD "app_name_alias" ASCENDING 
 
@@ -2064,6 +2069,10 @@ ADD INDEX "FK_core_user" ON "sess_pool"
   AREA "Schema Area"
   INDEX-FIELD "user_id" ASCENDING 
 
+ADD INDEX "idxLastTime" ON "sess_pool" 
+  AREA "Schema Area"
+  INDEX-FIELD "last_time" ASCENDING 
+
 ADD TABLE "sess_var"
   AREA "session area"
   DESCRIPTION "Application session variables table provided by framework, used by session management service"
@@ -2621,4 +2630,4 @@ ADD INDEX "UQ_sys_technology_tech_name" ON "sys_technology"
 PSC
 cpstream=UTF-8
 .
-0000061372
+0000061597
