@@ -57,6 +57,20 @@ class com.quarix.data.DataContext
     constructor public DataContext():
         super().
     end constructor.
+    
+    /* DataContext constructor that takes a dsContext:write-json() result as input */
+    constructor public DataContext(input icJson as longchar):
+      super().
+      loadContextFromJSON(icJson).
+    end constructor.
+    
+    method public void loadContextFromJSON(input icJson as longchar):
+      if icJson <> "" and icJson <> ? and icJson <>  '~{~"dsContext~":~{~}~}' then /* This could be the case if there are no query parameters */ 
+        dataset dsContext:READ-JSON ("longchar", icJson).
+      else
+        dataset dsContext:EMPTY-DATASET ( ).  
+    end method.
+      
 
     method public void ClearFilters():
         empty temp-table ttFilter.
@@ -1315,6 +1329,12 @@ class com.quarix.data.DataContext
 		return true.
 
 	end method.
+  
+	method public character getLastRowid(input tablename as character):
+	  find last ttRowId where ttRowId.ttName = tableName use-index idxNumRec no-error.
+	  if available ttRowId then return ttRowId.dbrowid.
+	  else return ?.
+  end method.
 
 	method public logical UpdateTtRowId(input tableName as character, input ttRowId as character, input newttRowId as character):
 

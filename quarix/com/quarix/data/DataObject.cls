@@ -1320,6 +1320,14 @@ class com.quarix.data.DataObject
         return false.
 
 	end method.
+  
+  	method public logical getDataset( output dataset-handle hdataset ):
+    
+    assign 
+      hdataset = getDefaultDatasetHandle().
+    return true.
+
+  	end method.
 
 	method public logical HandleRequest( input actionName as character, input webRequest as com.quarix.web.Request, input webResponse as com.quarix.web.Response ):
 
