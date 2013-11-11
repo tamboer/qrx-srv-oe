@@ -1,9 +1,9 @@
 .
 PSC
-filename=rep_obj_check
+filename=core_app_alias
 records=0000000000000
 ldbname=quarix
-timestamp=2013/11/11-15:44:30
+timestamp=2013/11/11-15:44:29
 numformat=46,44
 dateformat=dmy-1950
 map=NO-MAP

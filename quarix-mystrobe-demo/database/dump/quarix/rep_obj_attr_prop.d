@@ -3,7 +3,7 @@ PSC
 filename=rep_obj_attr_prop
 records=0000000000000
 ldbname=quarix
-timestamp=2013/02/06-11:20:36
+timestamp=2013/11/11-15:44:30
 numformat=46,44
 dateformat=dmy-1950
 map=NO-MAP
