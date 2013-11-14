@@ -5,36 +5,14 @@ using Progress.Lang.*.
 
 class wicketds.server.dsorderwrapper inherits com.quarix.data.dswrapper:
 
-	{wicketds/server/dsordordline.i}
+	{wicketds/server/dsorder.i}
 
 	constructor	dsorderwrapper():
-		dsHandle = dataset dsordordline:handle.
+		dsHandle = dataset dsorder:handle.
 	end constructor.
 
-	method public static logical createOrder(input dataset-handle hdsOrdOrdLine, input cSourceObject as character, output dataset-handle hdsOrder):
-
-		return createDataset(input dataset-handle hdsOrdOrdLine by-reference, input 'ttorder':U, input cSourceObject, output dataset-handle hdsOrder by-reference).
-
-		finally:
-			delete object hdsOrdOrdLine	no-error.
-			delete object hdsOrder		no-error.
-		end finally.
-
-	end method.
-
-	method public static logical createOrderLine(input dataset-handle hdsOrdOrdLine, input cSourceObject as character, output dataset-handle hdsOrderLine):
-
-		return createDataset(input dataset-handle hdsOrdOrdLine by-reference, input 'ttorderline':U, input cSourceObject, output dataset-handle hdsOrderLine by-reference).
-
-		finally:
-			delete object hdsOrdOrdLine	no-error.
-			delete object hdsOrderLine	no-error.
-		end finally.
-
-	end method.
-
     method public override handle getDsHandle():
-        return dataset dsordordline:handle.
+        return dataset dsorder:handle.
     end method.
 
 end class.

@@ -30,6 +30,13 @@ class wicketds.server.dtordordline inherits com.quarix.data.DataTransaction:
     end.
     private set.
 
+    def private property dsorderwrapper as wicketds.server.dsorderwrapper no-undo
+    get:
+        if not valid-object(dsorderwrapper) then dsorderwrapper = cast (GetInstance ('wicketds.server.dsorderwrapper':u), wicketds.server.dsorderwrapper).
+        return dsorderwrapper.
+    end.
+    private set.
+
     constructor public dtordordline (  ):
 
         datasetHandle   = {&DefaultDatasetHandle}.
@@ -41,6 +48,62 @@ class wicketds.server.dtordordline inherits com.quarix.data.DataTransaction:
         then return error.
 
 	end constructor.
+
+    method public override logical dataFetch ():
+
+        DataContext:setAllRecords(true).
+
+        return super:dataFetch().
+
+    end method.
+
+    method public override logical BeforeDataFetch ():
+
+        return BeforeDataFetch(input-output dataset-handle datasetHandle by-reference).
+
+    end method.
+
+    method private logical BeforeDataFetch(input-output dataset dsordordline):
+
+        define variable hdsOrder as handle no-undo.
+
+        dataset dsordordline:empty-dataset ().
+
+        wicketds.server.dsordordlinewrapper:createOrder(
+            input dataset dsordordline by-reference,
+            this-object:ToString(),
+            output dataset-handle hdsOrder by-reference
+            ).
+
+        if not valid-handle(hdsOrder)
+            then return false.
+
+        hdsOrder:empty-dataset ().
+
+        if not SetMainDataModel(dmorder, hdsOrder, 'ttorder,ttorder':U, ?)
+            then
+        do:
+            Util:DisposeDataset(hdsOrder).
+
+            return false.
+        end.
+
+        dmorder:ClearQueryData().
+
+        dataContext:copyFilters(dmorder, "ttorder", "ttorder").
+
+        return true.
+
+        catch appError as Progress.Lang.Error :
+
+            Util:DisposeDataset(hdsOrder).
+
+            ThrowError(input appError).
+            delete object appError.
+            return false.
+        end catch.
+
+    end method.
 
 	method protected handle getdsOrderLineTmpHandle():
 
@@ -59,7 +122,176 @@ class wicketds.server.dtordordline inherits com.quarix.data.DataTransaction:
 
 	end method.
 
-	method private logical SaveData(input-output dataset dsordordline):
+	method protected handle getdsOrderTmpHandle():
+
+        define variable hDs as handle no-undo.
+
+        assign
+            hDs = dsorderwrapper:getDSHandle().
+
+        if valid-handle(hDs)
+            then
+        do:
+            Util:TrackChanges(hDs, no).
+
+            hDs:empty-dataset().
+        end.
+
+        return hDs.
+
+    end method.
+/*
+    method private logical BeforeDataFetch(input-output dataset dsordordline):
+
+        define variable hdsOrder as handle no-undo.
+
+        dataset dsordordline:empty-dataset ().
+
+        wicketds.server.dsordordlinewrapper:createOrder(
+            input dataset dsordordline by-reference,
+            this-object:ToString(),
+            output dataset-handle hdsOrder by-reference
+            ).
+
+        if not valid-handle(hdsOrder)
+            then return false.
+
+        if not SetMainDataModel(dmorder, hdsOrder, 'ttorder,ttorder':U, 'FetchOrderMethod':U)
+        then return false.
+
+        dmorder:ClearQueryData().
+
+        dataContext:copyFilters(dmorder, "ttorder", "ttorder").
+
+        return true.
+
+        catch appError as Progress.Lang.Error :
+            ThrowError(input appError).
+            delete object appError.
+            return false.
+        end catch.
+
+    end method.
+
+    method protected logical FetchOrderMethod(output dataset-handle dsHandle):
+
+        define variable hQuery      as handle       no-undo.
+        define variable hBuffer     as handle       no-undo.
+        define variable cQuery      as character    no-undo.
+        define variable hdsOrder    as handle       no-undo.
+        define variable hBufOrd     as handle       no-undo.
+        define variable iSortOrder  as integer      no-undo.
+
+        hdsOrder = getdsOrderTmpHandle().
+
+        if not valid-handle(hdsOrder)
+            then return false.
+
+        if not dmorder:dataFetch(output dataset-handle hdsOrder by-reference)
+        then return false.
+
+        hBuffer = hdsOrder:get-buffer-handle (1).
+
+        create query hQuery.
+
+        hQuery:set-buffers (hBuffer).
+
+        cQuery = substitute('for each &1 no-lock', hBuffer:name).
+
+        if not hQuery:query-prepare (cQuery)
+        then return false.
+
+        hQuery:query-open ().
+
+        hQuery:get-first ().
+
+        hBufOrd = dsHandle:get-buffer-handle (1).
+
+        do while not hQuery:query-off-end:
+
+            iSortOrder = Util:GetNextSortOrder(hBufOrd).
+
+            hBufOrd:buffer-create ().
+
+            hBufOrd:buffer-copy (hBuffer, 'SortOrder').
+
+            hBufOrd:buffer-field('SortOrder'):buffer-value = iSortOrder.
+
+            dmorder:DataContext:UpdateTtRowId('ttorder':u, string(hBuffer:rowid), string(hBufOrd:rowid)).
+
+            hQuery:get-next ().
+        end.
+
+        hQuery:query-close ().
+
+        return true.
+
+        catch appError as Progress.Lang.Error :
+            ThrowError(input appError).
+            delete object appError.
+            return false.
+        end catch.
+        finally:
+            delete object dsHandle  no-error.
+            delete object hQuery    no-error.
+
+            Util:DisposeDataset(hdsOrder).
+
+        end finally.
+
+    end method.
+*/
+    method private logical AfterDataFetch (input-output dataset dsordordline):
+
+        define variable orderidlist     as wicketds.server.orderidlist  no-undo.
+        define variable hdsOrdOrdLine   as handle                       no-undo.
+
+        wicketds.server.dsordordlinewrapper:createOrderLine(
+            input dataset dsordordline by-reference,
+            this-object:ToString(),
+            output dataset-handle hdsOrdOrdLine by-reference
+            ).
+
+        if not valid-handle(hdsOrdOrdLine)
+        then return false.
+
+        hdsOrdOrdLine:empty-dataset ().
+
+        orderidlist = cast (GetInstance ('wicketds.server.orderidlist':u), wicketds.server.orderidlist).
+
+        for each ttorder
+            no-lock:
+            orderidlist:addOrderNum(ttorder.Ordernum).
+        end.
+
+        if orderidlist:IdListHasData()
+        then do:
+            if not dmorderline:getbyorderidlist(input orderidlist, output dataset-handle hdsOrdOrdLine by-reference)
+            then return false.
+        end.
+
+        return true.
+
+        catch appError as Progress.Lang.Error :
+            ThrowError(input appError).
+            delete object appError.
+            return false.
+        end catch.
+        finally:
+            UnloadInstance(orderidlist).
+
+            Util:DisposeDataset(hdsOrdOrdLine).
+        end finally.
+
+    end method.
+
+    method public override logical AfterDataFetch ():
+
+        return AfterDataFetch(input-output dataset-handle datasetHandle by-reference).
+
+    end method.
+
+    method private logical SaveData(input-output dataset dsordordline):
 
 		define variable orderidlist		as wicketds.server.orderidlist	no-undo.
 		define variable hdsOrderLine	as handle						no-undo.
@@ -197,13 +429,13 @@ class wicketds.server.dtordordline inherits com.quarix.data.DataTransaction:
 
 		end. /* if available(ttorderline) */
 
-		wicketds.server.dsorderwrapper:createOrder(
+		wicketds.server.dsordordlinewrapper:createOrder(
     		input dataset dsordordline by-reference,
     		this-object:ToString(),
     		output dataset-handle hdsOrderTmp by-reference
     		).
 
-		wicketds.server.dsorderwrapper:createOrderLine(
+		wicketds.server.dsordordlinewrapper:createOrderLine(
     		input dataset dsordordline by-reference,
     		this-object:ToString(),
     		output dataset-handle hdsOrderLineTmp by-reference
