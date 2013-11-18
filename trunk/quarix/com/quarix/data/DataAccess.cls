@@ -828,6 +828,10 @@ class com.quarix.data.DataAccess
 
     end method.
 
+    method protected character BeforePrepareQuery(input qryString as character):
+    	return qryString.
+    end method.
+
     method private logical prepareQuery(input hBuf as handle, input qryString as character):
 
         define variable hQry       as handle    no-undo.
@@ -836,6 +840,8 @@ class com.quarix.data.DataAccess
         define variable iNum       as integer   no-undo.
         define variable cIndex     as character no-undo.
         define variable cVal       as character no-undo.
+
+        qryString = BeforePrepareQuery(qryString).
 
         if LogQueryString
         then do:
@@ -1578,7 +1584,8 @@ class com.quarix.data.DataAccess
             end.
 
             /* get list of read-only fields to be excepted from assign */
-            do iFld = 1 to num-entries(ReadOnlyFields):
+            do iFld = 1 to num-entries(ReadOnlyFields)
+                on error undo, throw:
                 fldName = trim(entry(iFld, ReadOnlyFields)).
                 if num-entries(fldName, '.':u) eq 2 and entry(1, fldName, '.':u) eq hBuf:table then
                 do:
@@ -1618,12 +1625,12 @@ class com.quarix.data.DataAccess
                     if not hSrcBuf:available then
                     do:
                         if hSrcBuf:locked then
-                            ThrowError(101, 'msg_err_data_locked':u, hBuf:name, ?).
+                            ThrowClientError(101, 'msg_err_data_locked':u, hBuf:name, ?).
                         else
-                            ThrowError(102, 'msg_err_data_not_found':u, hBuf:name, ?).
+                            ThrowClientError(102, 'msg_err_data_not_found':u, hBuf:name, ?).
 
                         retVal = false.
-                        leave update_block.
+                        undo, leave update_block.
                     end.
                 end.
 
@@ -1635,38 +1642,40 @@ class com.quarix.data.DataAccess
                             if not BeforeRowSave(hBuf, ?, ?) then
                             do:
                                 retVal = false.
-                                leave update_block.
+                                undo, leave update_block.
                             end.
 
                             hSrcBuf:buffer-create() .
                             hSrcBuf:buffer-copy(hBuf, roFields, saveMap) no-error.
+
                             if Util:IsError() then
                             do:
-
-
                                 if error-status:get-number(1) eq 132 then
-                                    ThrowError(106, 'msg_err_data_dupe':u, hBuf:name, getDuplicateKeyField(hBuf, hSrcBuf)).
+                                    ThrowClientError(106, 'msg_err_data_dupe':u, hBuf:name, getDuplicateKeyField(hBuf, hSrcBuf)).
                                 else
-                                    ThrowError(106, 'msg_err_data_update':u, hBuf:name, ?).
+                                    ThrowClientError(106, 'msg_err_data_update':u, hBuf:name, ?).
+
                                 retVal = false.
-                                undo, throw new Progress.Lang.AppError(error-status:get-message (1), error-status:get-number (1)).
+                                undo, leave update_block.
                             end.
 
                             if not AfterRowSave(hBuf, hSrcBuf) then
                             do:
                                 retVal = false.
-                                leave update_block.
+                                undo, leave update_block.
                             end.
 
                             hSrcBuf:buffer-validate() no-error.
+
                             if Util:IsError() then
                             do:
                                 if error-status:get-number(1) eq 132 then
-                                    ThrowError(103, 'msg_err_data_dupe':u, hBuf:name, getDuplicateKeyField(hBuf, hSrcBuf)).
+                                    ThrowClientError(103, 'msg_err_data_dupe':u, hBuf:name, getDuplicateKeyField(hBuf, hSrcBuf)).
                                 else
-                                    ThrowError(103, 'msg_err_data_create':u, hBuf:name, ?).
+                                    ThrowClientError(103, 'msg_err_data_create':u, hBuf:name, ?).
+
                                 retVal = false.
-                                undo, throw new Progress.Lang.AppError(error-status:get-message (1), error-status:get-number (1)).
+                                undo, leave update_block.
                             end.
 
                             startRow = string(hSrcBuf:rowid).
@@ -1686,32 +1695,31 @@ class com.quarix.data.DataAccess
                             if not BeforeRowDelete(hBi, hSrcBuf) then
                             do:
                                 retVal = false.
-                                leave update_block.
+                                undo, leave update_block.
                             end.
 
                             hSrcBuf:buffer-delete() no-error.
                             if Util:IsError() then
                             do:
-                                ThrowError(104, 'msg_err_data_delete':u, hBuf:name, ?).
+                                ThrowClientError(104, 'msg_err_data_delete':u, hBuf:name, ?).
                                 retVal = false.
-                                undo, throw new Progress.Lang.AppError(error-status:get-message (1), error-status:get-number (1)).
+                                undo, leave update_block.
                             end.
 
                             if not AfterRowDelete(hBi) then
                             do:
                                 retVal = false.
-                                leave update_block.
+                                undo, leave update_block.
                             end.
                         end.
 
                     /* update record */
                     when row-modified then
                         do:
-
                             if not BeforeRowSave(hBuf, hBi, hSrcBuf) then
                             do:
                                 retVal = false.
-                                leave update_block.
+                                undo, leave update_block.
                             end.
 
                             retVal = hSrcBuf:buffer-compare(hBi, 'binary':u, roFields, saveMap, false) .
@@ -1719,8 +1727,8 @@ class com.quarix.data.DataAccess
                             /* compare before-image with 'current' data */
                             if retVal eq false then
                             do:
-                                ThrowError(105, 'msg_err_data_compare':u, hBuf:name, GetModifiedFields (hSrcBuf, hBi)).
-                                leave update_block.
+                                ThrowClientError(105, 'msg_err_data_compare':u, hBuf:name, GetModifiedFields (hSrcBuf, hBi)).
+                                undo, leave update_block.
                             end.
 
                             /* save changes */
@@ -1728,28 +1736,31 @@ class com.quarix.data.DataAccess
                             if Util:IsError() then
                             do:
                                 if error-status:get-number(1) eq 132 then
-                                    ThrowError(106, 'msg_err_data_dupe':u, hBuf:name, getDuplicateKeyField(hBuf, hSrcBuf)).
+                                    ThrowClientError(106, 'msg_err_data_dupe':u, hBuf:name, getDuplicateKeyField(hBuf, hSrcBuf)).
                                 else
-                                    ThrowError(106, 'msg_err_data_update':u, hBuf:name, ?).
+                                    ThrowClientError(106, 'msg_err_data_update':u, hBuf:name, ?).
+
                                 retVal = false.
-                                undo, throw new Progress.Lang.AppError(error-status:get-message (1), error-status:get-number (1)).
+                                undo, leave update_block.
                             end.
 
                             if not AfterRowSave(hBuf, hSrcBuf) then
                             do:
                                 retVal = false.
-                                leave update_block.
+                                undo, leave update_block.
                             end.
 
                             hSrcBuf:buffer-validate() no-error.
+
                             if Util:IsError() then
                             do:
                                 if error-status:get-number(1) eq 132 then
-                                    ThrowError(106, 'msg_err_data_dupe':u, hBuf:name, getDuplicateKeyField(hBuf, hSrcBuf)).
+                                    ThrowClientError(106, 'msg_err_data_dupe':u, hBuf:name, getDuplicateKeyField(hBuf, hSrcBuf)).
                                 else
-                                    ThrowError(106, 'msg_err_data_update':u, hBuf:name, ?).
+                                    ThrowClientError(106, 'msg_err_data_update':u, hBuf:name, ?).
+
                                 retVal = false.
-                                undo, throw new Progress.Lang.AppError(error-status:get-message (1), error-status:get-number (1)).
+                                undo, leave update_block.
                             end.
 
                             /* get full rowid in case datasource has more than one buffer */
@@ -1785,6 +1796,11 @@ class com.quarix.data.DataAccess
 
         return true.
 
+        catch appError as Progress.Lang.Error :
+            ThrowError(input appError).
+            delete object appError.
+            return false.
+        end catch.
         finally:
             if valid-handle(hQry) then
             do:
@@ -1792,6 +1808,7 @@ class com.quarix.data.DataAccess
                 delete object hQry .
             end.
         end finally.
+
     end method.
 
 
@@ -2065,6 +2082,39 @@ class com.quarix.data.DataAccess
 
     end method.
 
+    method private character GetFieldMappings(input hBuffer as handle, input hSrcBuffer as handle):
+
+    	define variable iNumFld		as integer		no-undo.
+    	define variable cFieldsMap	as character	no-undo.
+    	define variable cFldName	as character	no-undo.
+    	define variable hFld		as handle		no-undo.
+    	define variable cVal		as character	no-undo.
+
+    	if not valid-handle(hBuffer) or
+    		not valid-handle(hSrcBuffer)
+    	then return ?.
+
+    	do iNumFld = 1 to hSrcBuffer:num-fields:
+
+    		cFldName = hSrcBuffer:buffer-field (iNumFld):name.
+
+    		hFld = hBuffer:buffer-field (cFldName) no-error.
+
+    		if valid-handle(hFld)
+    		then do:
+    			cVal = substitute('&1.&2,&3.&4':u, hSrcBuffer:name, cFldName, hBuffer:name, hFld:name).
+
+    			cFieldsMap	=	if Util:IsEmpty(cFieldsMap)
+    							then cVal
+    							else substitute('&1,&2':u, cFieldsMap, cVal).
+    		end.
+
+    	end. /* do iNumFld = 1 to hSrcBuffer:num-fields */
+
+    	return cFieldsMap.
+
+    end method.
+
 
     method public final logical AddDataSource(
     	pcTable			as character,
@@ -2101,7 +2151,10 @@ class com.quarix.data.DataAccess
         assign
             pcFieldsMap = trim(Util:Nvl(pcFieldsMap, '':u))
             pcWhere     = trim(Util:Nvl(pcWhere, '':u)).
-
+/*
+        if Util:IsEmpty(pcFieldsMap)
+        then pcFieldsMap = GetFieldMappings(input hBuffer, input hSrcBuffer).
+*/
         assign hDataSource = hBuffer:data-source no-error.
 
         /* exclude fields list are set on source's buffer private-data */

@@ -484,17 +484,22 @@ class com.quarix.data.DataObject
       define variable JsonLogger   as com.quarix.service.logging.JsonLogger no-undo.
       define variable numErr       as integer no-undo.
 
-      if valid-object(ErrorManager) and ErrorManager:GetNumClientErrors() gt 0 then
-      do:
-         JsonLogger = cast(GetInstance('com.quarix.service.logging.JsonLogger':u),
-            'com.quarix.service.logging.JsonLogger':u).
-         if valid-object(JsonLogger) then
-         do:
-            if bufferName eq ? or ErrorManager:GetNumClientErrors(bufferName) eq 0 then
+      if valid-object(ErrorManager) and
+        ErrorManager:GetNumClientErrors() gt 0
+      then do:
+         JsonLogger = cast(GetInstance('com.quarix.service.logging.JsonLogger':u), 'com.quarix.service.logging.JsonLogger':u).
+
+         if valid-object(JsonLogger)
+         then do:
+            if bufferName eq ? or
+                ErrorManager:GetNumClientErrors(bufferName) eq 0
+            then
                JsonWriter:Out(',':u).
 
             JsonLogger:SetJsonWriter(JsonWriter).
+
             ErrorManager:LogClientErrors(JsonLogger, bufferName).
+
             UnloadInstance(JsonLogger).
          end.
          ErrorManager:Purge(bufferName).
@@ -1320,10 +1325,10 @@ class com.quarix.data.DataObject
         return false.
 
 	end method.
-  
+
   	method public logical getDataset( output dataset-handle hdataset ):
-    
-    assign 
+
+    assign
       hdataset = getDefaultDatasetHandle().
     return true.
 
