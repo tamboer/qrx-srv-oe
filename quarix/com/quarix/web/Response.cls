@@ -176,11 +176,13 @@ class com.quarix.web.Response
    end destructor.
 
    method public logical Out (input  mpOut as memptr ) :
-      define variable len   as integer   no-undo.
+      define variable len   as integer  no-undo.
+      define variable clOut as longchar no-undo.
 
-      do while len lt get-size(mpOut)
+      copy-lob from mpOut to clOut.
+      do while len lt length(clOut)
           on error undo, throw:
-         if not Out(get-string(mpOut, len + 1, 20000)) then
+         if not Out(substr(clOut, len + 1, 20000)) then
             return false.
          len = len + 20000.
       end.
