@@ -1,4 +1,4 @@
-{d:\Projects\OpenedgeArchitect\bravura\src\quarix-mystrobe-demo\wicketds\server\dscustomer.i}
+{wicketds\server\dscustomer.i}
 
 define variable objectconstructor	as com.quarix.codegen.objectconstructor	no-undo.
 define variable hObject				as handle								no-undo.
