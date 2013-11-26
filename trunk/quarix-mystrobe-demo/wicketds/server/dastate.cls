@@ -22,10 +22,11 @@ class wicketds.server.dastate inherits DataAccess:
 
         assign
             cFieldMapping   =
-                '{&tbl_state}.Region'    + ',ttstate.Region'         + ',' +
-                '{&tbl_state}.State'     + ',ttstate.StateCode'         + ',' +
+                '{&tbl_state}.Region'    + ',ttstate.Region'    + ',' +
+                '{&tbl_state}.State'     + ',ttstate.StateCode' + ',' +
                 '{&tbl_state}.StateName' + ',ttstate.StateName'
                 .
+
         return cFieldMapping.
 
     end method.
