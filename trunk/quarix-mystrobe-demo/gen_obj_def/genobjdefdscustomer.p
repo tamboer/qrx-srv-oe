@@ -1,4 +1,3 @@
-{wicketds\server\dscustomer.i}
 
 define variable objectconstructor	as com.quarix.codegen.objectconstructor	no-undo.
 define variable hObject				as handle								no-undo.
@@ -9,7 +8,7 @@ objectconstructor:DestinationFolder = "d:\Projects\OpenedgeArchitect\bravura\src
 
 objectconstructor:TabLength = 4.
 
-hObject = dataset dscustomer:handle.
+hObject = buffer Customer:handle.
 
 objectconstructor:createTableDefObject(hObject).
 
