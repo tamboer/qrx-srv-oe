@@ -13,7 +13,7 @@ routine-level on error undo, throw.
 
 using Progress.Lang.*.
 
-class com.quarix.data.dswrapper inherits com.quarix.base.BaseObject:
+class com.quarix.data.dswrapper inherits com.quarix.base.BaseObject implements com.quarix.base.iDisposable:
 
 	{com/quarix/data/ttbufhandle.i}
 
