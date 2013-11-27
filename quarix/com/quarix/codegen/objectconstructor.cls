@@ -8,7 +8,7 @@
    Notes       :
  ----------------------------------------------------------------------*/
 
-class com.quarix.codegen.objectconstructor:
+class com.quarix.codegen.objectconstructor final:
 
 	define public property DestinationPacket as character no-undo
         get.
@@ -65,7 +65,39 @@ class com.quarix.codegen.objectconstructor:
 
 			cFieldName = hBuffer:buffer-field(iFieldCount):name.
 
-			if not FileWriter:generateProperty(cFieldName)
+			if hBuffer:dbname <> 'PROGRESST'
+			then do:
+				if not FileWriter:generatePropertyDbField(cFieldName, hBuffer:serialize-name)
+				then return false.
+			end.
+			else
+				if not FileWriter:generatePropertyTtField(cFieldName, hBuffer:serialize-name)
+				then return false.
+		end.
+
+		return true.
+
+		catch appError as Progress.Lang.Error :
+			delete object appError.
+			return false.
+		end catch.
+
+	end method.
+
+	method private logical deleteFields(input hBuffer as handle):
+
+		define variable iFieldCount	as integer		no-undo.
+		define variable cFieldName	as character	no-undo.
+
+		if not valid-handle(hBuffer) or
+			hBuffer:type <> 'BUFFER'
+		then return false.
+
+		do iFieldCount = 1 to hBuffer:num-fields:
+
+			cFieldName = hBuffer:buffer-field(iFieldCount):name.
+
+			if not FileWriter:generateDeleteProperty(cFieldName)
 			then return false.
 		end.
 
@@ -83,15 +115,16 @@ class com.quarix.codegen.objectconstructor:
 	    define variable cClassName			as character	no-undo.
 		define variable cAbsoluteFileName	as character	no-undo.
 		define variable cFileName			as character	no-undo.
+		define variable cObjName			as character	no-undo.
 
 		if not valid-handle(hBuffer) or
 			hBuffer:type <> 'BUFFER'
 		then return false.
 
-		cFileName = hBuffer:serialize-name.
+		cObjName = hBuffer:serialize-name.
 
-	    if cFileName            = ''	or
-            cFileName           = ?		or
+	    if cObjName				= ''	or
+	    	cObjName          	= ?		or
             DestinationPacket   = ''	or
             DestinationPacket   = ?		or
 	    	DestinationFolder	= ''	or
@@ -102,7 +135,7 @@ class com.quarix.codegen.objectconstructor:
 		then return false.
 
 		assign
-			cFileName			= lc(cFileName)
+			cFileName			= lc(cObjName)
         	cClassName			= substitute('&1.&2', DestinationPacket, cFileName)
 			cClassName			= replace(cClassName, '..', '.')
 			DestinationFolder	= replace(DestinationFolder, '~\', '~/')
@@ -120,7 +153,37 @@ class com.quarix.codegen.objectconstructor:
 			return false.
 		end.
 
+		if not FileWriter:generateProperty('ObjectName', cObjName)
+		then do:
+			FileWriter:DeleteFile().
+			return false.
+		end.
+
 		if not addFields(input hBuffer)
+		then do:
+			FileWriter:DeleteFile().
+			return false.
+		end.
+
+		if not FileWriter:generateConstructor(cFileName, cObjName)
+		then do:
+			FileWriter:DeleteFile().
+			return false.
+		end.
+
+		if not FileWriter:generateDestructorHeader(cFileName)
+		then do:
+			FileWriter:DeleteFile().
+			return false.
+		end.
+
+		if not deleteFields(input hBuffer)
+		then do:
+			FileWriter:DeleteFile().
+			return false.
+		end.
+
+		if not FileWriter:generateDestructorClosingStatement()
 		then do:
 			FileWriter:DeleteFile().
 			return false.

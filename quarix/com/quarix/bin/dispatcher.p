@@ -46,6 +46,29 @@ define input  parameter pstrRequest   as memptr    no-undo.
 define output parameter table         for ttResponse.
 define output parameter pstrResponse  as memptr    no-undo.
 
+define variable lcFieldValue as longchar no-undo.
+define variable cFieldValue as character no-undo.
+
+for each ttRequest
+    no-lock:
+
+    copy-lob ttRequest.fieldValue to lcFieldValue.
+
+    cFieldValue = lcFieldValue.
+
+
+    message 'ttRequest.fieldType' ttRequest.fieldType skip
+        'ttRequest.fieldName' ttRequest.fieldName skip
+    cFieldValue
+    view-as alert-box.
+
+end.
+
+
+
+
+
+
 define variable mainController	as Controller	no-undo.
 define variable iStartTime		as integer		no-undo.
 define variable iCallDuration	as integer		no-undo.

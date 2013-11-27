@@ -87,6 +87,13 @@ class com.quarix.data.DataAccess
         get.
         set.
 
+    define protected property FieldMapping as fieldmapping no-undo
+        get:
+        	if not valid-object(FieldMapping) then FieldMapping = cast (GetInstance ('com.quarix.data.fieldmapping':u), com.quarix.data.fieldmapping).
+        	return FieldMapping.
+        end.
+        private set.
+
     define private variable hTtTemp    as handle    no-undo.
     define private variable hBufTtTemp as handle    no-undo.
     define private variable fieldMap   as character no-undo extent 16.
@@ -105,6 +112,9 @@ class com.quarix.data.DataAccess
         DetachDataSource().
 
         delete object hTtTemp no-error.
+
+		if valid-object(FieldMapping)
+		then FieldMapping:ClearFieldMap().
 
     end destructor.
 
@@ -3473,5 +3483,44 @@ class com.quarix.data.DataAccess
         return pcQueryString.
 
     end method.
+
+    method protected logical AddFieldMap(input dbfield as dbfield, input ttfield as ttfield):
+
+    	if not valid-object(FieldMapping)
+    	then return false.
+
+    	return FieldMapping:AddFieldMap(dbfield, ttfield).
+
+		catch appError as Progress.Lang.Error :
+			ThrowError(input appError).
+			delete object appError.
+			return false.
+		end catch.
+
+    end method.
+
+    method protected character GetFieldMapping():
+
+    	if not valid-object(FieldMapping)
+    	then return ''.
+
+    	return FieldMapping:GetFieldMapping().
+
+		catch appError as Progress.Lang.Error :
+			ThrowError(input appError).
+			delete object appError.
+			return ''.
+		end catch.
+
+    end method.
+
+    method protected void ClearFieldMap():
+
+		if not valid-object(FieldMapping)
+    	then return.
+
+    	FieldMapping:ClearFieldMap().
+
+	end method.
 
 end class.
