@@ -19,29 +19,36 @@ class com.quarix.data.dbfield final:
 		private get.
 		private set.
 
-	define private property ObjectName as character no-undo
+	define private property TableObject as com.quarix.data.tableobject no-undo
 		private get.
 		private set.
 
-	constructor	dbfield():
+	constructor	private dbfield():
 	end constructor.
 
-	constructor	dbfield(input cFieldName as character):
-		FieldName = cFieldName.
-	end constructor.
+	constructor	private dbfield(input cFieldName as character, input oTableObject as com.quarix.data.tableobject):
 
-	constructor	dbfield(input cFieldName as character, input cObjectName as character):
+		if cFieldName = ? or
+			cFieldName = '' or
+			not valid-object(oTableObject)
+		then return error.
+
 		assign
-			FieldName	= cFieldName
-			ObjectName	= cObjectName.
+			FieldName   = cFieldName
+			TableObject	= oTableObject.
+
 	end constructor.
+
+	method public static com.quarix.data.dbfield newField(input cFieldName as character, input oTableObject as com.quarix.data.tableobject):
+		return new com.quarix.data.dbfield(input cFieldName, input oTableObject).
+	end method.
 
 	method public character getName():
 		return FieldName.
 	end method.
 
 	method public character getFqName():
-		return substitute('&1.&2', ObjectName, FieldName).
+		return substitute('&1.&2', TableObject:TableObjectName, FieldName).
 	end method.
 
 end class.
