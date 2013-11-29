@@ -10,21 +10,28 @@
 
 class com.quarix.codegen.objectconstructor final:
 
-	define public property DestinationPacket as character no-undo
-        get.
-        set.
+	define private variable DestinationPacket	as character						no-undo.
+    define private variable DestinationFolder	as character						no-undo.
+	define private variable TabLength			as integer							no-undo.
+	define private variable FileWriter			as com.quarix.codegen.filewriter	no-undo.
 
-    define public property DestinationFolder as character no-undo
-        get.
-        set.
+	constructor private objectconstructor():
+	end constructor.
 
-	define public property TabLength as integer no-undo
-        get.
-        set.
+	constructor public objectconstructor(input cDestPacket as character, input cDestFolder as character, input cTabLength as integer):
 
-	define protected variable FileWriter as com.quarix.codegen.filewriter no-undo.
+		assign
+			DestinationPacket	= cDestPacket
+			DestinationFolder	= cDestFolder
+			TabLength			= cTabLength.
 
-	constructor public objectconstructor():
+		if DestinationPacket	= ''	or
+			DestinationPacket	= ?		or
+			DestinationFolder	= ''	or
+			DestinationFolder	= ?		or
+			TabLength			= 0		or
+			TabLength			= ?
+		then return error.
 
 		FileWriter = new com.quarix.codegen.filewriter().
 
@@ -33,29 +40,46 @@ class com.quarix.codegen.objectconstructor final:
 
 	end constructor.
 
-	constructor public objectconstructor(input cDestPacket as character, input cDestFolder as character):
+	method private logical AddScopedDefine(input hBuffer as handle):
 
-        assign
-            DestinationPacket   = cDestPacket
-            DestinationFolder   = cDestFolder.
+		define variable iFieldCount	as integer		no-undo.
+		define variable cFieldName	as character	no-undo.
 
-		if DestinationPacket	= ''	or
-            DestinationPacket	= ?		or
-		    DestinationFolder	= ''	or
-            DestinationFolder	= ?
-        then return error.
+		if not valid-handle(hBuffer) or
+			hBuffer:type <> 'BUFFER'
+		then return false.
 
-		FileWriter = new com.quarix.codegen.filewriter().
+		do iFieldCount = 1 to hBuffer:num-fields:
 
-		if not valid-object(FileWriter)
-        then return error.
+			cFieldName = hBuffer:buffer-field(iFieldCount):name.
 
-	end constructor.
+			if not FileWriter:generateScopedDefine(cFieldName, iFieldCount)
+			then return false.
+		end.
+
+		if hBuffer:dbname <> 'PROGRESST'
+		then do:
+			if not FileWriter:generateFieldListDefinitionDb(hBuffer:num-fields)
+			then return false.
+		end.
+		else do:
+			if not FileWriter:generateFieldListDefinitionTt(hBuffer:num-fields)
+			then return false.
+		end.
+
+		return true.
+
+		catch appError as Progress.Lang.Error :
+			delete object appError.
+			return false.
+		end catch.
+
+	end method.
 
 	method private logical addFields(input hBuffer as handle):
 
-		define variable iFieldCount		as integer		no-undo.
-		define variable cFieldName		as character	no-undo.
+		define variable iFieldCount	as integer		no-undo.
+		define variable cFieldName	as character	no-undo.
 
 		if not valid-handle(hBuffer) or
 			hBuffer:type <> 'BUFFER'
@@ -67,11 +91,45 @@ class com.quarix.codegen.objectconstructor final:
 
 			if hBuffer:dbname <> 'PROGRESST'
 			then do:
-				if not FileWriter:generatePropertyDbField(cFieldName, hBuffer:serialize-name)
+				if not FileWriter:generatePropertyDbField(cFieldName)
+				then return false.
+			end.
+			else do:
+				if not FileWriter:generatePropertyTtField(cFieldName)
+				then return false.
+			end.
+		end. /* do iFieldCount = 1 to hBuffer:num-fields */
+
+		return true.
+
+		catch appError as Progress.Lang.Error :
+			delete object appError.
+			return false.
+		end catch.
+
+	end method.
+
+	method private logical createFieldInstance(input hBuffer as handle):
+
+		define variable iFieldCount	as integer  	no-undo.
+		define variable cFieldName  as character	no-undo.
+
+		if not valid-handle(hBuffer) or
+			hBuffer:type <> 'BUFFER'
+		then return false.
+
+		do iFieldCount = 1 to hBuffer:num-fields:
+
+			cFieldName = hBuffer:buffer-field(iFieldCount):name.
+
+			if hBuffer:dbname <> 'PROGRESST'
+			then
+			do:
+				if not FileWriter:generateDbFieldInstance(cFieldName)
 				then return false.
 			end.
 			else
-				if not FileWriter:generatePropertyTtField(cFieldName, hBuffer:serialize-name)
+				if not FileWriter:generateTtFieldInstance(cFieldName)
 				then return false.
 		end.
 
@@ -115,35 +173,44 @@ class com.quarix.codegen.objectconstructor final:
 	    define variable cClassName			as character	no-undo.
 		define variable cAbsoluteFileName	as character	no-undo.
 		define variable cFileName			as character	no-undo.
-		define variable cObjName			as character	no-undo.
+		define variable cTableName			as character	no-undo.
 
 		if not valid-handle(hBuffer) or
 			hBuffer:type <> 'BUFFER'
 		then return false.
 
-		cObjName = hBuffer:serialize-name.
-
-	    if cObjName				= ''	or
-	    	cObjName          	= ?		or
-            DestinationPacket   = ''	or
-            DestinationPacket   = ?		or
-	    	DestinationFolder	= ''	or
-	    	DestinationFolder	= ?
-        then return false.
-
 		if not valid-object(FileWriter)
 		then return false.
 
+		cTableName = hBuffer:serialize-name.
+
+		if cTableName			= ''	or
+			cTableName         	= ?		or
+			DestinationPacket   = ''	or
+			DestinationPacket   = ?		or
+			DestinationFolder	= ''	or
+			DestinationFolder	= ?
+		then return false.
+
+		if hBuffer:dbname = 'PROGRESST'
+		then do:
+			if cTableName begins 'tt'
+			then cFileName = substitute('&1&2', 'TT', substitute('&1&2', caps(substring(substring(cTableName, 3), 1, 1)), substring(substring(cTableName, 3), 2))).
+			else cFileName = substitute('&1&2', 'TT', substitute('&1&2', caps(substring(cTableName, 1, 1)), substring(cTableName, 2))).
+		end.
+		else
+			cFileName= substitute('&1&2', 'DB', substitute('&1&2', caps(substring(cTableName, 1, 1)), substring(cTableName, 2))).
+
 		assign
-			cFileName			= lc(cObjName)
-        	cClassName			= substitute('&1.&2', DestinationPacket, cFileName)
-			cClassName			= replace(cClassName, '..', '.')
+			cClassName        	= substitute('&1.&2', DestinationPacket, cFileName)
+			cClassName        	= replace(cClassName, '..', '.')
 			DestinationFolder	= replace(DestinationFolder, '~\', '~/')
 			cAbsoluteFileName	= substitute('&1~/&2.cls', DestinationFolder, cFileName)
 			cAbsoluteFileName	= replace(cAbsoluteFileName, '~/~/', '~/').
 
-		FileWriter:FileName = cAbsoluteFileName.
-		FileWriter:TabLength = TabLength.
+		assign
+			FileWriter:FileName		= cAbsoluteFileName
+			FileWriter:TabLength	= TabLength.
 
 		FileWriter:DeleteFile().
 
@@ -153,8 +220,20 @@ class com.quarix.codegen.objectconstructor final:
 			return false.
 		end.
 
-		if not FileWriter:generateProperty('ObjectName', cObjName)
+		if not AddScopedDefine(input hBuffer)
 		then do:
+			FileWriter:DeleteFile().
+			return false.
+		end.
+
+		if not FileWriter:generatePropertyField('Instance', cClassName)
+		then do:
+			FileWriter:DeleteFile().
+			return false.
+		end.
+
+		if not FileWriter:generateProperty('TableName', '')
+		then  do:
 			FileWriter:DeleteFile().
 			return false.
 		end.
@@ -165,7 +244,19 @@ class com.quarix.codegen.objectconstructor final:
 			return false.
 		end.
 
-		if not FileWriter:generateConstructor(cFileName, cObjName)
+		if not FileWriter:generateConstructorHeader(cFileName, cTableName)
+		then do:
+			FileWriter:DeleteFile().
+			return false.
+		end.
+
+		if not createFieldInstance(input hBuffer)
+		then do:
+			FileWriter:DeleteFile().
+			return false.
+		end.
+
+		if not FileWriter:generateConstructorClosingStatement()
 		then do:
 			FileWriter:DeleteFile().
 			return false.
@@ -216,10 +307,7 @@ class com.quarix.codegen.objectconstructor final:
             hBuffer:type <> 'BUFFER'
 	    then return false.
 
-        if not createClassFile(input hBuffer)
-        then return false.
-
-	    return true.
+        return createClassFile(input hBuffer).
 
         catch appError as Progress.Lang.Error :
             delete object appError.
@@ -238,10 +326,7 @@ class com.quarix.codegen.objectconstructor final:
 
         hBuf = hTable:default-buffer-handle.
 
-        if not createDefFromBuffer(input hBuf)
-        then return false.
-
-        return true.
+        return createDefFromBuffer(input hBuf).
 
         catch appError as Progress.Lang.Error :
             delete object appError.

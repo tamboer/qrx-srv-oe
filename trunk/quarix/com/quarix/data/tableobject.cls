@@ -1,6 +1,6 @@
 
  /*------------------------------------------------------------------------
-    File        : ttfield
+    File        : tableobject
     Purpose     :
     Syntax      :
     Description :
@@ -13,9 +13,10 @@ routine-level on error undo, throw.
 
 using Progress.Lang.*.
 
-class com.quarix.data.tableobject abstract:
+class com.quarix.data.tableobject:
 
-	constructor	static tableobject():
-	end constructor.
+	define public property TableObjectName as character no-undo
+		get.
+		protected set.
 
 end class.
