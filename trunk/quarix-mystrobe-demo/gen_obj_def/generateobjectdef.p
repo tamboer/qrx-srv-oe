@@ -72,13 +72,7 @@ procedure GenerateObject:
 
 	put stream str_out unformatted 'define variable hObject as handle no-undo.' skip.
 
-	put stream str_out unformatted 'objectconstructor = new com.quarix.codegen.objectconstructor().' skip.
-
-	put stream str_out unformatted 'objectconstructor:DestinationPacket = "wicketds.server.tableobjects".' skip.
-
-	put stream str_out unformatted 'objectconstructor:DestinationFolder = "d:\Projects\OpenedgeArchitect\bravura\src\quarix-mystrobe-demo\wicketds\server\tableobjects\".' skip.
-
-	put stream str_out unformatted 'objectconstructor:TabLength = 4.' skip.
+	put stream str_out unformatted 'objectconstructor = new com.quarix.codegen.objectconstructor("wicketds.server.tableobjects", "d:\Projects\OpenedgeArchitect\bravura\src\quarix-mystrobe-demo\wicketds\server\tableobjects\", 4).' skip.
 
 	if pcType = 'tt'
 	then
@@ -88,7 +82,11 @@ procedure GenerateObject:
 
 	put stream str_out unformatted 'objectconstructor:createTableDefObject(hObject).' skip.
 
+	put stream str_out unformatted 'finally:' skip.
+
 	put stream str_out unformatted 'delete object objectconstructor no-error.' skip.
+
+	put stream str_out unformatted 'end finally.' skip.
 
 	output stream str_out close.
 
