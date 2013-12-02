@@ -3,14 +3,12 @@ routine-level on error undo, throw.
 
 using Progress.Lang.*.
 using com.quarix.data.DataAccess.
-
-&global-define tbl_customer Customer
+using wicketds.server.tableobjects.*.
+using com.quarix.data.*.
 
 class wicketds.server.dacustomer inherits DataAccess:
 
 	{wicketds/server/dscustomer.i}
-
-	define buffer {&tbl_customer} for {&tbl_customer}.
 
 	constructor public dacustomer (  ):
         ID = 'dacustomer':u.
@@ -20,27 +18,28 @@ class wicketds.server.dacustomer inherits DataAccess:
 
 		define variable cFieldMapping as character no-undo.
 
-		assign
-			cFieldMapping	=
-				'{&tbl_customer}.Address'		+ ',ttcustomer.Address'			+ ',' +
-				'{&tbl_customer}.Address2'		+ ',ttcustomer.Address2'		+ ',' +
-				'{&tbl_customer}.Balance'		+ ',ttcustomer.Balance'			+ ',' +
-				'{&tbl_customer}.City'			+ ',ttcustomer.City'			+ ',' +
-				'{&tbl_customer}.Comments'		+ ',ttcustomer.Comments'		+ ',' +
-				'{&tbl_customer}.Contact'		+ ',ttcustomer.Contact'			+ ',' +
-				'{&tbl_customer}.Country'		+ ',ttcustomer.Country'			+ ',' +
-				'{&tbl_customer}.CreditLimit'	+ ',ttcustomer.CreditLimit'		+ ',' +
-				'{&tbl_customer}.CustNum'		+ ',ttcustomer.CustNum'			+ ',' +
-				'{&tbl_customer}.Discount'		+ ',ttcustomer.Discount'		+ ',' +
-				'{&tbl_customer}.EmailAddress'	+ ',ttcustomer.EmailAddress'	+ ',' +
-				'{&tbl_customer}.Fax'			+ ',ttcustomer.Fax'				+ ',' +
-				'{&tbl_customer}.Name'			+ ',ttcustomer.Name'			+ ',' +
-				'{&tbl_customer}.Phone'			+ ',ttcustomer.Phone'			+ ',' +
-				'{&tbl_customer}.PostalCode'	+ ',ttcustomer.PostalCode'		+ ',' +
-				'{&tbl_customer}.SalesRep'		+ ',ttcustomer.SalesRep'		+ ',' +
-				'{&tbl_customer}.State'			+ ',ttcustomer.State'			+ ',' +
-				'{&tbl_customer}.Terms'			+ ',ttcustomer.Terms'
-				.
+		ClearFieldMap().
+
+		AddFieldMap(DBCustomer:Address, TTCustomer:Address).
+		AddFieldMap(DBCustomer:Address2, TTCustomer:Address2).
+		AddFieldMap(DBCustomer:Balance, TTCustomer:Balance).
+		AddFieldMap(DBCustomer:City, TTCustomer:City).
+		AddFieldMap(DBCustomer:Comments, TTCustomer:Comments).
+		AddFieldMap(DBCustomer:Contact, TTCustomer:Contact).
+		AddFieldMap(DBCustomer:Country, TTCustomer:Country).
+		AddFieldMap(DBCustomer:CreditLimit, TTCustomer:CreditLimit).
+		AddFieldMap(DBCustomer:CustNum, TTCustomer:CustNum).
+		AddFieldMap(DBCustomer:Discount, TTCustomer:Discount).
+		AddFieldMap(DBCustomer:EmailAddress, TTCustomer:EmailAddress).
+		AddFieldMap(DBCustomer:Fax, TTCustomer:Fax).
+		AddFieldMap(DBCustomer:Name, TTCustomer:Name).
+		AddFieldMap(DBCustomer:Phone, TTCustomer:Phone).
+		AddFieldMap(DBCustomer:PostalCode, TTCustomer:PostalCode).
+		AddFieldMap(DBCustomer:SalesRep, TTCustomer:SalesRep).
+		AddFieldMap(DBCustomer:State, TTCustomer:State).
+		AddFieldMap(DBCustomer:Terms, TTCustomer:Terms).
+
+		cFieldMapping = GetFieldMapping().
 
 		return cFieldMapping.
 
@@ -55,10 +54,10 @@ class wicketds.server.dacustomer inherits DataAccess:
 		cFieldMapping = SetFieldMappings().
 
 		assign
-			cDbTables	= "{&tbl_customer}"
-			cKeys		= 'CustNum':U.
+			cDbTables	= DBCustomer:TableName
+			cKeys		= DBCustomer:CustNum:getName().
 
-		return AddDataSource ('ttcustomer':u, cDbTables, cKeys, ?, cFieldMapping).
+		return AddDataSource (TTCustomer:TableName, cDbTables, cKeys, ?, cFieldMapping).
 
 		catch appError as Progress.Lang.Error :
 			ThrowError(input appError).
@@ -83,21 +82,21 @@ class wicketds.server.dacustomer inherits DataAccess:
 		then return false.
 
 		assign
-			cKeys			= 'CustNum':U
-			cExcludeFields	= 'ttcustomer.CustNum':U.
+			cKeys			= TTCustomer:CustNum:getName()
+			cExcludeFields	= TTCustomer:CustNum:getName().
 
-		if not AddDataSource ('ttcustomer':u, hTmpList:default-buffer-handle, cKeys, ?, ?, cExcludeFields, ?, ?)
+		if not AddDataSource (TTCustomer:TableName, hTmpList:default-buffer-handle, cKeys, ?, ?, cExcludeFields, ?, ?)
 		then return false.
 
 		cFieldMapping = SetFieldMappings().
 
 		assign
-			cDbTables	= "{&tbl_customer}"
-			cKeys		= 'CustNum':U.
+			cDbTables	= DBCustomer:TableName
+			cKeys		= DBCustomer:CustNum:getName().
 
-		cJoinClause	= 'ttcustomer.CustNum = ttcustomeridlist.CustNum':U.
+		cJoinClause	= substitute('&1 = &2', TTCustomer:CustNum:getFqName(), TTCustomeridlist:CustNum:getFqName()).
 
-		if not AddDataSource ('ttcustomer':u, cDbTables, cKeys, ?, cFieldMapping, cExcludeFields, ?, cJoinClause)
+		if not AddDataSource (ttcustomer:TableName, cDbTables, cKeys, ?, cFieldMapping, cExcludeFields, ?, cJoinClause)
 		then return false.
 
 		return true.
@@ -174,7 +173,6 @@ class wicketds.server.dacustomer inherits DataAccess:
 			end.
 
 		end. /* for each btCustomer */
-
 
         for each ttcustomer
             where row-state(ttcustomer) = row-created
