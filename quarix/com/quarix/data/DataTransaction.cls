@@ -814,7 +814,7 @@ class com.quarix.data.DataTransaction
 
         JsonWriter:Out(substitute (', "hasFirstRow": &1':u,string(lFirstBatch, 'true/false':u))).
         JsonWriter:Out(substitute (', "hasLastRow": &1':u,string(lLastBatch, 'true/false':u))).
-
+/*
         filterArray =  DataContext:getFilterArray(tableHandle:name).
         if not Util:IsEmpty(filterArray) then do:
             JsonWriter:Out(', ').
@@ -832,7 +832,7 @@ class com.quarix.data.DataTransaction
             JsonWriter:Out(', ').
             JsonWriter:AddArray("options", propArray). /*add properties array in Json*/
         end.
-
+*/
         JsonWriter:Out('~}':u).
 
         /* send the buffer specific messages here (warning, info)*/
