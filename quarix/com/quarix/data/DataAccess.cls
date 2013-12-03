@@ -3462,7 +3462,7 @@ class com.quarix.data.DataAccess
     end method.
 
     method public character NormalizeQuery (input pcQueryString as character, input pcOperator as character):
-        define variable cExceptList   as character no-undo initial '~~176,~\'.
+        define variable cExceptList   as character no-undo initial '~~176'.
         define variable cExceptString as character no-undo.
         define variable iNum          as integer   no-undo.
 
