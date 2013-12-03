@@ -1053,7 +1053,7 @@ class com.quarix.data.DataModel
 
         if not Util:IsEmpty(currentPos) then
             JsonWriter:Out(substitute(', "newPosition": "&1"':u, currentPos)).
-
+/*
         filterArray =  DataContext:getFilterArray(tableHandle:name).
         if not Util:IsEmpty(filterArray) then
         do:
@@ -1074,7 +1074,7 @@ class com.quarix.data.DataModel
             JsonWriter:Out(', ').
             JsonWriter:AddArray("options", propArray). /*add properties array in Json*/
         end.
-
+*/
         JsonWriter:Out('~}':u).
 
         /* send the buffer specific messages here (warning, info)*/
