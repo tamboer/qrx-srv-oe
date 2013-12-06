@@ -318,7 +318,7 @@ class com.quarix.base.Util  implements com.quarix.base.iSingleton use-widget-poo
 
     method public void LogDataset(input dataset-handle phDataSet):
 
-    	LogDataset(input dataset-handle phDataSet by-reference, '':U, no, yes).
+    	LogDataset(input dataset-handle phDataSet by-reference, '':U, no, yes, no).
 
     	finally:
 			delete object phDataSet no-error.
@@ -328,7 +328,7 @@ class com.quarix.base.Util  implements com.quarix.base.iSingleton use-widget-poo
 
     method public void LogDatasetUnformatted(input dataset-handle phDataSet):
 
-    	LogDataset(input dataset-handle phDataSet by-reference, '':U, no, no).
+    	LogDataset(input dataset-handle phDataSet by-reference, '':U, no, no, no).
 
     	finally:
 			delete object phDataSet no-error.
@@ -338,7 +338,7 @@ class com.quarix.base.Util  implements com.quarix.base.iSingleton use-widget-poo
 
     method public void LogDataset(input dataset-handle phDataSet, input pcName as character):
 
-    	LogDataset(input dataset-handle phDataSet by-reference, pcName, no, yes).
+    	LogDataset(input dataset-handle phDataSet by-reference, pcName, no, yes, no).
 
     	finally:
 			delete object phDataSet no-error.
@@ -348,7 +348,7 @@ class com.quarix.base.Util  implements com.quarix.base.iSingleton use-widget-poo
 
     method public void LogDatasetUnformatted(input dataset-handle phDataSet, input pcName as character):
 
-    	LogDataset(input dataset-handle phDataSet by-reference, pcName, no, no).
+    	LogDataset(input dataset-handle phDataSet by-reference, pcName, no, no, no).
 
     	finally:
 			delete object phDataSet no-error.
@@ -358,7 +358,7 @@ class com.quarix.base.Util  implements com.quarix.base.iSingleton use-widget-poo
 
     method public void LogDataset(input dataset-handle phDataSet, input plWriteBeforeImage as logical, input plFormatted as logical):
 
-    	LogDataset(input dataset-handle phDataSet by-reference, '':U, plWriteBeforeImage, plFormatted).
+    	LogDataset(input dataset-handle phDataSet by-reference, '':U, plWriteBeforeImage, plFormatted, no).
 
     	finally:
 			delete object phDataSet no-error.
@@ -366,7 +366,7 @@ class com.quarix.base.Util  implements com.quarix.base.iSingleton use-widget-poo
 
     end method.
 
-    method public void LogDataset(input dataset-handle phDataSet, input pcName as character, input plWriteBeforeImage as logical, input plFormatted as logical):
+    method public void LogDataset(input dataset-handle phDataSet, input pcName as character, input plWriteBeforeImage as logical, input plFormatted as logical, input plOverwrite as logical):
 
     	define variable cLogDirectory		as character	no-undo.
     	define variable cLogFileName		as character	no-undo.
@@ -395,15 +395,17 @@ class com.quarix.base.Util  implements com.quarix.base.iSingleton use-widget-poo
 			cLogFileName		= cFileName + '.xml':U
     		cFullLogFileName	= cLogDirectory + '~/':U + cLogFileName.
 
-    	do while search(cFullLogFileName) <> ?:
+    	if not plOverwrite
+    	then
+        	do while search(cFullLogFileName) <> ?:
 
-    		iNum = iNum + 1.
+        		iNum = iNum + 1.
 
-    		assign
-				cLogFileName		= cFileName + '_':U + string(iNum) + '.xml':U
-    			cFullLogFileName	= cLogDirectory + '~/':U + cLogFileName.
+        		assign
+    				cLogFileName		= cFileName + '_':U + string(iNum) + '.xml':U
+        			cFullLogFileName	= cLogDirectory + '~/':U + cLogFileName.
 
-    	end. /* do while search(cFullLogFileName) = ? */
+        	end. /* do while search(cFullLogFileName) = ? */
 
     	message
     		'------------------------------------------------------------------------------------------------------------------------------':U skip

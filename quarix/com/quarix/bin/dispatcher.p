@@ -45,7 +45,7 @@ define input  parameter table         for ttRequest.
 define input  parameter pstrRequest   as memptr    no-undo.
 define output parameter table         for ttResponse.
 define output parameter pstrResponse  as memptr    no-undo.
-
+/*
 define variable lcFieldValue as longchar no-undo.
 define variable cFieldValue as character no-undo.
 
@@ -63,7 +63,7 @@ for each ttRequest
     view-as alert-box.
 
 end.
-
+*/
 
 
 

@@ -104,17 +104,8 @@ class com.quarix.data.DataRequest
 
       dataset {&datasetName}:read-xml('memptr':u, mpRequest, 'empty':u, xsdFile, false, ?, 'ignore':u).
 
-      if valid-object(ErrorManager) and ErrorManager:GetLogLevel() ge ErrorManager:DebugLevel() then do:
-
-         cLogDirectory = Util:GetLogDirectory().
-
-         if not Util:IsEmpty(cLogDirectory)
-         then do:
-            cLogFileName = cLogDirectory + '/request.xml':u.
-
-            copy-lob mpRequest to file cLogFileName.
-         end.
-      end.
+      if valid-object(ErrorManager) and ErrorManager:GetLogLevel() ge ErrorManager:DebugLevel()
+      then Util:LogDataset(dataset {&datasetName} by-reference, 'request', yes, yes, yes).
 
       return true.
 
@@ -644,6 +635,7 @@ class com.quarix.data.DataRequest
                assign
                   fldExt = 0
                   hFld   = hBuf:buffer-field(fld.name) no-error.
+
                /* might be extent field */
                if not valid-handle(hFld) and index(fld.name, '_':u) gt 0 then
                   assign
@@ -675,16 +667,14 @@ class com.quarix.data.DataRequest
    end method.
 
    method private logical setFieldValue (beforeImage as logical, hFld as handle, fldExt as integer, fldVal as longchar):
+
       define variable boolVal as logical no-undo.
 
       /* empty string value received in xml from client */
-      if fldVal eq ? then do:
-         fldVal = ''.
-         /* for before image we don't need to change the field value if
-            initial is already empty string so we skip the assignment */
-         if beforeImage and hFld:initial eq fldVal then
-            return true.
-      end.
+      if fldVal eq ? and
+        hFld:initial eq ?
+      then return true.
+
       /* if the client send '?' in xml (probably because we've sent that
          from the back-end we change it to null value instead */
       if compare(fldVal, 'eq':u, '?':u, 'raw':u) then do:
@@ -692,11 +682,17 @@ class com.quarix.data.DataRequest
             hFld:buffer-value = ?.
          else
             hFld:buffer-value[fldExt] = ?.
+
          return true.
       end.
+
       case hFld:data-type:
          /* character data-type, just assign the input string  */
          when 'character':u or when 'clob':u then do:
+
+            if fldVal eq ?
+            then fldVal = ''.
+
             if fldExt eq 0 then
                hFld:buffer-value = fldVal .
             else
@@ -760,7 +756,15 @@ class com.quarix.data.DataRequest
                hFld:buffer-value[fldExt] = boolVal .
          end.
       end case.
+
       return true.
+
+      catch appError as Progress.Lang.Error :
+         ThrowError(input appError).
+         delete object appError.
+         return false.
+      end catch.
+
    end method.
 
 	method private logical setRowid (table-handle hTT, ttRowId as rowid, cliRowId as character):
