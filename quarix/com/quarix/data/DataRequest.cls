@@ -749,7 +749,11 @@ class com.quarix.data.DataRequest
          end.
          /* logical data-type, convert the input string to logical */
          when 'logical':u then do:
-            boolVal = string(fldVal) eq entry(1, hFld:format, '~/':u) .
+
+            if fldVal = ?
+            then boolVal = ?.
+            else boolVal = string(fldVal) eq entry(1, hFld:format, '~/':u) .
+
             if fldExt eq 0 then
                hFld:buffer-value = boolVal .
             else
