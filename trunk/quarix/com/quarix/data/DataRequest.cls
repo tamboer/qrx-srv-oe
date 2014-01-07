@@ -105,7 +105,10 @@ class com.quarix.data.DataRequest
       dataset {&datasetName}:read-xml('memptr':u, mpRequest, 'empty':u, xsdFile, false, ?, 'ignore':u).
 
       if valid-object(ErrorManager) and ErrorManager:GetLogLevel() ge ErrorManager:DebugLevel()
-      then Util:LogDataset(dataset {&datasetName} by-reference, 'request', yes, yes, yes).
+      then do:
+        Util:LogDataset(dataset {&datasetName} by-reference, 'request', yes, yes, yes).
+        Util:DumpMemPtrToFile(mpRequest, 'Requestxml', yes).
+      end.
 
       return true.
 
