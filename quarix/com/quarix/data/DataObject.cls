@@ -632,7 +632,7 @@ class com.quarix.data.DataObject
 
 	method private void DumpResponseToFile(input mp as memptr):
 
-		Util:DumpMemPtrToFile(mp, 'Response':U).
+		Util:DumpMemPtrToFile(mp, 'Response':U, true).
 
 	end method.
 

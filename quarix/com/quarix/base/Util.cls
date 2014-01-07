@@ -496,7 +496,7 @@ class com.quarix.base.Util  implements com.quarix.base.iSingleton use-widget-poo
     end method.
 
 
-    method public void DumpMemPtrToFile(input mp as memptr, input pcName as character):
+    method public void DumpMemPtrToFile(input mp as memptr, input pcName as character, input plOverwrite as logical):
 
     	define variable cLogDirectory		as character	no-undo.
     	define variable cLogFileName		as character	no-undo.
@@ -517,18 +517,26 @@ class com.quarix.base.Util  implements com.quarix.base.iSingleton use-widget-poo
     	then return.
 
     	assign
-			cLogFileName		= cFileName + '.json':U
+			cLogFileName		= cFileName + '.xml':U
     		cFullLogFileName	= cLogDirectory + '~/':U + cLogFileName.
 
-    	do while search(cFullLogFileName) <> ?:
+        if not plOverwrite
+        then
+        	do while search(cFullLogFileName) <> ?:
 
-    		iNum = iNum + 1.
+        		iNum = iNum + 1.
 
-    		assign
-				cLogFileName		= cFileName + '_':U + string(iNum) + '.json':U
-    			cFullLogFileName	= cLogDirectory + '~/':U + cLogFileName.
+        		assign
+    				cLogFileName		= cFileName + '_':U + string(iNum) + '.xml':U
+        			cFullLogFileName	= cLogDirectory + '~/':U + cLogFileName.
 
-    	end. /* do while search(cFullLogFileName) = ? */
+        	end. /* do while search(cFullLogFileName) = ? */
+
+        message
+            '------------------------------------------------------------------------------------------------------------------------------':U skip
+            'Write file in: ' cFullLogFileName skip
+            '------------------------------------------------------------------------------------------------------------------------------':U skip
+        view-as alert-box.
 
     	copy-lob mp to file cFullLogFileName.
 

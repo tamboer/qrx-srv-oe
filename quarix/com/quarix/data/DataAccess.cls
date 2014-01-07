@@ -1732,7 +1732,7 @@ class com.quarix.data.DataAccess
                                 undo, leave update_block.
                             end.
 
-                            retVal = hSrcBuf:buffer-compare(hBi, 'binary':u, roFields, saveMap, false) .
+                            retVal = hSrcBuf:buffer-compare(hBi, 'binary':u, roFields, saveMap, true) .
 
                             /* compare before-image with 'current' data */
                             if retVal eq false then
@@ -2104,7 +2104,11 @@ class com.quarix.data.DataAccess
     		not valid-handle(hSrcBuffer)
     	then return ?.
 
-    	do iNumFld = 1 to hSrcBuffer:num-fields:
+    	if hSrcBuffer:dbname = 'PROGRESST'
+    	then return ?.
+
+    	do iNumFld = 1 to hSrcBuffer:num-fields
+            on error undo, throw:
 
     		cFldName = hSrcBuffer:buffer-field (iNumFld):name.
 
@@ -2123,8 +2127,13 @@ class com.quarix.data.DataAccess
 
     	return cFieldsMap.
 
-    end method.
+    	catch appError as Progress.Lang.Error :
+            ThrowError(input appError).
+            delete object appError.
+            return ?.
+        end catch.
 
+    end method.
 
     method public final logical AddDataSource(
     	pcTable			as character,
@@ -2161,10 +2170,17 @@ class com.quarix.data.DataAccess
         assign
             pcFieldsMap = trim(Util:Nvl(pcFieldsMap, '':u))
             pcWhere     = trim(Util:Nvl(pcWhere, '':u)).
-/*
+
         if Util:IsEmpty(pcFieldsMap)
-        then pcFieldsMap = GetFieldMappings(input hBuffer, input hSrcBuffer).
-*/
+        then do:
+            pcFieldsMap = GetFieldMappings(input hBuffer, input hSrcBuffer).
+
+            message 'pcFieldsMap' pcFieldsMap
+        view-as alert-box.
+        end.
+
+
+
         assign hDataSource = hBuffer:data-source no-error.
 
         /* exclude fields list are set on source's buffer private-data */
