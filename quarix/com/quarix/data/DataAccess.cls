@@ -3508,14 +3508,14 @@ class com.quarix.data.DataAccess
     method protected character GetFieldMapping():
 
     	if not valid-object(FieldMapping)
-    	then return ''.
+    	then return ?.
 
     	return FieldMapping:GetFieldMapping().
 
 		catch appError as Progress.Lang.Error :
 			ThrowError(input appError).
 			delete object appError.
-			return ''.
+			return ?.
 		end catch.
 
     end method.
@@ -3526,6 +3526,66 @@ class com.quarix.data.DataAccess
     	then return.
 
     	FieldMapping:ClearFieldMap().
+
+	end method.
+
+	method protected character AutoFieldMap(input oDbTableObject as com.quarix.data.dbtableobject, input oTtTableObject as com.quarix.data.tttableobject):
+
+		if not valid-object(FieldMapping)
+    	then return ?.
+
+    	return FieldMapping:AutoFieldMap(input oDbTableObject, input oTtTableObject).
+
+    	catch appError as Progress.Lang.Error :
+			ThrowError(input appError).
+			delete object appError.
+			return ?.
+		end catch.
+
+	end method.
+
+	method public logical RemoveFieldMapByTTField(input ttfield as ttfield):
+
+		if not valid-object(FieldMapping)
+    	then return false.
+
+    	return FieldMapping:RemoveFieldMapByTTField(input ttfield).
+
+		catch appError as Progress.Lang.Error :
+			ThrowError(input appError).
+			delete object appError.
+			return false.
+		end catch.
+
+	end method.
+
+	method public logical RemoveFieldMapByDBField(input dbfield as dbfield):
+
+		if not valid-object(FieldMapping)
+    	then return false.
+
+    	return FieldMapping:RemoveFieldMapByDBField(input dbfield).
+
+		catch appError as Progress.Lang.Error :
+			ThrowError(input appError).
+			delete object appError.
+			return false.
+		end catch.
+
+	end method.
+
+	method public logical RemoveFieldMapsAfterPos(input dbfield as dbfield):
+
+		if not valid-object(FieldMapping)
+    	then return false.
+
+    	return FieldMapping:RemoveFieldMapsAfterPos(input dbfield).
+
+		catch appError as Progress.Lang.Error :
+			ThrowError(input appError).
+			delete object appError.
+			return false.
+		end catch.
 
 	end method.
 
