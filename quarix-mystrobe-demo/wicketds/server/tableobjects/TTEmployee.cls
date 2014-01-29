@@ -231,6 +231,10 @@ class wicketds.server.tableobjects.TTEmployee inherits com.quarix.data.tttableob
 
     end constructor.
 
+    method public static override integer NumberOfFields():
+        return extent(Instance:FieldInstanceList#).
+    end method.
+
     destructor public TTEmployee():
         delete object FieldInstanceList#[{&idxrowid}] no-error.
         delete object FieldInstanceList#[{&idxrowstate}] no-error.

@@ -55,6 +55,10 @@ class wicketds.server.tableobjects.TTCustomeridlist inherits com.quarix.data.ttt
 
     end constructor.
 
+    method public static override integer NumberOfFields():
+        return extent(Instance:FieldInstanceList#).
+    end method.
+
     destructor public TTCustomeridlist():
         delete object FieldInstanceList#[{&idxIdListOrder}] no-error.
         delete object FieldInstanceList#[{&idxHashCode}] no-error.

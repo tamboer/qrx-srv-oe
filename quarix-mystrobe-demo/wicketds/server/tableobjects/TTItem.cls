@@ -132,6 +132,10 @@ class wicketds.server.tableobjects.TTItem inherits com.quarix.data.tttableobject
 
     end constructor.
 
+    method public static override integer NumberOfFields():
+        return extent(Instance:FieldInstanceList#).
+    end method.
+
     destructor public TTItem():
         delete object FieldInstanceList#[{&idxrowid}] no-error.
         delete object FieldInstanceList#[{&idxrowstate}] no-error.

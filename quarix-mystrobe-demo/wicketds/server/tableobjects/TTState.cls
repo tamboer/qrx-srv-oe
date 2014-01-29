@@ -88,6 +88,10 @@ class wicketds.server.tableobjects.TTState inherits com.quarix.data.tttableobjec
 
     end constructor.
 
+    method public static override integer NumberOfFields():
+        return extent(Instance:FieldInstanceList#).
+    end method.
+
     destructor public TTState():
         delete object FieldInstanceList#[{&idxrowid}] no-error.
         delete object FieldInstanceList#[{&idxrowstate}] no-error.

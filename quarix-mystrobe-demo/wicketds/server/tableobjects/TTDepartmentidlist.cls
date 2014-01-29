@@ -55,6 +55,10 @@ class wicketds.server.tableobjects.TTDepartmentidlist inherits com.quarix.data.t
 
     end constructor.
 
+    method public static override integer NumberOfFields():
+        return extent(Instance:FieldInstanceList#).
+    end method.
+
     destructor public TTDepartmentidlist():
         delete object FieldInstanceList#[{&idxIdListOrder}] no-error.
         delete object FieldInstanceList#[{&idxHashCode}] no-error.

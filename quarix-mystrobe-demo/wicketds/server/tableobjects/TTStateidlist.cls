@@ -55,6 +55,10 @@ class wicketds.server.tableobjects.TTStateidlist inherits com.quarix.data.tttabl
 
     end constructor.
 
+    method public static override integer NumberOfFields():
+        return extent(Instance:FieldInstanceList#).
+    end method.
+
     destructor public TTStateidlist():
         delete object FieldInstanceList#[{&idxIdListOrder}] no-error.
         delete object FieldInstanceList#[{&idxHashCode}] no-error.

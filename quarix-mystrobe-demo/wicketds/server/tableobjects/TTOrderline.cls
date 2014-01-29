@@ -154,6 +154,10 @@ class wicketds.server.tableobjects.TTOrderline inherits com.quarix.data.tttableo
 
     end constructor.
 
+    method public static override integer NumberOfFields():
+        return extent(Instance:FieldInstanceList#).
+    end method.
+
     destructor public TTOrderline():
         delete object FieldInstanceList#[{&idxrowid}] no-error.
         delete object FieldInstanceList#[{&idxrowstate}] no-error.
