@@ -34,6 +34,8 @@ using Progress.Lang.*.
    using com.quarix.data.*.
    using com.quarix.web.*.
 
+&scoped-define req-var-xml-data         'xml':u
+
 class com.quarix.data.DataTransaction
     inherits DataObject
     implements iDataTransaction, iWebObject, com.quarix.base.iDisposable:
@@ -178,82 +180,6 @@ class com.quarix.data.DataTransaction
 		return true.
 
         catch appError as Progress.Lang.Error :
-            ThrowError(input appError).
-            delete object appError.
-            return false.
-        end catch.
-
-    end method.
-
-    method private logical HandleRequestDummyData (input lReloadDataRequest as logical):
-
-    	define variable mpReq as memptr no-undo.
-
-    	if not InitializeDataObject()
-    	then return false.
-
-        DataRequest = cast(GetInstance('com.quarix.data.DataRequest':u), 'com.quarix.data.DataRequest':u).
-
-        if not valid-object(DataRequest) then do:
-            ThrowError(1000, 'msg_err_load_obj':u, ?, ?).
-            return false.
-        end.
-
-        assign
-            DataRequest:ObjectType = 'DataCollection':u
-            mpReq = Request:GetBlobVariable('xml':u)
-            Response:ResponseType = Response:RESPONSE_DIRECT
-            Response:ContentType  = 'application/json':u.
-
-        if get-size(mpReq) gt 0
-        then do:
-            if lReloadDataRequest
-            then do:
-                if not DataRequest:Parse(mpReq)
-                then return false.
-            end.
-
-            set-size(mpReq) = 0.
-
-			/* Store the data into dataset from request */
-
-            if not LoadRequestData()
-            then return false.
-
-            /* Store the filters from request into DataCotext */
-
-            if not SetFiltersFromRequest()
-            then return false.
-
-            /* Load some session parameters from DataContext into ContextManager */
-
-            if not SetSessionParameters()
-            then return false.
-
-            /* Store different sort options into DataContext */
-
-            if not SetSortFromRequest()
-            then return false.
-
-            /* Set the batchsize in DataContext */
-
-            if not SetBatchSizeFromRequest()
-            then return false.
-
-            if DataRequest:ActionName = ACTION_DATA_FILL
-            then do:
-                if not HandleRequestChild()
-                then return false.
-            end.
-
-        end. /* if get-size(mpReq) gt 0 */
-
-        return true.
-
-        catch appError as Progress.Lang.Error :
-
-        	set-size(mpReq) = 0.
-
             ThrowError(input appError).
             delete object appError.
             return false.
@@ -1087,6 +1013,35 @@ class com.quarix.data.DataTransaction
         	delete object dsHandle no-error.
 
         end finally.
+
+    end method.
+
+    method protected override logical LoadRequestDataFromXml(input lReloadDataRequest as logical):
+
+        define variable mpReq as memptr no-undo.
+
+        if not super:LoadRequestDataFromXml (input lReloadDataRequest)
+        then return false.
+
+        mpReq = Request:GetBlobVariable({&req-var-xml-data}).
+
+        if get-size(mpReq) gt 0 and
+            DataRequest:ActionName = ACTION_DATA_FILL
+        then do:
+            if not HandleRequestChild()
+            then return false.
+        end.
+
+        return true.
+
+        catch appError as Progress.Lang.Error :
+
+            set-size(mpReq) = 0.
+
+            ThrowError(input appError).
+            delete object appError.
+            return false.
+        end catch.
 
     end method.
 

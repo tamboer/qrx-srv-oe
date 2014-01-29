@@ -117,4 +117,6 @@ interface com.quarix.data.iDataObject:
 
     method public void SetSessionParameters().
 
+    method public logical HandleRequestDummyData (lReloadDataRequest as logical).
+
 end interface.

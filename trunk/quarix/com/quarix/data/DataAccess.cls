@@ -2172,14 +2172,7 @@ class com.quarix.data.DataAccess
             pcWhere     = trim(Util:Nvl(pcWhere, '':u)).
 
         if Util:IsEmpty(pcFieldsMap)
-        then do:
-            pcFieldsMap = GetFieldMappings(input hBuffer, input hSrcBuffer).
-
-            message 'pcFieldsMap' pcFieldsMap
-        view-as alert-box.
-        end.
-
-
+        then pcFieldsMap = GetFieldMappings(input hBuffer, input hSrcBuffer).
 
         assign hDataSource = hBuffer:data-source no-error.
 
@@ -3478,7 +3471,7 @@ class com.quarix.data.DataAccess
     end method.
 
     method public character NormalizeQuery (input pcQueryString as character, input pcOperator as character):
-        define variable cExceptList   as character no-undo initial '~~176'.
+        define variable cExceptList   as character no-undo initial '~176'.
         define variable cExceptString as character no-undo.
         define variable iNum          as integer   no-undo.
 
@@ -3488,12 +3481,9 @@ class com.quarix.data.DataAccess
             pcQueryString = Util:RemoveString (pcQueryString, cExceptString).
         end.
 
-        ThrowDebug(100, 'normalizequery').
-        ThrowDebug(100, 'operator ' + pcOperator).
-
         if pcOperator = 'matches':U then do:
-            pcQueryString = replace (pcQueryString, '.':U, '~~~~.':U).
-            /* pcQueryString = replace (pcQueryString, '*':U, '~~~~*':U). */
+            pcQueryString = replace (pcQueryString, '~134', '~~~134').
+            pcQueryString = replace (pcQueryString, '~.', '~~~.').
         end.
 
         return pcQueryString.

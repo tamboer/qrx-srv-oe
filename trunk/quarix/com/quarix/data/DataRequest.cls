@@ -35,6 +35,8 @@ class com.quarix.data.DataRequest
    implements com.quarix.base.iSingleton  use-widget-pool final:
 
    /*&global-define quarix-standard-xml true*/
+   /*&global-define quarix-xml-xsi-nil true*/
+   /*&global-define quarix-xml-datetime true*/
 
    &if defined(quarix-standard-xml) gt 0 &then
       &global-define datasetName   reqMsg
@@ -91,12 +93,9 @@ class com.quarix.data.DataRequest
    end method.
    &endif
 
-   method public logical Parse (mpRequest as memptr):
+   method public logical Parse (mpRequest as memptr, input cDumpName as character):
 
-      define variable cLogDirectory	as character no-undo.
-      define variable cLogFileName	as character no-undo.
-
-   	  dataset {&datasetName}:empty-dataset().
+      dataset {&datasetName}:empty-dataset().
 
       if xsdFile eq ? or
          get-size(mpRequest) eq 0 then
@@ -104,10 +103,19 @@ class com.quarix.data.DataRequest
 
       dataset {&datasetName}:read-xml('memptr':u, mpRequest, 'empty':u, xsdFile, false, ?, 'ignore':u).
 
+      Util:LogDataset(dataset {&datasetName} by-reference, '00000000', yes, yes, yes).
+
       if valid-object(ErrorManager) and ErrorManager:GetLogLevel() ge ErrorManager:DebugLevel()
       then do:
-        Util:LogDataset(dataset {&datasetName} by-reference, 'request', yes, yes, yes).
-        Util:DumpMemPtrToFile(mpRequest, 'Requestxml', yes).
+         if not Util:IsEmpty(cDumpName)
+         then do:
+            Util:LogDataset(dataset {&datasetName} by-reference, cDumpName, yes, yes, yes).
+            Util:DumpMemPtrToFile(mpRequest, substitute('&1_&2', 'Requestxml', cDumpName), yes).
+         end.
+         else do:
+            /*Util:LogDataset(dataset {&datasetName} by-reference, 'request', yes, yes, yes).*/
+            Util:DumpMemPtrToFile(mpRequest, 'Requestxml', yes).
+         end.
       end.
 
       return true.
@@ -117,6 +125,12 @@ class com.quarix.data.DataRequest
          delete object appError.
          return false.
       end catch.
+
+   end method.
+
+   method public logical Parse (mpRequest as memptr):
+
+   	  return Parse (mpRequest, input '').
 
    end method.
 
@@ -669,9 +683,100 @@ class com.quarix.data.DataRequest
 
    end method.
 
+    /* http://books.xmlschemata.org/relaxng/ch19-77049.html */
+
+    method private logical getDateTimeFieldValue(input fldVal as longchar, output dResultTime as datetime-tz):
+
+        define variable cDate               as character    no-undo.
+        define variable cTime               as character    no-undo.
+        define variable cTimeZoneInfo       as character    no-undo.
+        define variable cTimeZone           as character    no-undo.
+        define variable cOldSesNumFormat    as character    no-undo.
+        define variable iYear               as integer      no-undo.
+        define variable iMonth              as integer      no-undo.
+        define variable iDay                as integer      no-undo.
+        define variable iHour               as integer      no-undo.
+        define variable iMinute             as integer      no-undo.
+        define variable iSecond             as integer      no-undo.
+        define variable iMillisecond        as integer      no-undo.
+        define variable iTimeZoneInfo       as integer      no-undo.
+
+        if fldVal = ?
+        then return true.
+
+        if fldVal begins '-'
+        then fldVal = substring(fldVal, 2).
+
+        assign
+            cDate   = entry(1, fldVal, 'T')
+            cTime   = entry(2, fldVal, 'T').
+
+        if index(cTime, 'Z') > 0
+        then
+            assign
+                cTimeZoneInfo   = substring(cTime, index(cTime, 'Z') + 1)
+                cTime           = substring(cTime, 1, index(cTime, 'Z') - 1)
+                cTimeZone       = 'Z'.
+        else
+            if index(cTime, '+') > 0
+            then
+                assign
+                    cTimeZoneInfo   = substring(cTime, index(cTime, '+') + 1)
+                    cTime           = substring(cTime, 1, index(cTime, '+') - 1)
+                    cTimeZone       = '+'.
+            else
+                if index(cTime, '-') > 0
+                then
+                    assign
+                        cTimeZoneInfo   = substring(cTime, index(cTime, '-') + 1)
+                        cTime           = substring(cTime, 1, index(cTime, '-') - 1)
+                        cTimeZone       = '-'.
+
+        assign
+            iYear   = integer(entry(1, cDate, '-'))
+            iMonth  = integer(entry(2, cDate, '-'))
+            iDay    = integer(entry(3, cDate, '-')).
+
+        cOldSesNumFormat = session:numeric-format.
+
+        session:numeric-format = 'American'.
+
+        assign
+            cTime           = substitute('&1:&2:&3', entry(1, cTime, ':'), entry(2, cTime, ':'), string(round(decimal(entry(3, cTime, ':')), 3)))
+            iHour           = integer(entry(1, cTime, ':'))
+            iMinute         = integer(entry(2, cTime, ':'))
+            iSecond         = integer(entry(1, entry(3, cTime, ':'), '.')).
+
+        if num-entries(entry(3, cTime, ':'), '.') > 1
+        then iMillisecond = integer(entry(2, entry(3, cTime, ':'), '.')).
+
+        session:numeric-format = cOldSesNumFormat.
+
+        if cTimeZone <> 'Z'
+        then do:
+            iTimeZoneInfo = integer(entry(1, cTimeZoneInfo, ':')) * 60 + integer(entry(2, cTimeZoneInfo, ':')).
+
+            if cTimeZone = '-'
+            then iTimeZoneInfo = - iTimeZoneInfo.
+        end.
+
+        dResultTime = datetime-tz (iMonth, iDay, iYear, iHour, iMinute, iSecond, iMillisecond, iTimeZoneInfo).
+
+        return true.
+
+        catch appError as Progress.Lang.Error :
+            ThrowError(input appError).
+            delete object appError.
+            return false.
+        end catch.
+
+   end method.
+
    method private logical setFieldValue (beforeImage as logical, hFld as handle, fldExt as integer, fldVal as longchar):
 
-      define variable boolVal as logical no-undo.
+      define variable boolVal       as logical      no-undo.
+      define variable dResultTimeTz as datetime-tz  no-undo.
+      define variable dResultTime   as datetime     no-undo.
 
       /* empty string value received in xml from client */
       if fldVal eq ? and
@@ -692,10 +797,11 @@ class com.quarix.data.DataRequest
       case hFld:data-type:
          /* character data-type, just assign the input string  */
          when 'character':u or when 'clob':u then do:
-
+            &if defined(quarix-xml-xsi-nil) gt 0 &then
+            &else
             if fldVal eq ?
             then fldVal = ''.
-
+            &endif
             if fldExt eq 0 then
                hFld:buffer-value = fldVal .
             else
@@ -703,24 +809,56 @@ class com.quarix.data.DataRequest
          end.
          /* date data-type, use session format for conversion  */
          when 'date':u then do:
-            if fldExt eq 0 then
-               hFld:buffer-value = date(string(fldVal)) .
-            else
-               hFld:buffer-value[fldExt] = date(string(fldVal)) .
+             &if defined(quarix-xml-datetime) gt 0 &then
+             if not getDateTimeFieldValue(input fldVal, output dResultTimeTz)
+             then return false.
+
+             if fldExt eq 0 then
+                hFld:buffer-value = date(dResultTimeTz) .
+             else
+                hFld:buffer-value[fldExt] = date(dResultTimeTz) .
+             &else
+             if fldExt eq 0 then
+                hFld:buffer-value = date(string(fldVal)) .
+             else
+                hFld:buffer-value[fldExt] = date(string(fldVal)) .
+             &endif
          end.
          /* datetime data-type, use session format for conversion  */
          when 'datetime':u then do:
-            if fldExt eq 0 then
-               hFld:buffer-value = datetime(string(fldVal)) .
-            else
-               hFld:buffer-value[fldExt] = datetime(string(fldVal)) .
+             &if defined(quarix-xml-datetime) gt 0 &then
+             if not getDateTimeFieldValue(input fldVal, output dResultTimeTz)
+             then return false.
+
+             dResultTime = dResultTimeTz.
+
+             if fldExt eq 0 then
+                hFld:buffer-value = dResultTime.
+             else
+                hFld:buffer-value[fldExt] = dResultTime.
+             &else
+             if fldExt eq 0 then
+                hFld:buffer-value = datetime(string(fldVal)) .
+             else
+                hFld:buffer-value[fldExt] = datetime(string(fldVal)) .
+             &endif
          end.
          /* datetime data-type, use session format for conversion  */
          when 'datetime-tz':u then do:
-            if fldExt eq 0 then
-               hFld:buffer-value = datetime-tz(string(fldVal)) .
-            else
-               hFld:buffer-value[fldExt] = datetime-tz(string(fldVal)) .
+             &if defined(quarix-xml-datetime) gt 0 &then
+             if not getDateTimeFieldValue(input fldVal, output dResultTimeTz)
+             then return false.
+
+             if fldExt eq 0 then
+                hFld:buffer-value = dResultTimeTz.
+             else
+                hFld:buffer-value[fldExt] = dResultTimeTz.
+             &else
+             if fldExt eq 0 then
+                hFld:buffer-value = datetime-tz(string(fldVal)) .
+             else
+                hFld:buffer-value[fldExt] = datetime-tz(string(fldVal)) .
+             &endif
          end.
          /* integer data-type, convert the input string to int */
          when 'integer':u or when 'recid':u then do:

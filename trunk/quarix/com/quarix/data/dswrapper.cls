@@ -41,14 +41,18 @@ class com.quarix.data.dswrapper inherits com.quarix.base.BaseObject implements c
 
 			do iNumBuf = 1 to dsHandle:num-buffers:
 
-				hBuf = dsHandle:get-buffer-handle (iNumBuf).
+				hBuf = dsHandle:get-buffer-handle (iNumBuf) no-error.
 
-				htt = hBuf:table-handle.
+				if valid-handle(hBuf)
+				then do:
+				    htt = hBuf:table-handle no-error.
 
-				delete object hBuf no-error.
+				    delete object hBuf no-error.
 
-				delete object htt no-error.
-			end.
+				    delete object htt no-error.
+				end.
+
+			end. /* do iNumBuf = 1 to dsHandle:num-buffers */
 
 			delete object dsHandle no-error.
 

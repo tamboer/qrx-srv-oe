@@ -33,6 +33,7 @@ using com.quarix.base.BaseObject.
 using com.quarix.data.*.
 using com.quarix.web.*.
 
+&scoped-define req-var-xml-data         'xml':u
 
 class com.quarix.data.DataObject
     inherits BaseObject
@@ -953,7 +954,7 @@ class com.quarix.data.DataObject
 
     end method.
 
-    method public logical LoadRequestData ():
+    method public logical LoadRequestData(input cDumpName as character):
 
         define variable numBuf  as integer no-undo.
         define variable hTT     as handle  no-undo.
@@ -967,6 +968,8 @@ class com.quarix.data.DataObject
         if not valid-object(DataContext)
         then return false.
 
+        datasetHandle:empty-dataset ().
+
         do numBuf = 1 to datasetHandle:num-buffers:
 
             assign hTT = datasetHandle:get-buffer-handle(numBuf):table-handle.
@@ -977,6 +980,13 @@ class com.quarix.data.DataObject
             then return false.
 
         end. /* do numBuf = 1 to datasetHandle:num-buffers */
+
+        if valid-object(ErrorManager) and ErrorManager:GetLogLevel() ge ErrorManager:DebugLevel()
+        then do:
+            if Util:IsEmpty(cDumpName)
+            then Util:LogDataset(dataset-handle datasetHandle by-reference, 'request', yes, yes, yes).
+            else Util:LogDataset(dataset-handle datasetHandle by-reference, cDumpName, yes, yes, yes).
+        end.
 
         return true.
 
@@ -990,6 +1000,12 @@ class com.quarix.data.DataObject
             if valid-handle(hTT) then
                 delete object hTT.
         end finally.
+
+    end method.
+
+    method public logical LoadRequestData ():
+
+        return LoadRequestData(input '').
 
     end method.
 
@@ -1565,6 +1581,114 @@ class com.quarix.data.DataObject
             DataContext:setSkipRow(hTT:name, true).
 
         end. /* do numBuf = 1 to datasetHandle:num-buffers */
+
+        return true.
+
+        catch appError as Progress.Lang.Error :
+            ThrowError(input appError).
+            delete object appError.
+            return false.
+        end catch.
+
+    end method.
+
+    method public logical SetRequestDataAccess():
+        return true.
+    end method.
+
+    method protected logical LoadRequestDataFromXml(input lReloadDataRequest as logical, input cDumpName as character, input-output mpReq as memptr):
+
+        if get-size(mpReq) eq 0
+        then return true.
+
+        if lReloadDataRequest
+        then do:
+            if not DataRequest:Parse(mpReq, cDumpName)
+            then return false.
+        end.
+
+        set-size(mpReq) = 0.
+
+        /* Store the data into dataset from request */
+
+        if not LoadRequestData(input cDumpName)
+        then return false.
+
+        return true.
+
+    end method.
+
+    method protected logical LoadRequestDataFromXml(input lReloadDataRequest as logical, input-output mpReq as memptr):
+
+        return LoadRequestDataFromXml(input lReloadDataRequest, input '', input-output mpReq).
+
+    end method.
+
+    method protected logical LoadRequestDataFromXml(input lReloadDataRequest as logical):
+
+        define variable mpReq as memptr no-undo.
+
+        mpReq = Request:GetBlobVariable({&req-var-xml-data}).
+
+        if not LoadRequestDataFromXml(input lReloadDataRequest, input-output mpReq)
+        then return false.
+
+        /* Store the filters from request into DataCotext */
+
+        if not SetFiltersFromRequest()
+        then return false.
+
+        /* Load some session parameters from DataContext into ContextManager */
+
+        if not SetSessionParameters()
+        then return false.
+
+        /* Store different sort options into DataContext */
+
+        if not SetSortFromRequest()
+        then return false.
+
+        /* Set the batchsize in DataContext */
+
+        if not SetBatchSizeFromRequest()
+        then return false.
+
+        return true.
+
+        catch appError as Progress.Lang.Error :
+
+            set-size(mpReq) = 0.
+
+            ThrowError(input appError).
+            delete object appError.
+            return false.
+        end catch.
+
+    end method.
+
+    method public logical HandleRequestDummyData (input lReloadDataRequest as logical):
+
+        if not InitializeDataObject()
+        then return false.
+
+        DataRequest = cast(GetInstance('com.quarix.data.DataRequest':u), 'com.quarix.data.DataRequest':u).
+
+        if not valid-object(DataRequest) then
+        do:
+            ThrowError(1000, 'msg_err_load_obj':u, ?, ?).
+            return false.
+        end.
+
+        assign
+            DataRequest:ObjectType = 'DataCollection':u
+            Response:ResponseType  = Response:RESPONSE_DIRECT
+            Response:ContentType   = 'application/json':u.
+
+        if not SetRequestDataAccess()
+        then return false.
+
+        if not LoadRequestDataFromXml(input lReloadDataRequest)
+        then return false.
 
         return true.
 

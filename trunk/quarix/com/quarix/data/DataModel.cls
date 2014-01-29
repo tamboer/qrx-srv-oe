@@ -510,93 +510,6 @@ class com.quarix.data.DataModel
 
     end method.
 
-    method public logical HandleRequestDummyData (input lReloadDataRequest as logical):
-
-        define variable mpReq as memptr no-undo.
-
-        if not InitializeDataObject()
-            then return false.
-
-        DataRequest = cast(GetInstance('com.quarix.data.DataRequest':u), 'com.quarix.data.DataRequest':u).
-
-        if not valid-object(DataRequest) then
-        do:
-            ThrowError(1000, 'msg_err_load_obj':u, ?, ?).
-            return false.
-        end.
-
-        if not valid-object(DataAccess)
-            then
-        do:
-            ThrowError(100, 'msg_err_data_source_return':u, ?, ?).
-            return false.
-        end.
-
-        DataAccess:DataRequest = DataRequest.
-
-        DataAccess:DetachDataSource().
-
-        if not DataAccess:AttachDataSource() then
-        do:
-            ThrowError(100, 'msg_err_data_source_return':u, ?, ?).
-            return false.
-        end.
-
-        assign
-            DataRequest:ObjectType = 'DataCollection':u
-            mpReq                  = Request:GetBlobVariable({&req-var-xml-data})
-            Response:ResponseType  = Response:RESPONSE_DIRECT
-            Response:ContentType   = 'application/json':u.
-
-        if get-size(mpReq) gt 0
-            then
-        do:
-            if lReloadDataRequest
-                then
-            do:
-                if not DataRequest:Parse(mpReq)
-                    then return false.
-            end.
-
-            set-size(mpReq) = 0.
-
-            /* Store the data into dataset from request */
-
-            if not LoadRequestData()
-                then return false.
-
-            /* Store the filters from request into DataCotext */
-
-            if not SetFiltersFromRequest()
-                then return false.
-
-            /* Load some session parameters from DataContext into ContextManager */
-
-            if not SetSessionParameters()
-            then return false.
-
-            /* Store different sort options into DataContext */
-
-            if not SetSortFromRequest()
-                then return false.
-
-            /* Set the batchsize in DataContext */
-
-            if not SetBatchSizeFromRequest()
-                then return false.
-
-        end. /* if get-size(mpReq) gt 0 */
-
-        return true.
-
-        catch appError as Progress.Lang.Error :
-            ThrowError(input appError).
-            delete object appError.
-            return false.
-        end catch.
-
-    end method.
-
     method private logical HandleRequestData ():
 
         define variable lRetVal as logical no-undo.
@@ -1506,6 +1419,35 @@ class com.quarix.data.DataModel
         end.
 
         return lLast.
+    end method.
+
+    method public override logical SetRequestDataAccess():
+
+        if not valid-object(DataAccess)
+        then
+        do:
+            ThrowError(100, 'msg_err_data_source_return':u, ?, ?).
+            return false.
+        end.
+
+        DataAccess:DataRequest = DataRequest.
+
+        DataAccess:DetachDataSource().
+
+        if not DataAccess:AttachDataSource() then
+        do:
+            ThrowError(100, 'msg_err_data_source_return':u, ?, ?).
+            return false.
+        end.
+
+        return true.
+
+        catch appError as Progress.Lang.Error :
+            ThrowError(input appError).
+            delete object appError.
+            return false.
+        end catch.
+
     end method.
 
 end class.
