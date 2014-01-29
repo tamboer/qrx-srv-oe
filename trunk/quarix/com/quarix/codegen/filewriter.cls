@@ -319,54 +319,6 @@
 
 	end method.
 
-	method private logical generateFieldListDefinition(input iFieldCount as integer, input cType as character):
-
-		if iFieldCount = 0	or
-			iFieldCount = ?	or
-			cType = ?		or
-			cType = ''
-		then return false.
-
-		if not addEmptyLine()
-		then return false.
-
-		addTab(1).
-		addText(substitute('define public variable FieldInstanceList# as &1 extent &2 no-undo.', cType, string(iFieldCount))).
-
-		if not writeLine()
-		then return false.
-
-		return true.
-
-		catch appError as Progress.Lang.Error :
-			delete object appError.
-			return false.
-		end catch.
-
-	end method.
-
-	method public logical generateFieldListDefinitionTt(input iFieldCount as integer):
-
-		return generateFieldListDefinition(input iFieldCount, input 'com.quarix.data.ttfield').
-
-		catch appError as Progress.Lang.Error :
-			delete object appError.
-			return false.
-		end catch.
-
-	end method.
-
-	method public logical generateFieldListDefinitionDb(input iFieldCount as integer):
-
-		return generateFieldListDefinition(input iFieldCount, input 'com.quarix.data.dbfield').
-
-		catch appError as Progress.Lang.Error :
-			delete object appError.
-			return false.
-		end catch.
-
- 	end method.
-
  	method public logical generateClosingStatement():
 
  		if not addEmptyLine()
@@ -476,6 +428,16 @@
 
 	 	addTab(2).
 	 	addText(substitute('TableObjectName = "&1".', cTableName)).
+
+	 	if not writeLine()
+	 	then return false.
+
+	 	if not addEmptyLine()
+	 	then return false.
+
+	 	addTab(2).
+	 	addText('extent(FieldInstanceList#) = ~{&idxNumFields~}.').
+
 	 	if not writeLine()
 	 	then return false.
 
@@ -644,13 +606,13 @@
 	 	then return false.
 
 	 	addTab(1).
-	 	addText('method public static override integer NumberOfFields():').
+	 	addText('method public static integer NumberOfFields():').
 
 	 	if not writeLine()
 	 	then return false.
 
 	 	addTab(2).
-	 	addText('return extent(Instance:FieldInstanceList#).').
+	 	addText('return Instance:FieldCount().').
 
 	 	if not writeLine()
 	 	then return false.
