@@ -12,7 +12,7 @@ class wicketds.server.tableobjects.TTSalesrep inherits com.quarix.data.tttableob
 
     &scoped-define idxRegion 6
 
-    define public variable FieldInstanceList# as com.quarix.data.ttfield extent 6 no-undo.
+    &scoped-define idxNumFields 6
 
     define private static property Instance as wicketds.server.tableobjects.TTSalesrep no-undo
         private get:
@@ -68,6 +68,8 @@ class wicketds.server.tableobjects.TTSalesrep inherits com.quarix.data.tttableob
 
         TableObjectName = "ttSalesrep".
 
+        extent(FieldInstanceList#) = {&idxNumFields}.
+
         FieldInstanceList#[{&idxrowid}] = com.quarix.data.ttfield:newField(input "rowid", input this-object).
         if not valid-object(FieldInstanceList#[{&idxrowid}]) then return error.
 
@@ -88,8 +90,8 @@ class wicketds.server.tableobjects.TTSalesrep inherits com.quarix.data.tttableob
 
     end constructor.
 
-    method public static override integer NumberOfFields():
-        return extent(Instance:FieldInstanceList#).
+    method public static integer NumberOfFields():
+        return Instance:FieldCount().
     end method.
 
     destructor public TTSalesrep():

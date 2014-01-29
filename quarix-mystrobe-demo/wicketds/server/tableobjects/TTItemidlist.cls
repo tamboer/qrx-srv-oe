@@ -6,7 +6,7 @@ class wicketds.server.tableobjects.TTItemidlist inherits com.quarix.data.tttable
 
     &scoped-define idxItemnum 3
 
-    define public variable FieldInstanceList# as com.quarix.data.ttfield extent 3 no-undo.
+    &scoped-define idxNumFields 3
 
     define private static property Instance as wicketds.server.tableobjects.TTItemidlist no-undo
         private get:
@@ -44,6 +44,8 @@ class wicketds.server.tableobjects.TTItemidlist inherits com.quarix.data.tttable
 
         TableObjectName = "ttitemidlist".
 
+        extent(FieldInstanceList#) = {&idxNumFields}.
+
         FieldInstanceList#[{&idxIdListOrder}] = com.quarix.data.ttfield:newField(input "IdListOrder", input this-object).
         if not valid-object(FieldInstanceList#[{&idxIdListOrder}]) then return error.
 
@@ -55,8 +57,8 @@ class wicketds.server.tableobjects.TTItemidlist inherits com.quarix.data.tttable
 
     end constructor.
 
-    method public static override integer NumberOfFields():
-        return extent(Instance:FieldInstanceList#).
+    method public static integer NumberOfFields():
+        return Instance:FieldCount().
     end method.
 
     destructor public TTItemidlist():
