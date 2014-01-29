@@ -104,15 +104,8 @@ class com.quarix.codegen.objectconstructor final:
 
 		end. /* do iFieldCount = 1 to hBuffer:num-fields */
 
-		if hBuffer:dbname <> 'PROGRESST'
-		then do:
-			if not FileWriter:generateFieldListDefinitionDb(hBuffer:num-fields)
-			then return false.
-		end.
-		else do:
-			if not FileWriter:generateFieldListDefinitionTt(hBuffer:num-fields)
-			then return false.
-		end.
+		if not FileWriter:generateScopedDefine('NumFields', hBuffer:num-fields)
+		then return false.
 
 		return true.
 
