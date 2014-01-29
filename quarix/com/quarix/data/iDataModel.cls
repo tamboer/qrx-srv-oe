@@ -74,8 +74,6 @@
 
       method public logical    HandleRequest          (methodName as character, webRequest as Request, webResponse as Response).
 
-      method public logical    HandleRequestDummyData (lReloadDataRequest as logical).
-
       method public logical    dataFetch  (      output dataset-handle dsHandle).
 
       method public logical    dataUpdate (input-output dataset-handle dsHandle).
