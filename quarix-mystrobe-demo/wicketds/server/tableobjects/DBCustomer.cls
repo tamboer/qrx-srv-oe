@@ -1,4 +1,4 @@
-class wicketds.server.tableobjects.DBCustomer inherits com.quarix.data.tableobject final:
+class wicketds.server.tableobjects.DBCustomer inherits com.quarix.data.dbtableobject final:
 
     &scoped-define idxCustNum 1
     &scoped-define idxCustNumDbPos 2

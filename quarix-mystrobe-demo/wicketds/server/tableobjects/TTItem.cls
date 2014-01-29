@@ -1,4 +1,4 @@
-class wicketds.server.tableobjects.TTItem inherits com.quarix.data.tableobject final:
+class wicketds.server.tableobjects.TTItem inherits com.quarix.data.tttableobject final:
 
     &scoped-define idxrowid 1
 

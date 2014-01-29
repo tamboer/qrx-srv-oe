@@ -1,4 +1,4 @@
-class wicketds.server.tableobjects.TTOrderidlist inherits com.quarix.data.tableobject final:
+class wicketds.server.tableobjects.TTOrderidlist inherits com.quarix.data.tttableobject final:
 
     &scoped-define idxIdListOrder 1
 
