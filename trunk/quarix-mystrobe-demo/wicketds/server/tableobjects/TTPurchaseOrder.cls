@@ -110,6 +110,10 @@ class wicketds.server.tableobjects.TTPurchaseOrder inherits com.quarix.data.ttta
 
     end constructor.
 
+    method public static override integer NumberOfFields():
+        return extent(Instance:FieldInstanceList#).
+    end method.
+
     destructor public TTPurchaseOrder():
         delete object FieldInstanceList#[{&idxrowid}] no-error.
         delete object FieldInstanceList#[{&idxrowstate}] no-error.

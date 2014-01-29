@@ -77,6 +77,10 @@ class wicketds.server.tableobjects.TTDepartment inherits com.quarix.data.tttable
 
     end constructor.
 
+    method public static override integer NumberOfFields():
+        return extent(Instance:FieldInstanceList#).
+    end method.
+
     destructor public TTDepartment():
         delete object FieldInstanceList#[{&idxrowid}] no-error.
         delete object FieldInstanceList#[{&idxrowstate}] no-error.

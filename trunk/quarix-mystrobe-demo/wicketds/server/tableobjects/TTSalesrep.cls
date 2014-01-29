@@ -88,6 +88,10 @@ class wicketds.server.tableobjects.TTSalesrep inherits com.quarix.data.tttableob
 
     end constructor.
 
+    method public static override integer NumberOfFields():
+        return extent(Instance:FieldInstanceList#).
+    end method.
+
     destructor public TTSalesrep():
         delete object FieldInstanceList#[{&idxrowid}] no-error.
         delete object FieldInstanceList#[{&idxrowstate}] no-error.

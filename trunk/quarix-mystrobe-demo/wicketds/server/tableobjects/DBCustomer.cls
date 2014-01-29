@@ -238,6 +238,10 @@ class wicketds.server.tableobjects.DBCustomer inherits com.quarix.data.dbtableob
 
     end constructor.
 
+	method public static override integer NumberOfFields():
+		return extent(Instance:FieldInstanceList#).
+	end method.
+
     destructor public DBCustomer():
         delete object FieldInstanceList#[{&idxCustNum}] no-error.
         delete object FieldInstanceList#[{&idxCountry}] no-error.
