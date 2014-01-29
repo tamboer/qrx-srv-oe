@@ -112,13 +112,13 @@
 
  	end method.
 
- 	method public logical generateHeader(input cClassName as character):
+ 	method private logical generateHeader(input cClassName as character, input cBaseClass as character):
 
  		if cClassName = '' or
  			cClassName = ?
  		then return false.
 
- 		addText(substitute('class &1 inherits com.quarix.data.tableobject final:', cClassName)).
+ 		addText(substitute('class &1 inherits &2 final:', cClassName, cBaseClass)).
 
  		if not writeLine()
  		then return false.
@@ -129,6 +129,18 @@
  			delete object appError.
  			return false.
  		end catch.
+
+ 	end method.
+
+ 	method public logical generateDbHeader(input cClassName as character):
+
+	 	return generateHeader(input cClassName, input 'com.quarix.data.dbtableobject').
+
+ 	end method.
+
+ 	method public logical generatettHeader(input cClassName as character):
+
+ 		return generateHeader(input cClassName, input 'com.quarix.data.tttableobject').
 
  	end method.
 

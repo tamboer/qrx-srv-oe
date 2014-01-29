@@ -261,11 +261,20 @@ class com.quarix.codegen.objectconstructor final:
 
 		FileWriter:DeleteFile().
 
-		if not FileWriter:generateHeader(cClassName)
+		if hBuffer:dbname = 'PROGRESST'
 		then do:
-			FileWriter:DeleteFile().
-			return false.
+			if not FileWriter:generatettHeader(cClassName)
+			then do:
+				FileWriter:DeleteFile().
+				return false.
+			end.
 		end.
+		else
+			if not FileWriter:generatedbHeader(cClassName)
+			then do:
+				FileWriter:DeleteFile().
+				return false.
+			end.
 
 		if not AddScopedDefine(input hBuffer)
 		then do:

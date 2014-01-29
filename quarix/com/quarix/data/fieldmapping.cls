@@ -19,6 +19,7 @@ class com.quarix.data.fieldmapping inherits com.quarix.base.BaseObject implement
 	define temp-table ttFieldMapping no-undo
 		field dbFieldName	as character
 		field ttFieldName	as character
+		field FieldDbPos	as integer
 		index PK_ttFieldMapping is primary is unique dbFieldName ttFieldName.
 
 	constructor	fieldmapping():
@@ -55,9 +56,11 @@ class com.quarix.data.fieldmapping inherits com.quarix.base.BaseObject implement
 				ttFieldMapping.dbFieldName	= cDbFieldName
 				ttFieldMapping.ttFieldName	= cTtFieldName.
 
-			release ttFieldMapping.
-
 		end. /* if not available(ttFieldMapping)*/
+
+		ttFieldMapping.FieldDbPos = dbfield:getFieldDbPos().
+
+		release ttFieldMapping.
 
 		return true.
 
@@ -94,6 +97,8 @@ class com.quarix.data.fieldmapping inherits com.quarix.base.BaseObject implement
 		end catch.
 
 	end method.
+
+	method public character AutoFieldMap()
 
 	destructor public fieldmapping():
 		empty temp-table ttFieldMapping.

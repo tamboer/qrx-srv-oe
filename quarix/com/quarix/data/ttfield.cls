@@ -19,28 +19,28 @@ class com.quarix.data.ttfield final:
 		private get.
 		private set.
 
-	define private property TableObject as com.quarix.data.tableobject no-undo
+	define private property ttTableObject as com.quarix.data.tttableobject no-undo
 		private get.
 		private set.
 
 	constructor	private ttfield():
 	end constructor.
 
-	constructor	private ttfield(input cFieldName as character, input oTableObject as com.quarix.data.tableobject):
+	constructor	private ttfield(input cFieldName as character, input ottTableObject as com.quarix.data.tttableobject):
 
 		if cFieldName = ? or
 			cFieldName = '' or
-			not valid-object(oTableObject)
+			not valid-object(ottTableObject)
 		then return error.
 
 		assign
-			FieldName	= cFieldName
-			TableObject	= oTableObject.
+			FieldName		= cFieldName
+			ttTableObject	= ottTableObject.
 
 	end constructor.
 
-	method public static com.quarix.data.ttfield newField(input cFieldName as character, input oTableObject as com.quarix.data.tableobject):
-		return new com.quarix.data.ttfield(input cFieldName, input oTableObject).
+	method public static com.quarix.data.ttfield newField(input cFieldName as character, input ottTableObject as com.quarix.data.tttableobject):
+		return new com.quarix.data.ttfield(input cFieldName, input ottTableObject).
 	end method.
 
 	method public character getName():
@@ -48,7 +48,7 @@ class com.quarix.data.ttfield final:
 	end method.
 
 	method public character getFqName():
-		return substitute('&1.&2', TableObject:TableObjectName, FieldName).
+		return substitute('&1.&2', ttTableObject:TableObjectName, FieldName).
 	end method.
 
 end class.
