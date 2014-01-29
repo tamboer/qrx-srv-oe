@@ -249,6 +249,38 @@
 
  	end method.
 
+ 	method public logical generateScopedDefine(input PropName as character, input PropIdx as integer, input PropDbPos as integer):
+
+	 	if PropName = ''	or
+	 		PropName = ?	or
+	 		PropIdx = ?		or
+	 		PropIdx = 0
+	 		then return false.
+
+	 	if not addEmptyLine()
+	 	then return false.
+
+	 	addTab(1).
+	 	addText(substitute('&&scoped-define idx&1 &2', PropName, string(PropIdx))).
+
+	 	if not writeLine()
+	 	then return false.
+
+	 	addTab(1).
+	 	addText(substitute('&&scoped-define idx&1DbPos &2', PropName, string(PropDbPos))).
+
+	 	if not writeLine()
+	 	then return false.
+
+	 	return true.
+
+	 	catch appError as Progress.Lang.Error :
+	 		delete object appError.
+	 		return false.
+	 	end catch.
+
+ 	end method.
+
  	method public logical generateScopedDefine(input PropName as character, input PropIdx as integer):
 
  		if PropName = ''	or
@@ -475,8 +507,13 @@
  		if not addEmptyLine()
  		then return false.
 
- 		addTab(2).
- 		addText(substitute('FieldInstanceList#[~{&&idx&1~}] = &2:newField(input "&1", input this-object).', PropName, cType)).
+	 	addTab(2).
+
+ 		if cType = 'com.quarix.data.dbfield'
+ 		then
+		 	addText(substitute('FieldInstanceList#[~{&&idx&1~}] = &2:newField(input "&1", input ~{&&idx&1DbPos~}, input this-object).', PropName, cType)).
+		else
+ 			addText(substitute('FieldInstanceList#[~{&&idx&1~}] = &2:newField(input "&1", input this-object).', PropName, cType)).
 
  		if not writeLine()
  		then return false.

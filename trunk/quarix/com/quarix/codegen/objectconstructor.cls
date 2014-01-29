@@ -63,18 +63,46 @@ class com.quarix.codegen.objectconstructor final:
 
 		define variable iFieldCount	as integer		no-undo.
 		define variable cFieldName	as character	no-undo.
+		define variable iPos		as integer		no-undo.
 
 		if not valid-handle(hBuffer) or
 			hBuffer:type <> 'BUFFER'
 		then return false.
 
+		if hBuffer:dbname <> 'PROGRESST'
+		then do:
+			find first _File
+				where _File._File-Name = hBuffer:name
+				no-lock no-error.
+
+			if not available(_File)
+			then return false.
+		end.
+
 		do iFieldCount = 1 to hBuffer:num-fields:
 
 			cFieldName = hBuffer:buffer-field(iFieldCount):name.
 
-			if not FileWriter:generateScopedDefine(cFieldName, iFieldCount)
-			then return false.
-		end.
+			if hBuffer:dbname <> 'PROGRESST'
+			then do:
+				find first _Field
+					where _Field._File-recid = recid(_File)
+					  and _Field._Field-Name = cFieldName
+					no-lock no-error.
+
+				if not available(_Field)
+				then return false.
+
+				iPos = _Field._Field-Physpos.
+
+				if not FileWriter:generateScopedDefine(cFieldName, iFieldCount, iPos)
+				then return false.
+			end.
+			else
+				if not FileWriter:generateScopedDefine(cFieldName, iFieldCount)
+				then return false.
+
+		end. /* do iFieldCount = 1 to hBuffer:num-fields */
 
 		if hBuffer:dbname <> 'PROGRESST'
 		then do:
