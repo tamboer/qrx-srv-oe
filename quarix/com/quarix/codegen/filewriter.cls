@@ -614,7 +614,7 @@
  		addText(substitute('delete object FieldInstanceList#[~{&&idx&1~}] no-error.', PropName)).
 
  		if not writeLine()
- 			then return false.
+ 		then return false.
 
  		return true.
 
@@ -635,6 +635,38 @@
  			delete object appError.
  			return false.
  		end catch.
+
+ 	end method.
+
+ 	method public logical generateNumberOfFields():
+
+	 	if not addEmptyLine()
+	 	then return false.
+
+	 	addTab(1).
+	 	addText('method public static override integer NumberOfFields():').
+
+	 	if not writeLine()
+	 	then return false.
+
+	 	addTab(2).
+	 	addText('return extent(Instance:FieldInstanceList#).').
+
+	 	if not writeLine()
+	 	then return false.
+
+	 	addTab(1).
+	 	addText('end method.').
+
+	 	if not writeLine()
+	 	then return false.
+
+	 	return true.
+
+	 	catch appError as Progress.Lang.Error :
+	 		delete object appError.
+	 		return false.
+	 	end catch.
 
  	end method.
 

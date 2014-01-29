@@ -318,6 +318,12 @@ class com.quarix.codegen.objectconstructor final:
 			return false.
 		end.
 
+		if not FileWriter:generateNumberOfFields()
+		then do:
+			FileWriter:DeleteFile().
+			return false.
+		end.
+
 		if not FileWriter:generateDestructorHeader(cFileName)
 		then do:
 			FileWriter:DeleteFile().

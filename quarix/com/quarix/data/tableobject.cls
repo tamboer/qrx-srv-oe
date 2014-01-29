@@ -19,4 +19,7 @@ class com.quarix.data.tableobject:
 		get.
 		protected set.
 
+	method public static integer NumberOfFields():
+	end method.
+
 end class.

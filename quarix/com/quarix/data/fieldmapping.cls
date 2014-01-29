@@ -98,7 +98,15 @@ class com.quarix.data.fieldmapping inherits com.quarix.base.BaseObject implement
 
 	end method.
 
-	method public character AutoFieldMap()
+	method public character AutoFieldMap(input oDbTableObject as com.quarix.data.dbtableobject, input oTtTableObject as com.quarix.data.tttableobject):
+
+		ClearFieldMap().
+
+		if not valid-object(oDbTableObject) or
+			not valid-object(oTtTableObject)
+		then return ?.
+
+	end method.
 
 	destructor public fieldmapping():
 		empty temp-table ttFieldMapping.
