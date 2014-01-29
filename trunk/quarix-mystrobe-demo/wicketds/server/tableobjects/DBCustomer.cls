@@ -54,7 +54,7 @@ class wicketds.server.tableobjects.DBCustomer inherits com.quarix.data.dbtableob
     &scoped-define idxEmailAddress 18
     &scoped-define idxEmailAddressDbPos 19
 
-    define public variable FieldInstanceList# as com.quarix.data.dbfield extent 18 no-undo.
+    &scoped-define idxNumFields 18
 
     define private static property Instance as wicketds.server.tableobjects.DBCustomer no-undo
         private get:
@@ -182,6 +182,8 @@ class wicketds.server.tableobjects.DBCustomer inherits com.quarix.data.dbtableob
 
         TableObjectName = "Customer".
 
+        extent(FieldInstanceList#) = {&idxNumFields}.
+
         FieldInstanceList#[{&idxCustNum}] = com.quarix.data.dbfield:newField(input "CustNum", input {&idxCustNumDbPos}, input this-object).
         if not valid-object(FieldInstanceList#[{&idxCustNum}]) then return error.
 
@@ -238,9 +240,9 @@ class wicketds.server.tableobjects.DBCustomer inherits com.quarix.data.dbtableob
 
     end constructor.
 
-	method public static override integer NumberOfFields():
-		return extent(Instance:FieldInstanceList#).
-	end method.
+    method public static integer NumberOfFields():
+        return Instance:FieldCount().
+    end method.
 
     destructor public DBCustomer():
         delete object FieldInstanceList#[{&idxCustNum}] no-error.
