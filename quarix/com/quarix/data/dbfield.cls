@@ -19,6 +19,10 @@ class com.quarix.data.dbfield final:
 		private get.
 		private set.
 
+	define private property FieldDbPos as integer no-undo
+		private get.
+		private set.
+
 	define private property TableObject as com.quarix.data.tableobject no-undo
 		private get.
 		private set.
@@ -26,25 +30,32 @@ class com.quarix.data.dbfield final:
 	constructor	private dbfield():
 	end constructor.
 
-	constructor	private dbfield(input cFieldName as character, input oTableObject as com.quarix.data.tableobject):
+	constructor	private dbfield(input cFieldName as character, input iFieldDbPos as integer, input oTableObject as com.quarix.data.tableobject):
 
-		if cFieldName = ? or
-			cFieldName = '' or
+		if cFieldName = ?	or
+			cFieldName = ''	or
+			iFieldDbPos = ?	or
+			iFieldDbPos = 0	or
 			not valid-object(oTableObject)
 		then return error.
 
 		assign
 			FieldName   = cFieldName
-			TableObject	= oTableObject.
+			TableObject	= oTableObject
+			FieldDbPos	= iFieldDbPos.
 
 	end constructor.
 
-	method public static com.quarix.data.dbfield newField(input cFieldName as character, input oTableObject as com.quarix.data.tableobject):
-		return new com.quarix.data.dbfield(input cFieldName, input oTableObject).
+	method public static com.quarix.data.dbfield newField(input cFieldName as character, input iFieldDbPos as integer, input oTableObject as com.quarix.data.tableobject):
+		return new com.quarix.data.dbfield(input cFieldName, input iFieldDbPos, input oTableObject).
 	end method.
 
 	method public character getName():
 		return FieldName.
+	end method.
+
+	method public integer getFieldDbPos():
+		return FieldDbPos.
 	end method.
 
 	method public character getFqName():
