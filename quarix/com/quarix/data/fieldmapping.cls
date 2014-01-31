@@ -126,13 +126,13 @@ class com.quarix.data.fieldmapping inherits com.quarix.base.BaseObject implement
 
 		do iTtNumField = 1 to iTtFieldCount:
 
-			oTtField = oTtTableObject:FieldInstanceList#[iTtNumField].
+			oTtField = cast(oTtTableObject:FieldInstanceList#[iTtNumField], com.quarix.data.ttfield).
 
 			cTtFieldName= oTtField:getName().
 
 			do iDbNumField = 1 to iDbFieldCount:
 
-				oDbField = oDbTableObject:FieldInstanceList#[iDbNumField].
+				oDbField = cast(oDbTableObject:FieldInstanceList#[iDbNumField], com.quarix.data.dbfield).
 
 				cDbFieldName = oDbField:getName().
 
