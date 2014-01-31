@@ -19,4 +19,23 @@ class com.quarix.data.tableobject:
 		get.
 		protected set.
 
+	define public variable FieldInstanceList# as com.quarix.data.tablefield extent no-undo.
+
+	method public integer FieldCount():
+		return extent(FieldInstanceList#).
+	end method.
+
+	destructor public tableobject():
+
+		define variable iNumFld		as integer	no-undo.
+		define variable iFldCount	as integer	no-undo.
+
+		iFldCount = extent(FieldInstanceList#) no-error.
+
+		do iNumFld = 1 to extent(FieldInstanceList#):
+			delete object FieldInstanceList#[iNumFld] no-error.
+		end.
+
+	end destructor.
+
 end class.

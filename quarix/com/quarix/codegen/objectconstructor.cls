@@ -182,32 +182,6 @@ class com.quarix.codegen.objectconstructor final:
 
 	end method.
 
-	method private logical deleteFields(input hBuffer as handle):
-
-		define variable iFieldCount	as integer		no-undo.
-		define variable cFieldName	as character	no-undo.
-
-		if not valid-handle(hBuffer) or
-			hBuffer:type <> 'BUFFER'
-		then return false.
-
-		do iFieldCount = 1 to hBuffer:num-fields:
-
-			cFieldName = hBuffer:buffer-field(iFieldCount):name.
-
-			if not FileWriter:generateDeleteProperty(cFieldName)
-			then return false.
-		end.
-
-		return true.
-
-		catch appError as Progress.Lang.Error :
-			delete object appError.
-			return false.
-		end catch.
-
-	end method.
-
 	method private logical createClassFile(input hBuffer as handle):
 
 	    define variable cClassName			as character	no-undo.
@@ -312,24 +286,6 @@ class com.quarix.codegen.objectconstructor final:
 		end.
 
 		if not FileWriter:generateNumberOfFields()
-		then do:
-			FileWriter:DeleteFile().
-			return false.
-		end.
-
-		if not FileWriter:generateDestructorHeader(cFileName)
-		then do:
-			FileWriter:DeleteFile().
-			return false.
-		end.
-
-		if not deleteFields(input hBuffer)
-		then do:
-			FileWriter:DeleteFile().
-			return false.
-		end.
-
-		if not FileWriter:generateDestructorClosingStatement()
 		then do:
 			FileWriter:DeleteFile().
 			return false.

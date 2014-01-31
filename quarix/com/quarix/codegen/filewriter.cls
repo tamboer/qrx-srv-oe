@@ -156,7 +156,7 @@
  		then return false.
 
  		addTab(1).
- 		addText('define private static property ').
+ 		addText('define public static property ').
  		addText(PropName).
  		addText(substitute(' as &1 ', cType)).
  		addText('no-undo').
@@ -165,7 +165,7 @@
  		then return false.
 
  		addTab(2).
- 		addText('private get:').
+ 		addText('public get:').
 
  		if not writeLine()
  		then return false.
@@ -362,7 +362,7 @@
  		then return false.
 
  		addTab(3).
- 		addText(substitute('return Instance:FieldInstanceList#[~{&&idx&1~}].', PropName)).
+ 		addText(substitute('return cast(Instance:FieldInstanceList#[~{&&idx&1~}], &2).', PropName, cType)).
 
  		if not writeLine()
  		then return false.
@@ -521,64 +521,6 @@
  	method public logical generateTtFieldInstance(input PropName as character):
 
  		return generateFieldInstance(input PropName, input 'com.quarix.data.ttfield').
-
- 		catch appError as Progress.Lang.Error :
- 			delete object appError.
- 			return false.
- 		end catch.
-
- 	end method.
-
- 	method public logical generateDestructorHeader(input cClassName as character):
-
- 		if cClassName = '' or
- 			cClassName = ?
- 		then return false.
-
- 		if not addEmptyLine()
- 		then return false.
-
- 		addTab(1).
- 		addText(substitute('destructor public &1():', cClassName)).
-
- 		if not writeLine()
- 		then return false.
-
- 		return true.
-
- 		catch appError as Progress.Lang.Error :
- 			delete object appError.
- 			return false.
- 		end catch.
-
- 	end method.
-
- 	method public logical generateDestructorClosingStatement():
-
- 		addTab(1).
- 		addText('end destructor.').
-
- 		if not writeLine()
- 		then return false.
-
- 		return true.
-
- 		catch appError as Progress.Lang.Error :
- 			delete object appError.
- 			return false.
- 		end catch.
-
- 	end method.
-
- 	method public logical generateDeleteProperty(input PropName as character):
-
- 		addTab(2).
- 		addText(substitute('delete object FieldInstanceList#[~{&&idx&1~}] no-error.', PropName)).
-
- 		if not writeLine()
- 		then return false.
-
- 		return true.
 
  		catch appError as Progress.Lang.Error :
  			delete object appError.

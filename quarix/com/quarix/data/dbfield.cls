@@ -13,17 +13,9 @@ routine-level on error undo, throw.
 
 using Progress.Lang.*.
 
-class com.quarix.data.dbfield final:
-
-	define private property FieldName as character no-undo
-		private get.
-		private set.
+class com.quarix.data.dbfield inherits com.quarix.data.tablefield final:
 
 	define private property FieldDbPos as integer no-undo
-		private get.
-		private set.
-
-	define private property dbTableObject as com.quarix.data.dbtableobject no-undo
 		private get.
 		private set.
 
@@ -41,7 +33,7 @@ class com.quarix.data.dbfield final:
 
 		assign
 			FieldName   	= cFieldName
-			dbTableObject	= odbTableObject
+			oTableObject	= odbTableObject
 			FieldDbPos		= iFieldDbPos.
 
 	end constructor.
@@ -50,16 +42,8 @@ class com.quarix.data.dbfield final:
 		return new com.quarix.data.dbfield(input cFieldName, input iFieldDbPos, input odbTableObject).
 	end method.
 
-	method public character getName():
-		return FieldName.
-	end method.
-
 	method public integer getFieldDbPos():
 		return FieldDbPos.
-	end method.
-
-	method public character getFqName():
-		return substitute('&1.&2', dbTableObject:TableObjectName, FieldName).
 	end method.
 
 end class.
