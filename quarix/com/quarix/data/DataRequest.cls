@@ -103,8 +103,6 @@ class com.quarix.data.DataRequest
 
       dataset {&datasetName}:read-xml('memptr':u, mpRequest, 'empty':u, xsdFile, false, ?, 'ignore':u).
 
-      Util:LogDataset(dataset {&datasetName} by-reference, '00000000', yes, yes, yes).
-
       if valid-object(ErrorManager) and ErrorManager:GetLogLevel() ge ErrorManager:DebugLevel()
       then do:
          if not Util:IsEmpty(cDumpName)

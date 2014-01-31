@@ -1544,6 +1544,38 @@ class com.quarix.data.DataAccess
 
     end method.
 
+    method public void DisplaySessionParameters():
+
+        define variable cFilterSessionID            as character    no-undo.
+        define variable cFilterLanguageID           as character    no-undo.
+        define variable cFilterDefaultLanguageID    as character    no-undo.
+        define variable cFilterUsrID                as character    no-undo.
+        define variable cCompany                    as character    no-undo.
+        define variable cCustomerID                 as character    no-undo.
+        define variable cEntityType                 as character    no-undo.
+
+        ContextManager:GetValue(input 'SessionID':u, output cFilterSessionID).
+        ContextManager:GetValue(input 'LanguageID':u, output cFilterLanguageID).
+        ContextManager:GetValue(input 'DefaultLanguageID':u, output cFilterDefaultLanguageID).
+        ContextManager:GetValue(input 'UsrID':u, output cFilterUsrID).
+        ContextManager:GetValue(input 'Company':u, output cCompany).
+        ContextManager:GetValue(input 'CustomerID':u, output cCustomerID).
+        ContextManager:GetValue(input 'EntityType':u, output cEntityType).
+
+        message
+            '------------------------------------------------------------------------------------------------------------------------------':U skip
+            'cFilterSessionID' cFilterSessionID skip
+            'cFilterLanguageID' cFilterLanguageID skip
+            'cFilterDefaultLanguageID' cFilterDefaultLanguageID skip
+            'cFilterUsrID' cFilterUsrID skip
+            'cCompany' cCompany skip
+            'cCustomerID' cCustomerID skip
+            'cEntityType' cEntityType skip
+            '------------------------------------------------------------------------------------------------------------------------------':U skip
+        view-as alert-box.
+
+    end method.
+
     method private logical saveTable (input hBuf as handle):
 
         define variable iRel     as integer   no-undo.
@@ -1634,8 +1666,21 @@ class com.quarix.data.DataAccess
                     /* record not found in database */
                     if not hSrcBuf:available then
                     do:
-                        if hSrcBuf:locked then
+                        if hSrcBuf:locked
+                        then do:
                             ThrowClientError(101, 'msg_err_data_locked':u, hBuf:name, ?).
+
+                            if valid-object(ErrorManager) and
+                                ErrorManager:GetLogLevel() ge ErrorManager:DebugLevel()
+                            then do:
+                                message substitute('Record in buffer &1 is locked: &2', quoter(hSrcBuf:name), quoter(hBuf:data-source:save-where-string(1)))
+                                view-as alert-box.
+
+                                DisplaySessionParameters().
+
+                                Util:DisplayStackTrace().
+                            end.
+                        end.
                         else
                             ThrowClientError(102, 'msg_err_data_not_found':u, hBuf:name, ?).
 

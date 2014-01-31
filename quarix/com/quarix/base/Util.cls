@@ -37,6 +37,11 @@ class com.quarix.base.Util  implements com.quarix.base.iSingleton use-widget-poo
 
 	{com/quarix/data/dsindexinformation.i}
 
+	define temp-table ttCallStack no-undo
+	   field order as integer
+	   field programName as character
+	   index PK_ttCallStack is primary unique order.
+
   &if keyword-all('static':u) ne ? &then
    define private static variable util as Util no-undo.
 
@@ -1267,6 +1272,41 @@ class com.quarix.base.Util  implements com.quarix.base.iSingleton use-widget-poo
             delete object hTtTemp	no-error.
             delete object hSrcBuf	no-error.
         end finally.
+
+    end method.
+
+    method public void DisplayStackTrace():
+
+        define variable iLevel      as integer      no-undo.
+        define variable cCallStack  as character    no-undo.
+
+        empty temp-table ttCallStack.
+
+        iLevel = 1.
+
+        do while program-name(iLevel) <> ?:
+
+            create ttCallStack.
+
+            assign
+                ttCallStack.order       = iLevel
+                ttCallStack.programName = program-name(iLevel).
+
+            iLevel = iLevel + 1.
+
+        end. /* do while program-name(iLevel) <> ? */
+
+        for each ttCallStack no-lock
+            by ttCallStack.order descending:
+            if isEmpty(cCallStack)
+            then cCallStack = ttCallStack.programName.
+            else cCallStack = cCallStack + chr(10) + ttCallStack.programName.
+        end.
+
+        message '------------------------------------------------------------------------------------------------------------------------------':U skip
+        cCallStack skip
+        '------------------------------------------------------------------------------------------------------------------------------':U skip
+        view-as alert-box.
 
     end method.
 
