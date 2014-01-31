@@ -701,6 +701,8 @@ class com.quarix.data.DataRequest
         define variable iMillisecond        as integer      no-undo.
         define variable iTimeZoneInfo       as integer      no-undo.
 
+    	cOldSesNumFormat = session:numeric-format.
+
         if fldVal = ?
         then return true.
 
@@ -737,8 +739,6 @@ class com.quarix.data.DataRequest
             iMonth  = integer(entry(2, cDate, '-'))
             iDay    = integer(entry(3, cDate, '-')).
 
-        cOldSesNumFormat = session:numeric-format.
-
         session:numeric-format = 'American'.
 
         assign
@@ -769,6 +769,9 @@ class com.quarix.data.DataRequest
             delete object appError.
             return false.
         end catch.
+        finally:
+        	session:numeric-format = cOldSesNumFormat.
+        end finally.
 
    end method.
 
