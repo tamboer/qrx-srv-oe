@@ -22,8 +22,8 @@ class wicketds.server.tableobjects.TTItem inherits com.quarix.data.tttableobject
 
     &scoped-define idxNumFields 10
 
-    define private static property Instance as wicketds.server.tableobjects.TTItem no-undo
-        private get:
+    define public static property Instance as wicketds.server.tableobjects.TTItem no-undo
+        public get:
             if not valid-object(Instance) then Instance = new wicketds.server.tableobjects.TTItem().
 
             return Instance.
@@ -38,61 +38,61 @@ class wicketds.server.tableobjects.TTItem inherits com.quarix.data.tttableobject
 
     define public static property rowid as com.quarix.data.ttfield no-undo
         get:
-            return Instance:FieldInstanceList#[{&idxrowid}].
+            return cast(Instance:FieldInstanceList#[{&idxrowid}], com.quarix.data.ttfield).
         end.
         private set.
 
     define public static property rowstate as com.quarix.data.ttfield no-undo
         get:
-            return Instance:FieldInstanceList#[{&idxrowstate}].
+            return cast(Instance:FieldInstanceList#[{&idxrowstate}], com.quarix.data.ttfield).
         end.
         private set.
 
     define public static property SortOrder as com.quarix.data.ttfield no-undo
         get:
-            return Instance:FieldInstanceList#[{&idxSortOrder}].
+            return cast(Instance:FieldInstanceList#[{&idxSortOrder}], com.quarix.data.ttfield).
         end.
         private set.
 
     define public static property CatDescription as com.quarix.data.ttfield no-undo
         get:
-            return Instance:FieldInstanceList#[{&idxCatDescription}].
+            return cast(Instance:FieldInstanceList#[{&idxCatDescription}], com.quarix.data.ttfield).
         end.
         private set.
 
     define public static property ItemName as com.quarix.data.ttfield no-undo
         get:
-            return Instance:FieldInstanceList#[{&idxItemName}].
+            return cast(Instance:FieldInstanceList#[{&idxItemName}], com.quarix.data.ttfield).
         end.
         private set.
 
     define public static property Itemnum as com.quarix.data.ttfield no-undo
         get:
-            return Instance:FieldInstanceList#[{&idxItemnum}].
+            return cast(Instance:FieldInstanceList#[{&idxItemnum}], com.quarix.data.ttfield).
         end.
         private set.
 
     define public static property Price as com.quarix.data.ttfield no-undo
         get:
-            return Instance:FieldInstanceList#[{&idxPrice}].
+            return cast(Instance:FieldInstanceList#[{&idxPrice}], com.quarix.data.ttfield).
         end.
         private set.
 
     define public static property Weight as com.quarix.data.ttfield no-undo
         get:
-            return Instance:FieldInstanceList#[{&idxWeight}].
+            return cast(Instance:FieldInstanceList#[{&idxWeight}], com.quarix.data.ttfield).
         end.
         private set.
 
     define public static property Category1 as com.quarix.data.ttfield no-undo
         get:
-            return Instance:FieldInstanceList#[{&idxCategory1}].
+            return cast(Instance:FieldInstanceList#[{&idxCategory1}], com.quarix.data.ttfield).
         end.
         private set.
 
     define public static property Category2 as com.quarix.data.ttfield no-undo
         get:
-            return Instance:FieldInstanceList#[{&idxCategory2}].
+            return cast(Instance:FieldInstanceList#[{&idxCategory2}], com.quarix.data.ttfield).
         end.
         private set.
 
@@ -137,18 +137,5 @@ class wicketds.server.tableobjects.TTItem inherits com.quarix.data.tttableobject
     method public static integer NumberOfFields():
         return Instance:FieldCount().
     end method.
-
-    destructor public TTItem():
-        delete object FieldInstanceList#[{&idxrowid}] no-error.
-        delete object FieldInstanceList#[{&idxrowstate}] no-error.
-        delete object FieldInstanceList#[{&idxSortOrder}] no-error.
-        delete object FieldInstanceList#[{&idxCatDescription}] no-error.
-        delete object FieldInstanceList#[{&idxItemName}] no-error.
-        delete object FieldInstanceList#[{&idxItemnum}] no-error.
-        delete object FieldInstanceList#[{&idxPrice}] no-error.
-        delete object FieldInstanceList#[{&idxWeight}] no-error.
-        delete object FieldInstanceList#[{&idxCategory1}] no-error.
-        delete object FieldInstanceList#[{&idxCategory2}] no-error.
-    end destructor.
 
 end class.

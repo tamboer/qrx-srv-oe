@@ -8,8 +8,8 @@ class wicketds.server.tableobjects.TTSalesrepidlist inherits com.quarix.data.ttt
 
     &scoped-define idxNumFields 3
 
-    define private static property Instance as wicketds.server.tableobjects.TTSalesrepidlist no-undo
-        private get:
+    define public static property Instance as wicketds.server.tableobjects.TTSalesrepidlist no-undo
+        public get:
             if not valid-object(Instance) then Instance = new wicketds.server.tableobjects.TTSalesrepidlist().
 
             return Instance.
@@ -24,19 +24,19 @@ class wicketds.server.tableobjects.TTSalesrepidlist inherits com.quarix.data.ttt
 
     define public static property IdListOrder as com.quarix.data.ttfield no-undo
         get:
-            return Instance:FieldInstanceList#[{&idxIdListOrder}].
+            return cast(Instance:FieldInstanceList#[{&idxIdListOrder}], com.quarix.data.ttfield).
         end.
         private set.
 
     define public static property HashCode as com.quarix.data.ttfield no-undo
         get:
-            return Instance:FieldInstanceList#[{&idxHashCode}].
+            return cast(Instance:FieldInstanceList#[{&idxHashCode}], com.quarix.data.ttfield).
         end.
         private set.
 
     define public static property SalesRep as com.quarix.data.ttfield no-undo
         get:
-            return Instance:FieldInstanceList#[{&idxSalesRep}].
+            return cast(Instance:FieldInstanceList#[{&idxSalesRep}], com.quarix.data.ttfield).
         end.
         private set.
 
@@ -60,11 +60,5 @@ class wicketds.server.tableobjects.TTSalesrepidlist inherits com.quarix.data.ttt
     method public static integer NumberOfFields():
         return Instance:FieldCount().
     end method.
-
-    destructor public TTSalesrepidlist():
-        delete object FieldInstanceList#[{&idxIdListOrder}] no-error.
-        delete object FieldInstanceList#[{&idxHashCode}] no-error.
-        delete object FieldInstanceList#[{&idxSalesRep}] no-error.
-    end destructor.
 
 end class.

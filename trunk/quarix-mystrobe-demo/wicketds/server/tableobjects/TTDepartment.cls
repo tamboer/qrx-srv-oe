@@ -12,8 +12,8 @@ class wicketds.server.tableobjects.TTDepartment inherits com.quarix.data.tttable
 
     &scoped-define idxNumFields 5
 
-    define private static property Instance as wicketds.server.tableobjects.TTDepartment no-undo
-        private get:
+    define public static property Instance as wicketds.server.tableobjects.TTDepartment no-undo
+        public get:
             if not valid-object(Instance) then Instance = new wicketds.server.tableobjects.TTDepartment().
 
             return Instance.
@@ -28,31 +28,31 @@ class wicketds.server.tableobjects.TTDepartment inherits com.quarix.data.tttable
 
     define public static property rowid as com.quarix.data.ttfield no-undo
         get:
-            return Instance:FieldInstanceList#[{&idxrowid}].
+            return cast(Instance:FieldInstanceList#[{&idxrowid}], com.quarix.data.ttfield).
         end.
         private set.
 
     define public static property rowstate as com.quarix.data.ttfield no-undo
         get:
-            return Instance:FieldInstanceList#[{&idxrowstate}].
+            return cast(Instance:FieldInstanceList#[{&idxrowstate}], com.quarix.data.ttfield).
         end.
         private set.
 
     define public static property SortOrder as com.quarix.data.ttfield no-undo
         get:
-            return Instance:FieldInstanceList#[{&idxSortOrder}].
+            return cast(Instance:FieldInstanceList#[{&idxSortOrder}], com.quarix.data.ttfield).
         end.
         private set.
 
     define public static property DeptCode as com.quarix.data.ttfield no-undo
         get:
-            return Instance:FieldInstanceList#[{&idxDeptCode}].
+            return cast(Instance:FieldInstanceList#[{&idxDeptCode}], com.quarix.data.ttfield).
         end.
         private set.
 
     define public static property DeptName as com.quarix.data.ttfield no-undo
         get:
-            return Instance:FieldInstanceList#[{&idxDeptName}].
+            return cast(Instance:FieldInstanceList#[{&idxDeptName}], com.quarix.data.ttfield).
         end.
         private set.
 
@@ -82,13 +82,5 @@ class wicketds.server.tableobjects.TTDepartment inherits com.quarix.data.tttable
     method public static integer NumberOfFields():
         return Instance:FieldCount().
     end method.
-
-    destructor public TTDepartment():
-        delete object FieldInstanceList#[{&idxrowid}] no-error.
-        delete object FieldInstanceList#[{&idxrowstate}] no-error.
-        delete object FieldInstanceList#[{&idxSortOrder}] no-error.
-        delete object FieldInstanceList#[{&idxDeptCode}] no-error.
-        delete object FieldInstanceList#[{&idxDeptName}] no-error.
-    end destructor.
 
 end class.

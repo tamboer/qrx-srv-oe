@@ -14,8 +14,8 @@ class wicketds.server.tableobjects.TTSalesrep inherits com.quarix.data.tttableob
 
     &scoped-define idxNumFields 6
 
-    define private static property Instance as wicketds.server.tableobjects.TTSalesrep no-undo
-        private get:
+    define public static property Instance as wicketds.server.tableobjects.TTSalesrep no-undo
+        public get:
             if not valid-object(Instance) then Instance = new wicketds.server.tableobjects.TTSalesrep().
 
             return Instance.
@@ -30,37 +30,37 @@ class wicketds.server.tableobjects.TTSalesrep inherits com.quarix.data.tttableob
 
     define public static property rowid as com.quarix.data.ttfield no-undo
         get:
-            return Instance:FieldInstanceList#[{&idxrowid}].
+            return cast(Instance:FieldInstanceList#[{&idxrowid}], com.quarix.data.ttfield).
         end.
         private set.
 
     define public static property rowstate as com.quarix.data.ttfield no-undo
         get:
-            return Instance:FieldInstanceList#[{&idxrowstate}].
+            return cast(Instance:FieldInstanceList#[{&idxrowstate}], com.quarix.data.ttfield).
         end.
         private set.
 
     define public static property SortOrder as com.quarix.data.ttfield no-undo
         get:
-            return Instance:FieldInstanceList#[{&idxSortOrder}].
+            return cast(Instance:FieldInstanceList#[{&idxSortOrder}], com.quarix.data.ttfield).
         end.
         private set.
 
     define public static property SalesRep as com.quarix.data.ttfield no-undo
         get:
-            return Instance:FieldInstanceList#[{&idxSalesRep}].
+            return cast(Instance:FieldInstanceList#[{&idxSalesRep}], com.quarix.data.ttfield).
         end.
         private set.
 
     define public static property RepName as com.quarix.data.ttfield no-undo
         get:
-            return Instance:FieldInstanceList#[{&idxRepName}].
+            return cast(Instance:FieldInstanceList#[{&idxRepName}], com.quarix.data.ttfield).
         end.
         private set.
 
     define public static property Region as com.quarix.data.ttfield no-undo
         get:
-            return Instance:FieldInstanceList#[{&idxRegion}].
+            return cast(Instance:FieldInstanceList#[{&idxRegion}], com.quarix.data.ttfield).
         end.
         private set.
 
@@ -93,14 +93,5 @@ class wicketds.server.tableobjects.TTSalesrep inherits com.quarix.data.tttableob
     method public static integer NumberOfFields():
         return Instance:FieldCount().
     end method.
-
-    destructor public TTSalesrep():
-        delete object FieldInstanceList#[{&idxrowid}] no-error.
-        delete object FieldInstanceList#[{&idxrowstate}] no-error.
-        delete object FieldInstanceList#[{&idxSortOrder}] no-error.
-        delete object FieldInstanceList#[{&idxSalesRep}] no-error.
-        delete object FieldInstanceList#[{&idxRepName}] no-error.
-        delete object FieldInstanceList#[{&idxRegion}] no-error.
-    end destructor.
 
 end class.
