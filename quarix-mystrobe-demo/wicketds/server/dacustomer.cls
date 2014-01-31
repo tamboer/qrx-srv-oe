@@ -18,6 +18,8 @@ class wicketds.server.dacustomer inherits DataAccess:
 
 		define variable cFieldMapping as character no-undo.
 
+		cFieldMapping = AutoFieldMap(DBCustomer:Instance, TTCustomer:Instance).
+/*
 		ClearFieldMap().
 
 		AddFieldMap(DBCustomer:Address, TTCustomer:Address).
@@ -40,7 +42,7 @@ class wicketds.server.dacustomer inherits DataAccess:
 		AddFieldMap(DBCustomer:Terms, TTCustomer:Terms).
 
 		cFieldMapping = GetFieldMapping().
-
+*/
 		return cFieldMapping.
 
 	end method.
