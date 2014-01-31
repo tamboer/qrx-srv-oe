@@ -26,8 +26,8 @@ class wicketds.server.tableobjects.TTOrderline inherits com.quarix.data.tttableo
 
     &scoped-define idxNumFields 12
 
-    define private static property Instance as wicketds.server.tableobjects.TTOrderline no-undo
-        private get:
+    define public static property Instance as wicketds.server.tableobjects.TTOrderline no-undo
+        public get:
             if not valid-object(Instance) then Instance = new wicketds.server.tableobjects.TTOrderline().
 
             return Instance.
@@ -42,73 +42,73 @@ class wicketds.server.tableobjects.TTOrderline inherits com.quarix.data.tttableo
 
     define public static property rowid as com.quarix.data.ttfield no-undo
         get:
-            return Instance:FieldInstanceList#[{&idxrowid}].
+            return cast(Instance:FieldInstanceList#[{&idxrowid}], com.quarix.data.ttfield).
         end.
         private set.
 
     define public static property rowstate as com.quarix.data.ttfield no-undo
         get:
-            return Instance:FieldInstanceList#[{&idxrowstate}].
+            return cast(Instance:FieldInstanceList#[{&idxrowstate}], com.quarix.data.ttfield).
         end.
         private set.
 
     define public static property SortOrder as com.quarix.data.ttfield no-undo
         get:
-            return Instance:FieldInstanceList#[{&idxSortOrder}].
+            return cast(Instance:FieldInstanceList#[{&idxSortOrder}], com.quarix.data.ttfield).
         end.
         private set.
 
     define public static property Discount as com.quarix.data.ttfield no-undo
         get:
-            return Instance:FieldInstanceList#[{&idxDiscount}].
+            return cast(Instance:FieldInstanceList#[{&idxDiscount}], com.quarix.data.ttfield).
         end.
         private set.
 
     define public static property ExtendedPrice as com.quarix.data.ttfield no-undo
         get:
-            return Instance:FieldInstanceList#[{&idxExtendedPrice}].
+            return cast(Instance:FieldInstanceList#[{&idxExtendedPrice}], com.quarix.data.ttfield).
         end.
         private set.
 
     define public static property Itemnum as com.quarix.data.ttfield no-undo
         get:
-            return Instance:FieldInstanceList#[{&idxItemnum}].
+            return cast(Instance:FieldInstanceList#[{&idxItemnum}], com.quarix.data.ttfield).
         end.
         private set.
 
     define public static property Linenum as com.quarix.data.ttfield no-undo
         get:
-            return Instance:FieldInstanceList#[{&idxLinenum}].
+            return cast(Instance:FieldInstanceList#[{&idxLinenum}], com.quarix.data.ttfield).
         end.
         private set.
 
     define public static property OrderLineStatus as com.quarix.data.ttfield no-undo
         get:
-            return Instance:FieldInstanceList#[{&idxOrderLineStatus}].
+            return cast(Instance:FieldInstanceList#[{&idxOrderLineStatus}], com.quarix.data.ttfield).
         end.
         private set.
 
     define public static property Ordernum as com.quarix.data.ttfield no-undo
         get:
-            return Instance:FieldInstanceList#[{&idxOrdernum}].
+            return cast(Instance:FieldInstanceList#[{&idxOrdernum}], com.quarix.data.ttfield).
         end.
         private set.
 
     define public static property Price as com.quarix.data.ttfield no-undo
         get:
-            return Instance:FieldInstanceList#[{&idxPrice}].
+            return cast(Instance:FieldInstanceList#[{&idxPrice}], com.quarix.data.ttfield).
         end.
         private set.
 
     define public static property Qty as com.quarix.data.ttfield no-undo
         get:
-            return Instance:FieldInstanceList#[{&idxQty}].
+            return cast(Instance:FieldInstanceList#[{&idxQty}], com.quarix.data.ttfield).
         end.
         private set.
 
     define public static property ItemName as com.quarix.data.ttfield no-undo
         get:
-            return Instance:FieldInstanceList#[{&idxItemName}].
+            return cast(Instance:FieldInstanceList#[{&idxItemName}], com.quarix.data.ttfield).
         end.
         private set.
 
@@ -159,20 +159,5 @@ class wicketds.server.tableobjects.TTOrderline inherits com.quarix.data.tttableo
     method public static integer NumberOfFields():
         return Instance:FieldCount().
     end method.
-
-    destructor public TTOrderline():
-        delete object FieldInstanceList#[{&idxrowid}] no-error.
-        delete object FieldInstanceList#[{&idxrowstate}] no-error.
-        delete object FieldInstanceList#[{&idxSortOrder}] no-error.
-        delete object FieldInstanceList#[{&idxDiscount}] no-error.
-        delete object FieldInstanceList#[{&idxExtendedPrice}] no-error.
-        delete object FieldInstanceList#[{&idxItemnum}] no-error.
-        delete object FieldInstanceList#[{&idxLinenum}] no-error.
-        delete object FieldInstanceList#[{&idxOrderLineStatus}] no-error.
-        delete object FieldInstanceList#[{&idxOrdernum}] no-error.
-        delete object FieldInstanceList#[{&idxPrice}] no-error.
-        delete object FieldInstanceList#[{&idxQty}] no-error.
-        delete object FieldInstanceList#[{&idxItemName}] no-error.
-    end destructor.
 
 end class.

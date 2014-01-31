@@ -8,8 +8,8 @@ class wicketds.server.tableobjects.TTOrderidlist inherits com.quarix.data.tttabl
 
     &scoped-define idxNumFields 3
 
-    define private static property Instance as wicketds.server.tableobjects.TTOrderidlist no-undo
-        private get:
+    define public static property Instance as wicketds.server.tableobjects.TTOrderidlist no-undo
+        public get:
             if not valid-object(Instance) then Instance = new wicketds.server.tableobjects.TTOrderidlist().
 
             return Instance.
@@ -24,19 +24,19 @@ class wicketds.server.tableobjects.TTOrderidlist inherits com.quarix.data.tttabl
 
     define public static property IdListOrder as com.quarix.data.ttfield no-undo
         get:
-            return Instance:FieldInstanceList#[{&idxIdListOrder}].
+            return cast(Instance:FieldInstanceList#[{&idxIdListOrder}], com.quarix.data.ttfield).
         end.
         private set.
 
     define public static property HashCode as com.quarix.data.ttfield no-undo
         get:
-            return Instance:FieldInstanceList#[{&idxHashCode}].
+            return cast(Instance:FieldInstanceList#[{&idxHashCode}], com.quarix.data.ttfield).
         end.
         private set.
 
     define public static property Ordernum as com.quarix.data.ttfield no-undo
         get:
-            return Instance:FieldInstanceList#[{&idxOrdernum}].
+            return cast(Instance:FieldInstanceList#[{&idxOrdernum}], com.quarix.data.ttfield).
         end.
         private set.
 
@@ -60,11 +60,5 @@ class wicketds.server.tableobjects.TTOrderidlist inherits com.quarix.data.tttabl
     method public static integer NumberOfFields():
         return Instance:FieldCount().
     end method.
-
-    destructor public TTOrderidlist():
-        delete object FieldInstanceList#[{&idxIdListOrder}] no-error.
-        delete object FieldInstanceList#[{&idxHashCode}] no-error.
-        delete object FieldInstanceList#[{&idxOrdernum}] no-error.
-    end destructor.
 
 end class.
