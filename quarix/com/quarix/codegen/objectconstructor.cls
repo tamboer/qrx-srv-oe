@@ -312,7 +312,7 @@ class com.quarix.codegen.objectconstructor final:
 
     end method.
 
-	method public logical createDefFromBuffer(input hBuffer as handle):
+	method private logical createDefFromBuffer(input hBuffer as handle):
 
 	    if not valid-handle(hBuffer) or
             hBuffer:type <> 'BUFFER'
@@ -327,7 +327,7 @@ class com.quarix.codegen.objectconstructor final:
 
 	end method.
 
-	method public logical createDefFromTable(input hTable as handle):
+	method private logical createDefFromTable(input hTable as handle):
 
         define variable hBuf as handle no-undo.
 
@@ -346,7 +346,7 @@ class com.quarix.codegen.objectconstructor final:
 
 	end method.
 
-	method public logical createDefFromDataset(input hDataset as handle):
+	method private logical createDefFromDataset(input hDataset as handle):
 
 	    define variable iNumBuf    as integer  no-undo.
 	    define variable hBuf       as handle   no-undo.
