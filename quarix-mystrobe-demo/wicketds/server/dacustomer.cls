@@ -96,7 +96,7 @@ class wicketds.server.dacustomer inherits DataAccess:
 			cDbTables	= DBCustomer:TableName
 			cKeys		= DBCustomer:CustNum:getName().
 
-		cJoinClause	= substitute('&1 &2 &2', TTCustomer:CustNum:getFqName(), operator:Eq(), TTCustomeridlist:CustNum:getFqName()).
+		cJoinClause	= substitute('&1 &2 &2', TTCustomer:CustNum:getFqName(), operator:isEq(), TTCustomeridlist:CustNum:getFqName()).
 
 		if not AddDataSource (ttcustomer:TableName, cDbTables, cKeys, ?, cFieldMapping, cExcludeFields, ?, cJoinClause)
 		then return false.
