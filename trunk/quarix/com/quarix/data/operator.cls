@@ -46,35 +46,35 @@ class com.quarix.data.operator final:
     constructor private operator():
     end constructor.
 
-    method public static character Eq():
+    method public static character isEq():
         return cEqual.
     end method.
 
-    method public static character Ne():
+    method public static character isNe():
         return cNotEqual.
     end method.
 
-    method public static character Lt():
+    method public static character isLt():
         return cLessThan.
     end method.
 
-    method public static character Le():
+    method public static character isLe():
         return cLessThanOrEqual.
     end method.
 
-    method public static character Gt():
+    method public static character isGt():
         return cGreaterThan.
     end method.
 
-    method public static character Ge():
+    method public static character isGe():
         return cGreaterThanOrEqual.
     end method.
 
-    method public static character Matches():
+    method public static character isMatches():
         return cMatches.
     end method.
 
-    method public static character Begins():
+    method public static character isBegins():
         return cBegins.
     end method.
 
