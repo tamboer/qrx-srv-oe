@@ -34,23 +34,16 @@ using com.quarix.data.operator.
 
 class com.quarix.data.filter.filterentry:
 
-	define private static property FilterObject as com.quarix.data.filter.filterentry no-undo
-		private get:
-			if not valid-object(FilterObject) then FilterObject = new com.quarix.data.filter.filterentry().
-
-			return FilterObject.
-		end.
-		private set.
-
-	define private variable FieldName		as character							no-undo.
-	define private variable Operator		as character							no-undo.
-	define private variable FilterValue		as character							no-undo.
-	define private variable NextFilterEntry	as com.quarix.data.filter.filterentry	no-undo.
+	define private variable FieldName       as character                          	no-undo.
+	define private variable Operator        as character                          	no-undo.
+	define private variable FilterValue     as character                          	no-undo.
+	define private variable FilterObject	as com.quarix.data.filter.filterentry	no-undo.
+	define private variable FilterObjectVal	as com.quarix.data.filter.filterentry	no-undo.
 
 	constructor private filterentry():
 	end constructor.
 
-	method public filterentry addCondition(input pcFieldName as character, input pcOperator as character, input pcFilterValue as character):
+	method public logical _addCondition(input pcFieldName as character, input pcOperator as character, input pcFilterValue as character):
 
 		if pcFieldName = ?		or
 			pcFieldName = ''	or
@@ -58,31 +51,98 @@ class com.quarix.data.filter.filterentry:
 			pcOperator = ''		or
 			pcFilterValue = ?	or
 			pcFilterValue = ''
-		then return ?.
+			then return false.
 
 		assign
 			FieldName   = pcFieldName
 			Operator    = pcOperator
 			FilterValue	= pcFilterValue.
 
-		NextFilterEntry = new com.quarix.data.filter.filterentry().
-
-		return NextFilterEntry.
+		return true.
 
 		catch appError as Progress.Lang.Error :
-			delete object NextFilterEntry no-error.
 			delete object appError.
-			return ?.
+			return false.
+		end catch.
+
+	end method.
+
+	method public logical _addCondition(input oFilterObject as com.quarix.data.filter.filterentry, input pcOperator as character, input oFilterObjectVal as com.quarix.data.filter.filterentry):
+
+		if not valid-object(oFilterObject)					or
+			(pcOperator <> com.quarix.data.operator:isAnd() and
+			pcOperator <> com.quarix.data.operator:isOr())	or
+			not valid-object(oFilterObjectVal)
+			then return false.
+
+		assign
+			FilterObject	= oFilterObject
+			Operator		= pcOperator
+			FilterObject	= oFilterObjectVal.
+
+		return true.
+
+		catch appError as Progress.Lang.Error :
+			delete object appError.
+			return false.
 		end catch.
 
 	end method.
 
 	method static private filterentry addFilterCondition(input pcFieldName as character, input pcOperator as character, input pcFilterValue as character):
-		return FilterObject:addCondition(input pcFieldName, input pcOperator, input pcFilterValue).
+
+		define variable oFilterEntry as com.quarix.data.filter.filterentry no-undo.
+
+		oFilterEntry = new com.quarix.data.filter.filterentry().
+
+		if not oFilterEntry:_addCondition(input pcFieldName, input pcOperator, input pcFilterValue)
+		then do:
+			delete object oFilterEntry no-error.
+			return ?.
+		end.
+
+		return oFilterEntry.
+
+		catch appError as Progress.Lang.Error:
+			delete object appError.
+			delete object oFilterEntry no-error.
+			return ?.
+		end catch.
+
+	end method.
+
+	method static private filterentry addFilterCondition(input oFilterObject as com.quarix.data.filter.filterentry, input pcOperator as character, input oFilterObjectVal as com.quarix.data.filter.filterentry):
+
+		define variable oFilterEntry as com.quarix.data.filter.filterentry no-undo.
+
+		oFilterEntry = new com.quarix.data.filter.filterentry().
+
+		if not oFilterEntry:_addCondition(input oFilterObject, input pcOperator, input oFilterObjectVal)
+		then do:
+			delete object oFilterEntry no-error.
+			return ?.
+		end.
+
+		return oFilterEntry.
+
+		catch appError as Progress.Lang.Error:
+			delete object appError.
+			delete object oFilterEntry no-error.
+			return ?.
+		end catch.
+
 	end method.
 
 	method static private filterentry addFilterCondition(input TTField as com.quarix.data.ttfield, input pcOperator as character, input pcFilterValue as character):
 		return addFilterCondition(input TTField:getFqName(), input pcOperator, input pcFilterValue).
+	end method.
+
+	method static public filterentry isAnd(input oFilterObject as com.quarix.data.filter.filterentry, input oFilterObjectVal as com.quarix.data.filter.filterentry):
+		return addFilterCondition(input oFilterObject, input com.quarix.data.operator:isAnd(), input oFilterObjectVal).
+	end method.
+
+	method static public filterentry isOr(input oFilterObject as com.quarix.data.filter.filterentry, input oFilterObjectVal as com.quarix.data.filter.filterentry):
+		return addFilterCondition(input oFilterObject, input com.quarix.data.operator:isOr(), input oFilterObjectVal).
 	end method.
 
 	method static public filterentry isEq(input pcFieldName as character, input pcFilterValue as character):
@@ -149,16 +209,9 @@ class com.quarix.data.filter.filterentry:
 		return isBegins(input TTField:getFqName(), input pcFilterValue).
 	end method.
 
-	method public filterentry andEq(input pcFieldName as character, input pcFilterValue as character):
-		return addCondition(input pcFieldName, com.quarix.data.operator:isAndEq(), input pcFilterValue).
-	end method.
-
-	method public filterentry andEq(input TTField as com.quarix.data.ttfield, input pcFilterValue as character):
-		return andEq(input TTField:getFqName(), input pcFilterValue).
-	end method.
-
-	method public void andEq(input pFilterObject as com.quarix.data.filter.filterentry):
-		FilterObject = pFilterObject.
+	destructor public filterentry():
+		delete object FilterObject		no-error.
+		delete object FilterObjectVal	no-error.
 	end method.
 
 end class.

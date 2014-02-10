@@ -42,8 +42,8 @@ class com.quarix.data.operator final:
     define private static variable cGreaterThanOrEqual  as character initial 'ge'.
     define private static variable cMatches             as character initial 'matches'.
     define private static variable cBegins              as character initial 'begins'.
-	define private static variable cAndEqual			as character initial 'andeq'.
-	define private static variable cOrEqual				as character initial 'oreq'.
+	define private static variable cAnd					as character initial 'and'.
+	define private static variable cOr					as character initial 'or'.
 
     constructor static operator():
     end constructor.
@@ -80,12 +80,12 @@ class com.quarix.data.operator final:
         return cBegins.
     end method.
 
-	method public static character isAndEq():
-		return cAndEqual.
+	method public static character isAnd():
+		return cAnd.
 	end method.
 
-	method public static character isOrEq():
-		return cOrEqual.
+	method public static character isOr():
+		return cOr.
 	end method.
 
 end class.
