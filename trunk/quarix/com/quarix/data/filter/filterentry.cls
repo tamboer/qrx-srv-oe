@@ -34,6 +34,9 @@ using com.quarix.data.operator.
 
 class com.quarix.data.filter.filterentry:
 
+
+
+/*
 	define private variable FieldName       as character                          	no-undo.
 	define private variable Operator        as character                          	no-undo.
 	define private variable FilterValue     as character                          	no-undo.
@@ -213,5 +216,5 @@ class com.quarix.data.filter.filterentry:
 		delete object FilterObject		no-error.
 		delete object FilterObjectVal	no-error.
 	end method.
-
+*/
 end class.
