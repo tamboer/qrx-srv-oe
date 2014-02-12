@@ -1,6 +1,6 @@
 
 /*------------------------------------------------------------------------
-   File        : is
+   File        : isop
    Purpose     :
    Syntax      :
    Description :
@@ -32,93 +32,93 @@ routine-level on error undo, throw.
 
 using com.quarix.data.filter.operator.
 
-class com.quarix.data.filter.is:
+class com.quarix.data.filter.isop:
 
 	define private variable cOperator as character no-undo.
 
-	constructor private is():
+	constructor private isop():
 	end constructor.
 
-	constructor private Is(input pcOperator as character):
+	constructor private isop(input pcOperator as character):
 		cOperator = pcOperator.
 	end constructor.
 
-	define public static property EQ as com.quarix.data.filter.is no-undo
+	define public static property EQ as com.quarix.data.filter.isop no-undo
 		public get:
 			if not valid-object(EQ) then
-				assign EQ = new com.quarix.data.filter.is(operator:isEq()).
+				assign EQ = new com.quarix.data.filter.isop(operator:isEq()).
 			return EQ.
 		end.
 		private set.
 
-	define public static property NE as com.quarix.data.filter.is no-undo
+	define public static property NE as com.quarix.data.filter.isop no-undo
 		public get:
 			if not valid-object(NE) then
-				assign NE = new com.quarix.data.filter.is(operator:isNe()).
+				assign NE = new com.quarix.data.filter.isop(operator:isNe()).
 			return NE.
 		end.
 		private set.
 
-	define public static property LT as com.quarix.data.filter.is no-undo
+	define public static property LT as com.quarix.data.filter.isop no-undo
 		public get:
 			if not valid-object(LT) then
-				assign LT = new com.quarix.data.filter.is(operator:isLt()).
+				assign LT = new com.quarix.data.filter.isop(operator:isLt()).
 			return LT.
 		end.
 		private set.
 
-	define public static property LE as com.quarix.data.filter.is no-undo
+	define public static property LE as com.quarix.data.filter.isop no-undo
 		public get:
 			if not valid-object(LE) then
-				assign LE = new com.quarix.data.filter.is(operator:isLe()).
+				assign LE = new com.quarix.data.filter.isop(operator:isLe()).
 			return LE.
 		end.
 		private set.
 
-	define public static property GT as com.quarix.data.filter.is no-undo
+	define public static property GT as com.quarix.data.filter.isop no-undo
 		public get:
 			if not valid-object(GT) then
-				assign GT = new com.quarix.data.filter.is(operator:isGt()).
+				assign GT = new com.quarix.data.filter.isop(operator:isGt()).
 			return GT.
 		end.
 		private set.
 
-	define public static property GE as com.quarix.data.filter.is no-undo
+	define public static property GE as com.quarix.data.filter.isop no-undo
 		public get:
 			if not valid-object(GE) then
-				assign GE = new com.quarix.data.filter.is(operator:isGe()).
+				assign GE = new com.quarix.data.filter.isop(operator:isGe()).
 			return GE.
 		end.
 		private set.
 
-	define public static property MATCHES as com.quarix.data.filter.is no-undo
+	define public static property MATCHES as com.quarix.data.filter.isop no-undo
 		public get:
 			if not valid-object(MATCHES) then
-				assign MATCHES = new com.quarix.data.filter.is(operator:isMatches()).
+				assign MATCHES = new com.quarix.data.filter.isop(operator:isMatches()).
 			return MATCHES.
 		end.
 		private set.
 
-        define public static property BEGINS_ as com.quarix.data.filter.is no-undo
+        define public static property BEGINS_ as com.quarix.data.filter.isop no-undo
             public get:
                 if not valid-object(BEGINS_) then
-                    assign BEGINS_ = new com.quarix.data.filter.is(operator:isBegins()).
+                    assign BEGINS_ = new com.quarix.data.filter.isop(operator:isBegins()).
                 return BEGINS_.
             end.
             private set.
 
-	define public static property AND_ as com.quarix.data.filter.is no-undo
+	define public static property AND_ as com.quarix.data.filter.isop no-undo
 		public get:
 			if not valid-object(AND_) then
-				assign AND_ = new com.quarix.data.filter.is(operator:isAnd()).
+				assign AND_ = new com.quarix.data.filter.isop(operator:isAnd()).
 			return AND_.
 		end.
 		private set.
 
-	define public static property OR_ as com.quarix.data.filter.is no-undo
+	define public static property OR_ as com.quarix.data.filter.isop no-undo
 		public get:
 			if not valid-object(OR_) then
-				assign OR_ = new com.quarix.data.filter.is(operator:isOr()).
+				assign OR_ = new com.quarix.data.filter.isop(operator:isOr()).
 			return OR_.
 		end.
 		private set.

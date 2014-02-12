@@ -33,7 +33,7 @@ routine-level on error undo, throw.
 using Progress.Lang.*.
 using com.quarix.data.filter.__.
 using com.quarix.data.filter.operator.
-using com.quarix.data.filter.is.
+using com.quarix.data.filter.isop.
 
 class com.quarix.data.filter.__:
 
@@ -47,7 +47,7 @@ class com.quarix.data.filter.__:
 	constructor private __():
 	end constructor.
 
-	method private __ _addCondition(input pcFieldName as character, input pcOperator as character, input pcFilterValue as character, input pcFilterRelation as character):
+	method private __ addCondition(input pcFieldName as character, input pcOperator as character, input pcFilterValue as character, input pcFilterRelation as character):
 
 		if pcFieldName = ?		or
 			pcFieldName = ''	or
@@ -60,8 +60,8 @@ class com.quarix.data.filter.__:
 		if pcFilterRelation <> '' and
 			pcFilterRelation <> ?
 		then
-			if pcFilterRelation <> com.quarix.data.filter.operator:isAnd() and
-				pcFilterRelation <> com.quarix.data.filter.operator:isOr()
+			if pcFilterRelation <> isop:AND_:ToString() and
+				pcFilterRelation <> isop:OR_:ToString()
 			then return ?.
 
 		assign
@@ -82,7 +82,7 @@ class com.quarix.data.filter.__:
 
 	end method.
 
-	method private __ _addCondition(input oFilterObject as com.quarix.data.filter.__, input pcFilterRelation as character):
+	method private __ addCondition(input oFilterObject as com.quarix.data.filter.__, input pcFilterRelation as character):
 
 		if not valid-object(oFilterObject)
 		then return ?.
@@ -90,8 +90,8 @@ class com.quarix.data.filter.__:
 		if pcFilterRelation <> '' and
 			pcFilterRelation <> ?
 		then
-			if pcFilterRelation <> com.quarix.data.filter.operator:isAnd() and
-				pcFilterRelation <> com.quarix.data.filter.operator:isOr()
+			if pcFilterRelation <> isop:AND_:ToString() and
+				pcFilterRelation <> isop:OR_:ToString()
 			then return ?.
 
 		assign
@@ -110,7 +110,7 @@ class com.quarix.data.filter.__:
 
 	end method.
 
-	method public __ _addCondition(input pcFieldName as character, input oIs as com.quarix.data.filter.is, input pcFilterValue as character, input oIsRel as com.quarix.data.filter.is):
+	method public __ _addCondition(input pcFieldName as character, input oIs as com.quarix.data.filter.isop, input pcFilterValue as character, input oIsRel as com.quarix.data.filter.isop):
 
 		define variable cFilterRelation as character no-undo.
 
@@ -120,7 +120,7 @@ class com.quarix.data.filter.__:
 		if valid-object(oIsRel)
 		then cFilterRelation = oIsRel:ToString().
 
-		return _addCondition(
+		return addCondition(
 			input pcFieldName,
 			input oIs:ToString(),
 			input pcFilterValue,
@@ -134,14 +134,14 @@ class com.quarix.data.filter.__:
 
 	end method.
 
-	method public __ _addCondition(input oFilterObject as com.quarix.data.filter.__, input oIsRel as com.quarix.data.filter.is):
+	method public __ _addCondition(input oFilterObject as com.quarix.data.filter.__, input oIsRel as com.quarix.data.filter.isop):
 
 		define variable cFilterRelation as character no-undo.
 
 		if valid-object(oIsRel)
 		then cFilterRelation = oIsRel:ToString().
 
-		return _addCondition(
+		return addCondition(
 			input oFilterObject,
 			input cFilterRelation
 			).
@@ -153,39 +153,47 @@ class com.quarix.data.filter.__:
 
 	end method.
 
-	method public __ And(input pcFieldName as character, input oIs as com.quarix.data.filter.is, input pcFilterValue as character):
+	method public __ And_(input pcFieldName as character, input oIs as com.quarix.data.filter.isop, input pcFilterValue as character):
 		return _addCondition(
 			input pcFieldName,
 			input oIs,
 			input pcFilterValue,
-			input com.quarix.data.filter.is:AND_
+			input com.quarix.data.filter.isop:AND_
 			).
 	end method.
 
-	method public __ Or(input pcFieldName as character, input oIs as com.quarix.data.filter.is, input pcFilterValue as character):
+	method public __ And_(input ottfield as com.quarix.data.ttfield, input oIs as com.quarix.data.filter.isop, input pcFilterValue as character):
+		return And_(input ottfield:getFqName(), input oIs, input pcFilterValue).
+	end method.
+
+	method public __ And_(input oFilterObject as com.quarix.data.filter.__):
+		return _addCondition(
+			input oFilterObject,
+			input com.quarix.data.filter.isop:AND_
+			).
+	end method.
+
+	method public __ Or_(input pcFieldName as character, input oIs as com.quarix.data.filter.isop, input pcFilterValue as character):
 		return _addCondition(
 			input pcFieldName,
 			input oIs,
 			input pcFilterValue,
-			input com.quarix.data.filter.is:OR_
+			input com.quarix.data.filter.isop:OR_
 			).
 	end method.
 
-	method public __ And(input oFilterObject as com.quarix.data.filter.__):
+	method public __ Or_(input ottfield as com.quarix.data.ttfield, input oIs as com.quarix.data.filter.isop, input pcFilterValue as character):
+		return Or_(input ottfield:getFqName(), input oIs, input pcFilterValue).
+	end method.
+
+	method public __ Or_(input oFilterObject as com.quarix.data.filter.__):
 		return _addCondition(
 			input oFilterObject,
-			input com.quarix.data.filter.is:AND_
+			input com.quarix.data.filter.isop:OR_
 			).
 	end method.
 
-	method public __ Or(input oFilterObject as com.quarix.data.filter.__):
-		return _addCondition(
-			input oFilterObject,
-			input com.quarix.data.filter.is:OR_
-			).
-	end method.
-
-	method static public __ In(input oFilterObject as com.quarix.data.filter.__):
+	method static public __ In_(input oFilterObject as com.quarix.data.filter.__):
 
 		define variable oFilterEntry as com.quarix.data.filter.__ no-undo.
 
@@ -193,9 +201,9 @@ class com.quarix.data.filter.__:
 		then return ?.
 
 		oFilterEntry = new com.quarix.data.filter.__().
-/*
-		return oFilterEntry:_addCondition(input oFilterObject, ?).
-*/
+
+        return oFilterEntry:_addCondition(input oFilterObject, ?).
+
 		catch appError as Progress.Lang.Error :
 			delete object appError.
 			delete object oFilterEntry no-error.
@@ -204,7 +212,7 @@ class com.quarix.data.filter.__:
 
 	end method.
 
-	method static public __ On(input pcFieldName as character, input oIs as com.quarix.data.filter.is, input pcFilterValue as character):
+	method static public __ On_(input pcFieldName as character, input oIs as com.quarix.data.filter.isop, input pcFilterValue as character):
 
 		define variable oFilterEntry as com.quarix.data.filter.__ no-undo.
 
@@ -223,6 +231,14 @@ class com.quarix.data.filter.__:
 			return ?.
 		end catch.
 
+	end method.
+
+	method static public __ On_(input ottfield as com.quarix.data.ttfield, input oIs as com.quarix.data.filter.isop, input pcFilterValue as character):
+		return On_(
+			input ottfield:getFqName(),
+			input oIs,
+			input pcFilterValue
+			).
 	end method.
 
 	destructor public __():
