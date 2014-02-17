@@ -37,17 +37,21 @@ using com.quarix.data.filter.isop.
 
 class com.quarix.data.filter.__:
 
+	define private static temp-table ttFilterObject no-undo
+		field oFilterEntry as Progress.Lang.Object.
+
 	define private variable FieldName       	as character                    no-undo.
 	define private variable Operator        	as character                    no-undo.
 	define private variable FilterValue			as character                    no-undo.
 	define private variable FilterObject		as com.quarix.data.filter.__	no-undo.
 	define private variable FilterRelation		as character					no-undo.
+	define private variable PrevFilterObject	as com.quarix.data.filter.__	no-undo.
 	define private variable NextFilterObject    as com.quarix.data.filter.__	no-undo.
 
 	constructor private __():
 	end constructor.
 
-	method private __ addCondition(input pcFieldName as character, input pcOperator as character, input pcFilterValue as character, input pcFilterRelation as character):
+	method private logical addCondition(input pcFieldName as character, input pcOperator as character, input pcFilterValue as character, input pcFilterRelation as character, input poPrevFilterObject as com.quarix.data.filter.__):
 
 		if pcFieldName = ?		or
 			pcFieldName = ''	or
@@ -55,14 +59,14 @@ class com.quarix.data.filter.__:
 			pcOperator = ''		or
 			pcFilterValue = ?	or
 			pcFilterValue = ''
-		then return ?.
+		then return false.
 
 		if pcFilterRelation <> '' and
 			pcFilterRelation <> ?
 		then
 			if pcFilterRelation <> isop:AND_:ToString() and
 				pcFilterRelation <> isop:OR_:ToString()
-			then return ?.
+			then return false.
 
 		assign
 			FieldName		= pcFieldName
@@ -70,52 +74,68 @@ class com.quarix.data.filter.__:
 			FilterValue		= pcFilterValue
 			FilterRelation	= pcFilterRelation.
 
-		NextFilterObject = new com.quarix.data.filter.__().
+		if valid-object(poPrevFilterObject)
+		then PrevFilterObject = poPrevFilterObject.
 
-		return NextFilterObject.
+		return true.
 
 		catch appError as Progress.Lang.Error :
 			delete object appError.
-			delete object NextFilterObject no-error.
-			return ?.
+			return false.
 		end catch.
 
 	end method.
 
-	method private __ addCondition(input oFilterObject as com.quarix.data.filter.__, input pcFilterRelation as character):
+	method private logical addCondition(input oFilterObject as com.quarix.data.filter.__, input pcFilterRelation as character, input poPrevFilterObject as com.quarix.data.filter.__):
+
+		define variable oPrevFilterObject as com.quarix.data.filter.__ no-undo.
 
 		if not valid-object(oFilterObject)
-		then return ?.
+		then return false.
 
 		if pcFilterRelation <> '' and
 			pcFilterRelation <> ?
 		then
 			if pcFilterRelation <> isop:AND_:ToString() and
 				pcFilterRelation <> isop:OR_:ToString()
-			then return ?.
+			then return false.
+
+		do while valid-object(oFilterObject):
+
+			oPrevFilterObject = oFilterObject:GetFilterEntryParent().
+
+			if valid-object(oPrevFilterObject)
+			then oFilterObject = oPrevFilterObject.
+			else leave.
+		end.
 
 		assign
 			FilterObject	= oFilterObject
 			FilterRelation	= pcFilterRelation.
 
-		NextFilterObject = new com.quarix.data.filter.__().
+		if valid-object(poPrevFilterObject)
+		then PrevFilterObject = poPrevFilterObject.
 
-		return NextFilterObject.
+		return true.
 
 		catch appError as Progress.Lang.Error :
 			delete object appError.
 			delete object NextFilterObject no-error.
-			return ?.
+			return false.
 		end catch.
 
 	end method.
 
-	method public __ _addCondition(input pcFieldName as character, input oIs as com.quarix.data.filter.isop, input pcFilterValue as character, input oIsRel as com.quarix.data.filter.isop):
+	method public __ GetFilterEntryParent():
+		return PrevFilterObject.
+	end method.
+
+	method public logical _addCondition(input pcFieldName as character, input oIs as com.quarix.data.filter.isop, input pcFilterValue as character, input oIsRel as com.quarix.data.filter.isop, input poPrevFilterObject as com.quarix.data.filter.__):
 
 		define variable cFilterRelation as character no-undo.
 
 		if not valid-object(oIs)
-		then return ?.
+		then return false.
 
 		if valid-object(oIsRel)
 		then cFilterRelation = oIsRel:ToString().
@@ -124,17 +144,18 @@ class com.quarix.data.filter.__:
 			input pcFieldName,
 			input oIs:ToString(),
 			input pcFilterValue,
-			input cFilterRelation
+			input cFilterRelation,
+			input poPrevFilterObject
 			).
 
 		catch appError as Progress.Lang.Error :
 			delete object appError.
-			return ?.
+			return false.
 		end catch.
 
 	end method.
 
-	method public __ _addCondition(input oFilterObject as com.quarix.data.filter.__, input oIsRel as com.quarix.data.filter.isop):
+	method public logical _addCondition(input oFilterObject as com.quarix.data.filter.__, input oIsRel as com.quarix.data.filter.isop, input poPrevFilterObject as com.quarix.data.filter.__):
 
 		define variable cFilterRelation as character no-undo.
 
@@ -143,18 +164,77 @@ class com.quarix.data.filter.__:
 
 		return addCondition(
 			input oFilterObject,
-			input cFilterRelation
+			input cFilterRelation,
+			input poPrevFilterObject
 			).
 
 		catch appError as Progress.Lang.Error :
 			delete object appError.
+			return false.
+		end catch.
+
+	end method.
+
+	method private __ addNextCondition(input pcFieldName as character, input oIs as com.quarix.data.filter.isop, input pcFilterValue as character, input oIsRel as com.quarix.data.filter.isop):
+
+		define variable oNextFilterObject as com.quarix.data.filter.__ no-undo.
+
+		oNextFilterObject = new com.quarix.data.filter.__().
+
+		NextFilterObject = oNextFilterObject.
+
+		if not NextFilterObject:_addCondition(
+			input pcFieldName,
+			input oIs,
+			input pcFilterValue,
+			input oIsRel,
+			input this-object
+			)
+		then do:
+			delete object NextFilterObject no-error.
+			return ?.
+		end.
+
+		return NextFilterObject.
+
+		catch appError as Progress.Lang.Error :
+			delete object appError.
+			delete object NextFilterObject no-error.
+			return ?.
+		end catch.
+
+	end method.
+
+	method private __ addNextCondition(input oFilterObject as com.quarix.data.filter.__, input oIsRel as com.quarix.data.filter.isop):
+
+		define variable oNextFilterObject as com.quarix.data.filter.__ no-undo.
+
+		oNextFilterObject = new com.quarix.data.filter.__().
+
+		NextFilterObject = oNextFilterObject.
+
+		if not NextFilterObject:_addCondition(
+			input oFilterObject,
+			input oIsRel,
+			input this-object
+			)
+		then do:
+			delete object NextFilterObject no-error.
+			return ?.
+		end.
+
+		return NextFilterObject.
+
+		catch appError as Progress.Lang.Error :
+			delete object appError.
+			delete object NextFilterObject no-error.
 			return ?.
 		end catch.
 
 	end method.
 
 	method public __ And_(input pcFieldName as character, input oIs as com.quarix.data.filter.isop, input pcFilterValue as character):
-		return _addCondition(
+		return addNextCondition(
 			input pcFieldName,
 			input oIs,
 			input pcFilterValue,
@@ -167,14 +247,14 @@ class com.quarix.data.filter.__:
 	end method.
 
 	method public __ And_(input oFilterObject as com.quarix.data.filter.__):
-		return _addCondition(
+		return addNextCondition(
 			input oFilterObject,
 			input com.quarix.data.filter.isop:AND_
 			).
 	end method.
 
 	method public __ Or_(input pcFieldName as character, input oIs as com.quarix.data.filter.isop, input pcFilterValue as character):
-		return _addCondition(
+		return addNextCondition(
 			input pcFieldName,
 			input oIs,
 			input pcFilterValue,
@@ -187,7 +267,7 @@ class com.quarix.data.filter.__:
 	end method.
 
 	method public __ Or_(input oFilterObject as com.quarix.data.filter.__):
-		return _addCondition(
+		return addNextCondition(
 			input oFilterObject,
 			input com.quarix.data.filter.isop:OR_
 			).
@@ -202,7 +282,20 @@ class com.quarix.data.filter.__:
 
 		oFilterEntry = new com.quarix.data.filter.__().
 
-        return oFilterEntry:_addCondition(input oFilterObject, ?).
+		if not oFilterEntry:_addCondition(
+			input oFilterObject,
+			input ?,
+			input ?)
+		then do:
+			delete object oFilterEntry no-error.
+			return ?.
+		end.
+
+		create ttFilterObject.
+
+		ttFilterObject.oFilterEntry = oFilterEntry.
+
+        return oFilterEntry.
 
 		catch appError as Progress.Lang.Error :
 			delete object appError.
@@ -218,12 +311,23 @@ class com.quarix.data.filter.__:
 
 		oFilterEntry = new com.quarix.data.filter.__().
 
-		return oFilterEntry:_addCondition(
+		if not oFilterEntry:_addCondition(
 			input pcFieldName,
 			input oIs,
 			input pcFilterValue,
-			?
-			).
+			input ?,
+			input ?
+			)
+		then do:
+			delete object oFilterEntry no-error.
+			return ?.
+		end.
+
+		create ttFilterObject.
+
+		ttFilterObject.oFilterEntry = oFilterEntry.
+
+		return oFilterEntry.
 
 		catch appError as Progress.Lang.Error :
 			delete object appError.
@@ -239,6 +343,63 @@ class com.quarix.data.filter.__:
 			input oIs,
 			input pcFilterValue
 			).
+	end method.
+
+	method public character DisplayQuery():
+
+		define variable oFilterObject		as com.quarix.data.filter.__ no-undo.
+		define variable oPrevFilterObject	as com.quarix.data.filter.__ no-undo.
+
+		oFilterObject = this-object.
+
+		do while valid-object(oFilterObject):
+
+			oPrevFilterObject = oFilterObject:GetFilterEntryParent().
+
+			if valid-object(oPrevFilterObject)
+			then oFilterObject = oPrevFilterObject.
+			else leave.
+		end.
+
+		return oFilterObject:DisplayFilterEntry().
+
+		catch appError as Progress.Lang.Error :
+			delete object appError.
+			return ''.
+		end catch.
+
+	end method.
+
+	method public character DisplayFilterEntry():
+
+		define variable cValue as character no-undo.
+
+		if FilterRelation <> '' and
+			FilterRelation <> ?
+		then cValue = FilterRelation.
+
+		if FieldName <> '' and
+			FieldName <> ?
+		then cValue = if cValue <> '' then substitute('&1 &2', cValue, substitute('&1 &2 &3', FieldName, Operator, FilterValue)) else substitute('&1 &2 &3', FieldName, Operator, FilterValue).
+		else do:
+			cValue = if cValue <> '' then substitute('&1 (', cValue) else '('.
+
+			if valid-object(FilterObject)
+			then cValue = cValue + FilterObject:DisplayQuery().
+
+			cValue = substitute('&1 )', cValue).
+		end.
+
+		if valid-object(NextFilterObject)
+		then cValue = substitute('&1 &2', cValue, NextFilterObject:DisplayFilterEntry()).
+
+		return cValue.
+
+		catch appError as Progress.Lang.Error :
+			delete object appError.
+			return ''.
+		end catch.
+
 	end method.
 
 	destructor public __():
