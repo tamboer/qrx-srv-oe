@@ -1,0 +1,76 @@
+ADD TABLE "DbLog"
+  AREA "Data Area"
+  DUMP-NAME "dblog"
+
+ADD FIELD "LogCategoryCode" OF "DbLog" AS character 
+  FORMAT "x(16)"
+  INITIAL ""
+  POSITION 2
+  MAX-WIDTH 32
+  ORDER 10
+
+ADD FIELD "LogDateTime" OF "DbLog" AS datetime 
+  FORMAT "99/99/9999 HH:MM:SS.SSS"
+  INITIAL ?
+  POSITION 3
+  MAX-WIDTH 8
+  ORDER 20
+
+ADD FIELD "LogCode" OF "DbLog" AS character 
+  FORMAT "x(20)"
+  INITIAL ""
+  POSITION 4
+  MAX-WIDTH 40
+  ORDER 30
+
+ADD FIELD "LogText" OF "DbLog" AS character 
+  FORMAT "x(80)"
+  INITIAL ""
+  POSITION 5
+  MAX-WIDTH 160
+  ORDER 40
+
+ADD FIELD "LogDetail" OF "DbLog" AS clob 
+  FORMAT "x(8)"
+  INITIAL ?
+  POSITION 6
+  LOB-AREA "Data Area"
+  LOB-BYTES 104857600
+  LOB-SIZE 100M
+  CLOB-CODEPAGE "UTF-8"
+  CLOB-COLLATION "BASIC"
+  CLOB-TYPE 2
+  ORDER 50
+
+ADD FIELD "LogOrder" OF "DbLog" AS integer 
+  FORMAT ">>>>>>9"
+  INITIAL "0"
+  POSITION 7
+  MAX-WIDTH 4
+  ORDER 60
+
+ADD FIELD "LogUserCode" OF "DbLog" AS character 
+  FORMAT "x(20)"
+  INITIAL ""
+  POSITION 8
+  MAX-WIDTH 40
+  ORDER 70
+
+ADD FIELD "LogGuid" OF "DbLog" AS character 
+  FORMAT "x(36)"
+  INITIAL ""
+  POSITION 9
+  MAX-WIDTH 72
+  ORDER 80
+
+ADD INDEX "XPK_Primary" ON "DbLog" 
+  AREA "Data Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "LogGuid" ASCENDING 
+
+.
+PSC
+cpstream=UTF-8
+.
+0000001299

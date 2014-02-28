@@ -1,0 +1,45 @@
+ADD TABLE "LogCategoryAdapter"
+  AREA "Schema Area"
+  DUMP-NAME "logcategoryadapter"
+
+ADD FIELD "LogCategoryCode" OF "LogCategoryAdapter" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 2
+  MAX-WIDTH 16
+  HELP "LogCategoryCode"
+  ORDER 10
+
+ADD FIELD "AdapterClass" OF "LogCategoryAdapter" AS character 
+  FORMAT "x(64)"
+  INITIAL ""
+  POSITION 3
+  MAX-WIDTH 128
+  HELP "ImplementingClass"
+  ORDER 20
+
+ADD FIELD "Configuration" OF "LogCategoryAdapter" AS character 
+  FORMAT "x(55)"
+  INITIAL ""
+  POSITION 4
+  MAX-WIDTH 110
+  HELP "Configuration"
+  ORDER 30
+
+ADD INDEX "PK_ttCategoryAdapter" ON "LogCategoryAdapter" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "LogCategoryCode" ASCENDING 
+  INDEX-FIELD "AdapterClass" ASCENDING 
+
+
+ADD INDEX "FK_CategoryCode" ON "LogCategoryAdapter" 
+  AREA "Schema Area"
+  INDEX-FIELD "LogCategoryCode" ASCENDING 
+
+.
+PSC
+cpstream=ISO8859-1
+.
+0000000917

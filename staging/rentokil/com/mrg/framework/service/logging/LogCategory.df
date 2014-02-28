@@ -1,0 +1,38 @@
+ADD TABLE "LogCategory"
+  AREA "Schema Area"
+  DUMP-NAME "logcategory"
+
+ADD FIELD "LogCategoryCode" OF "LogCategory" AS character 
+  FORMAT "x(16)"
+  INITIAL ""
+  POSITION 2
+  MAX-WIDTH 32
+  HELP "LogCategoryCode"
+  ORDER 10
+
+ADD FIELD "CategoryDescription" OF "LogCategory" AS character 
+  FORMAT "x(64)"
+  INITIAL ""
+  POSITION 3
+  MAX-WIDTH 128
+  HELP "CategoryDescription"
+  ORDER 20
+
+ADD FIELD "EnableLogging" OF "LogCategory" AS logical 
+  FORMAT "yes/no"
+  INITIAL "yes"
+  POSITION 4
+  MAX-WIDTH 1
+  ORDER 30
+
+ADD INDEX "PK_ttCategory" ON "LogCategory" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "LogCategoryCode" ASCENDING 
+
+.
+PSC
+cpstream=ISO8859-1
+.
+0000000681
