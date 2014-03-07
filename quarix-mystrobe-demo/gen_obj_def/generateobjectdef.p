@@ -80,7 +80,7 @@ procedure GenerateObject:
 	else
 		put stream str_out unformatted 'hObject = dataset ' pcFileName ':handle.' skip.
 
-	put stream str_out unformatted 'objectconstructor:createTableDefObject(hObject).' skip.
+	put stream str_out unformatted 'objectconstructor:createTableDefObject(hObject, "sports2000").' skip.
 
 	put stream str_out unformatted 'finally:' skip.
 
