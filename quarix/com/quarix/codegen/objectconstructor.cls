@@ -59,11 +59,15 @@ class com.quarix.codegen.objectconstructor final:
 
 	end constructor.
 
-	method private logical AddScopedDefine(input hBuffer as handle):
+	method private logical AddScopedDefine(input hBuffer as handle, input cDbName as character):
 
-		define variable iFieldCount	as integer		no-undo.
-		define variable cFieldName	as character	no-undo.
-		define variable iPos		as integer		no-undo.
+		define variable iFieldCount		as integer		no-undo.
+		define variable cFieldName		as character	no-undo.
+		define variable iPos			as integer		no-undo.
+		define variable cQuery			as character	no-undo.
+		define variable hDbBufferFile	as handle		no-undo.
+		define variable hDbBufferField	as handle		no-undo.
+		define variable cFullDbName		as character	no-undo.
 
 		if not valid-handle(hBuffer) or
 			hBuffer:type <> 'BUFFER'
@@ -71,13 +75,39 @@ class com.quarix.codegen.objectconstructor final:
 
 		if hBuffer:dbname <> 'PROGRESST'
 		then do:
-			find first _File
-				where _File._File-Name = hBuffer:name
-				no-lock no-error.
+			if cDbName <> '' and
+				cDbName <> ?
+			then do:
+				cFullDbName = substitute('&1._File', cDbName).
 
-			if not available(_File)
-			then return false.
-		end.
+				create buffer hDbBufferFile for table cFullDbName no-error.
+
+				if not valid-handle(hDbBufferFile)
+				then return false.
+
+				cQuery = substitute('where &1._File._File-Name = &2', cDbName, quoter(hBuffer:name)).
+
+				hDbBufferFile:find-first (cQuery, no-lock) no-error.
+
+				if not hDbBufferFile:available
+				then return false.
+
+				cFullDbName = substitute('&1._Field', cDbName).
+
+				create buffer hDbBufferField for table cFullDbName no-error.
+
+				if not valid-handle(hDbBufferField)
+				then return false.
+			end.
+			else do:
+				find first _File
+					where _File._File-Name = hBuffer:name
+					no-lock no-error.
+
+				if not available(_File)
+				then return false.
+			end.
+		end. /* if hBuffer:dbname <> 'PROGRESST' */
 
 		do iFieldCount = 1 to hBuffer:num-fields:
 
@@ -85,15 +115,29 @@ class com.quarix.codegen.objectconstructor final:
 
 			if hBuffer:dbname <> 'PROGRESST'
 			then do:
-				find first _Field
-					where _Field._File-recid = recid(_File)
-					  and _Field._Field-Name = cFieldName
-					no-lock no-error.
+				if cDbName <> '' and
+					cDbName <> ?
+				then do:
+					cQuery = substitute('where &1._File-recid = &2 and &1._Field-Name = &3', cFullDbName, hDbBufferFile:recid, quoter(cFieldName)).
 
-				if not available(_Field)
-				then return false.
+					hDbBufferField:find-first (cQuery, no-lock) no-error.
 
-				iPos = _Field._Field-Physpos.
+					if not hDbBufferField:available
+					then return false.
+
+					iPos = hDbBufferField:buffer-field ('_Field-Physpos'):buffer-value.
+				end.
+				else do:
+					find first _Field
+						where _Field._File-recid = recid(_File)
+						  and _Field._Field-Name = cFieldName
+						no-lock no-error.
+
+					if not available(_Field)
+					then return false.
+
+					iPos = _Field._Field-Physpos.
+				end.
 
 				if not FileWriter:generateScopedDefine(cFieldName, iFieldCount, iPos)
 				then return false.
@@ -113,6 +157,10 @@ class com.quarix.codegen.objectconstructor final:
 			delete object appError.
 			return false.
 		end catch.
+		finally:
+			delete object hDbBufferFile		no-error.
+			delete object hDbBufferField	no-error.
+		end finally.
 
 	end method.
 
@@ -182,7 +230,7 @@ class com.quarix.codegen.objectconstructor final:
 
 	end method.
 
-	method private logical createClassFile(input hBuffer as handle):
+	method private logical createClassFile(input hBuffer as handle, input cDbName as character):
 
 	    define variable cClassName			as character	no-undo.
 		define variable cAbsoluteFileName	as character	no-undo.
@@ -243,7 +291,7 @@ class com.quarix.codegen.objectconstructor final:
 				return false.
 			end.
 
-		if not AddScopedDefine(input hBuffer)
+		if not AddScopedDefine(input hBuffer, input cDbName)
 		then do:
 			FileWriter:DeleteFile().
 			return false.
@@ -312,13 +360,13 @@ class com.quarix.codegen.objectconstructor final:
 
     end method.
 
-	method private logical createDefFromBuffer(input hBuffer as handle):
+	method private logical createDefFromBuffer(input hBuffer as handle, input cDbName as character):
 
 	    if not valid-handle(hBuffer) or
             hBuffer:type <> 'BUFFER'
 	    then return false.
 
-        return createClassFile(input hBuffer).
+        return createClassFile(input hBuffer, input cDbName).
 
         catch appError as Progress.Lang.Error :
             delete object appError.
@@ -337,7 +385,7 @@ class com.quarix.codegen.objectconstructor final:
 
         hBuf = hTable:default-buffer-handle.
 
-        return createDefFromBuffer(input hBuf).
+        return createDefFromBuffer(input hBuf, input '').
 
         catch appError as Progress.Lang.Error :
             delete object appError.
@@ -359,7 +407,7 @@ class com.quarix.codegen.objectconstructor final:
 
             hBuf = hDataset:get-buffer-handle (iNumBuf).
 
-            if not createDefFromBuffer(input hBuf)
+            if not createDefFromBuffer(input hBuf, input '')
             then return false.
 
 	    end. /* do iNumBuf = 1 to hDataset:num-buffers */
@@ -373,7 +421,7 @@ class com.quarix.codegen.objectconstructor final:
 
 	end method.
 
-	method public logical createTableDefObject(input hObject as handle):
+	method public logical createTableDefObject(input hObject as handle, input cDbName as character):
 
 	    if not valid-handle(hObject)
 	    then return false.
@@ -387,7 +435,7 @@ class com.quarix.codegen.objectconstructor final:
 	        then return createDefFromTable(input hObject).
 
 	        when 'BUFFER'
-	        then return createDefFromBuffer(input hObject).
+	        then return createDefFromBuffer(input hObject, input cDbName).
 
 	        otherwise
 	           return false.
@@ -401,6 +449,10 @@ class com.quarix.codegen.objectconstructor final:
             return false.
         end catch.
 
+	end method.
+
+	method public logical createTableDefObject(input hObject as handle):
+		return createTableDefObject(input hObject, input '').
 	end method.
 
 end class.
