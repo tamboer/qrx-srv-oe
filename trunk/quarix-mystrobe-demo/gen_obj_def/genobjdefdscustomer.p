@@ -10,7 +10,7 @@ objectconstructor = new com.quarix.codegen.objectconstructor(
 
 hObject = buffer Customer:handle.
 
-objectconstructor:createTableDefObject(hObject).
+objectconstructor:createTableDefObject(hObject, 'sports2000').
 
 finally:
 	delete object objectconstructor no-error.

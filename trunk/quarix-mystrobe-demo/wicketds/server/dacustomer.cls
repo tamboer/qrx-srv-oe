@@ -5,6 +5,7 @@ using Progress.Lang.*.
 using com.quarix.data.DataAccess.
 using wicketds.server.tableobjects.*.
 using com.quarix.data.*.
+using com.quarix.data.filter.operator.
 
 class wicketds.server.dacustomer inherits DataAccess:
 
