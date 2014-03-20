@@ -2520,6 +2520,21 @@ class com.quarix.data.DataAccess
 
     end method.
 
+    method public character GetKeyValue
+        (input tableName as character, input keyField    as character,
+        input keyValue   as character, input lookupField as character):
+
+        define variable mPtr as memptr no-undo.
+
+        return GetKeyValue(tableName, keyField, keyValue, lookupField, mPtr).
+
+        catch appError as Progress.Lang.Error :
+            ThrowError(input appError).
+            delete object appError.
+            return ?.
+        end catch.
+
+    end method.
 
     method public character GetKeyValue
         (input tableName as character, input keyField    as character,
