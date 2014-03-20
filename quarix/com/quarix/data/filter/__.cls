@@ -51,6 +51,17 @@ class com.quarix.data.filter.__:
 	constructor private __():
 	end constructor.
 
+	method private static void addFilterObject(input poFilterEntry as com.quarix.data.filter.__):
+
+		if not valid-object(poFilterEntry)
+		then return.
+
+		create ttFilterObject.
+
+		ttFilterObject.oFilterEntry = poFilterEntry.
+
+	end method.
+
 	method private logical addCondition(input pcFieldName as character, input pcOperator as character, input pcFilterValue as character, input pcFilterRelation as character, input poPrevFilterObject as com.quarix.data.filter.__):
 
 		if pcFieldName = ?		or
@@ -291,9 +302,7 @@ class com.quarix.data.filter.__:
 			return ?.
 		end.
 
-		create ttFilterObject.
-
-		ttFilterObject.oFilterEntry = oFilterEntry.
+		addFilterObject(input oFilterEntry).
 
         return oFilterEntry.
 
@@ -323,9 +332,7 @@ class com.quarix.data.filter.__:
 			return ?.
 		end.
 
-		create ttFilterObject.
-
-		ttFilterObject.oFilterEntry = oFilterEntry.
+		addFilterObject(input oFilterEntry).
 
 		return oFilterEntry.
 
