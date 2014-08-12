@@ -30,6 +30,9 @@ routine-level on error undo, throw.
 
 using Progress.Lang.*.
 using com.quarix.data.DataAccess.
+using com.quarix.samples.sports2000.tableobjects.TTCustomer.
+using com.quarix.samples.sports2000.tableobjects.DBCustomer.
+
 
 &global-define tbl_customer Customer
 
@@ -44,8 +47,12 @@ class com.quarix.samples.sports2000.dacustomer inherits DataAccess:
 	end constructor.
 
 	method private character SetFieldMappings():
+   
+    define variable cFieldMapping as character no-undo.
 
-		define variable cFieldMapping as character no-undo.
+    cFieldMapping = AutoFieldMap(DBCustomer:Instance, TTCustomer:Instance).
+    
+		/*
 		assign
 			cFieldMapping	=	
 			          '{&tbl_customer}.custNum'     + ',ttCustomer.custNum'			+ ',' +
@@ -64,7 +71,7 @@ class com.quarix.samples.sports2000.dacustomer inherits DataAccess:
 								'{&tbl_customer}.terms'       + ',ttCustomer.terms'			  + ',' +
 								'{&tbl_customer}.discount'    + ',ttCustomer.discount'		+ ',' +
 								'{&tbl_customer}.comments'    + ',ttCustomer.comments'.
-
+    */
 		return cFieldMapping.
 
 	end method.
