@@ -191,12 +191,6 @@ def var cTest as char no-undo.
 
 
 DO on error undo, throw:
-/*
-  COPY-LOB FROM FILE 
-    /* 'c:/test/ports.txt' */
-    'c:\qrx_srv_oe\log\res.json' 
-    TO  lcJson NO-CONVERT.
-*/
   oJsonParser = NEW ObjectModelParser().
   oJsonConstruct = oJsonParser:Parse(mJson).
   IF valid-object(oJsonConstruct) then do:
@@ -223,19 +217,6 @@ DO on error undo, throw:
         delete object oTableInfoJsonObj.
         delete object oTableJsonObj.
       END.
-/*
-    output to value('c:/test/brol.txt').
-    FOR each ttCustomer no-lock:
-        export ttCustomer.
-    END.
-    output close.
-*/
-/*     
-            message cTableId view-as alert-box.
-            lcTest = oTablesJsonArr:GETJSONTEXT().
-    cTest = lcTest.
-    message "Here we are" cTest view-as alert-box.
-*/
 
     END.
     delete object oJsonConstruct.
