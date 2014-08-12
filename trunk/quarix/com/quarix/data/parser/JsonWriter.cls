@@ -410,6 +410,8 @@ class com.quarix.data.parser.JsonWriter
       define variable hRowState as handle   no-undo.
       define variable hSortOrd  as handle   no-undo.
       define variable iNumFld   as integer  no-undo.
+      define variable iStartPos as integer  no-undo.
+      define variable iEndPos   as integer  no-undo.
 
       if not valid-handle(hTT) then
          return false.
@@ -467,12 +469,24 @@ class com.quarix.data.parser.JsonWriter
       end.
 
       hTT:write-json ('longchar',lcJson,true).
-
+/*
       lcJson = replace(lcJson, '~n    "":', '').
       lcJson = replace(lcJson, '~n  ~{','[').
       lcJson = replace(lcJson, '~n  ~}',']').
       lcJson = substring(lcJson,length(substitute('~{"&1": ~[',httBuf:name)) + 1).
       lcJson = substring(lcJson,1,r-index(lcJson,'~]~}') - 1).
+*/
+
+/* Micro-optimization: Less operations on large json = faster for big datasets */
+
+      assign lcJson    = replace(lcJson, '~n  ~},~n  ~{', '],[')
+             lcJson    = replace(lcJson, '~n    "": ', '')
+             iStartPos =   INDEX(lcJson, '": [~n  ~{') + 8
+             iEndPos   = R-INDEX(lcJson, '~n  ~}~n]}')
+             lcJson    =  
+               '[' + 
+                (IF iStartPos > 8 AND iEndPos > 0 THEN substr(lcJson, iStartPos , iEndPos - iStartPos) ELSE "")
+              + ']' .
 
       Out(lcJson).
       &else
