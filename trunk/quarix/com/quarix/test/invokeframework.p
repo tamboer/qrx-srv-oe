@@ -637,14 +637,12 @@ PROCEDURE sendRows :
   DEFINE INPUT  PARAMETER ihTT         AS HANDLE     NO-UNDO.
   DEFINE INPUT  PARAMETER icModule     AS CHARACTER  NO-UNDO.
   DEFINE INPUT  PARAMETER icStartRowId AS CHARACTER  NO-UNDO.
+  DEFINE INPUT  PARAMETER icSessionId  AS CHAR       NO-UNDO.
 
   DEF VAR pstrResponse AS MEMPTR NO-UNDO.
-  DEF VAR cSessionId   AS CHAR   NO-UNDO.
-
-  ASSIGN cSessionId = generateSessionId().
 
   RUN invokeServerCall
-    (INPUT cSessionId, 
+    (INPUT icSessionId, 
      INPUT cAppName + "/" + /* application name */
            icModule + "/" + /* module name */
            "data", /* module method  
@@ -654,10 +652,12 @@ PROCEDURE sendRows :
      INPUT icStartRowId,
      OUTPUT TABLE ttResponse BY-REFERENCE,
      OUTPUT pstrResponse).
-    
+  
+  /*
   OUTPUT TO c:/qrx_srv_oe/LOG/res.json BINARY NO-CONVERT.
   EXPORT pstrResponse.
   OUTPUT CLOSE.
+  */ 
   
   RUN com/quarix/test/jsonreader.p(INPUT-output pstrResponse,
                                    INPUT ihTT).
