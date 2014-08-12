@@ -41,11 +41,16 @@ def var hInvFw as handle no-undo.
 
 RUN com/quarix/test/invokeframework.p PERSISTENT set hInvFw.
 
+def var cSessionId as char no-undo init ?.
+
+assign cSessionId = dynamic-function("generateSessionId" in hInvFw).
+
 run setAppName   in hInvFw("sampleApp").
 run setAppSrvURL in hInvFw("-URL 'AppServer://localhost:5162/quarix_samples'").
 run setLogDir    in hInvFw("c:/qrx_srv_oe/log/").
 run setDebug     in hInvFw(FALSE).
 
+/* TODO: Implement settings */
 
 PROCEDURE ttcustomer_sendrows:
 
@@ -64,7 +69,8 @@ PROCEDURE ttcustomer_sendrows:
 
   RUN sendRows in hInvFw(INPUT TEMP-TABLE ttcustomer:HANDLE,
                INPUT "com/quarix/samples/sports2000/dmcustomer",
-               INPUT "first").
+               INPUT "first",
+               input cSessionId).
           
 END PROCEDURE.
 
