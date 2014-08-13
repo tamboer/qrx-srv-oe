@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------------
-File : dacustomer
+File : ttcustomer
 Purpose : Customer Temp-table for sports2000 sample
 Syntax :
 Description :
