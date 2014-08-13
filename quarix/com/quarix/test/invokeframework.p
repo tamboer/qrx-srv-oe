@@ -68,7 +68,12 @@ DEFINE TEMP-TABLE ttFieldChange NO-UNDO
     isBeforeImage
     fieldSortOrder.
 
-&GLOBAL-DEFINE FILTER_OP_EQUALS "eq"
+&GLOBAL-DEFINE FILTER_OP_EQUAL "eq"
+&GLOBAL-DEFINE FILTER_OP_GREATER_OR_EQUAL "ge"
+&GLOBAL-DEFINE FILTER_OP_GREATER_THAN "gt"
+&GLOBAL-DEFINE FILTER_OP_LESS_OR_EQUAL "le"
+&GLOBAL-DEFINE FILTER_OP_LESS_THAN "lt"
+&GLOBAL-DEFINE FILTER_OP_NOT_EQUAL "ne"
 
 &GLOBAL-DEFINE REQ_TYPE_INPUT    1
 &GLOBAL-DEFINE REQ_TYPE_HEADERS  2
@@ -229,27 +234,6 @@ END PROCEDURE.
 
 &ENDIF
 
-&IF DEFINED(EXCLUDE-addEqualsFilter) = 0 &THEN
-
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE addEqualsFilter Procedure 
-PROCEDURE addEqualsFilter :
-/*------------------------------------------------------------------------------
-  Purpose:     
-  Parameters:  <none>
-  Notes:       
-------------------------------------------------------------------------------*/
-  DEF INPUT PARAM cFilterName  AS CHAR NO-UNDO.
-  DEF INPUT PARAM cFilterValue AS CHAR NO-UNDO.
-
-  RUN addFilter(cFilterName, {&FILTER_OP_EQUALS}, cFilterValue).
-
-END PROCEDURE.
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
-&ENDIF
-
 &IF DEFINED(EXCLUDE-addFilter) = 0 &THEN
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE addFilter Procedure 
@@ -268,6 +252,132 @@ PROCEDURE addFilter :
          ttFilters.filterName  = cFilterName
          ttFilters.filterOp    = cFilterOp
          ttFilters.filterValue = cFilterValue.
+
+END PROCEDURE.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ENDIF
+
+&IF DEFINED(EXCLUDE-addFilterEqual) = 0 &THEN
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE addFilterEqual Procedure 
+PROCEDURE addFilterEqual :
+/*------------------------------------------------------------------------------
+  Purpose:     
+  Parameters:  <none>
+  Notes:       
+------------------------------------------------------------------------------*/
+  DEF INPUT PARAM cFilterName  AS CHAR NO-UNDO.
+  DEF INPUT PARAM cFilterValue AS CHAR NO-UNDO.
+
+  RUN addFilter(cFilterName, {&FILTER_OP_EQUAL}, cFilterValue).
+
+END PROCEDURE.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ENDIF
+
+&IF DEFINED(EXCLUDE-addFilterGreaterOrEqual) = 0 &THEN
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE addFilterGreaterOrEqual Procedure 
+PROCEDURE addFilterGreaterOrEqual :
+/*------------------------------------------------------------------------------
+  Purpose:     
+  Parameters:  <none>
+  Notes:       
+------------------------------------------------------------------------------*/
+  DEF INPUT PARAM cFilterName  AS CHAR NO-UNDO.
+  DEF INPUT PARAM cFilterValue AS CHAR NO-UNDO.
+
+  RUN addFilter(cFilterName, {&FILTER_OP_GREATER_OR_EQUAL}, cFilterValue).
+
+END PROCEDURE.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ENDIF
+
+&IF DEFINED(EXCLUDE-addFilterGreaterThan) = 0 &THEN
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE addFilterGreaterThan Procedure 
+PROCEDURE addFilterGreaterThan :
+/*------------------------------------------------------------------------------
+  Purpose:     
+  Parameters:  <none>
+  Notes:       
+------------------------------------------------------------------------------*/
+  DEF INPUT PARAM cFilterName  AS CHAR NO-UNDO.
+  DEF INPUT PARAM cFilterValue AS CHAR NO-UNDO.
+
+  RUN addFilter(cFilterName, {&FILTER_OP_GREATER_THAN}, cFilterValue).
+
+END PROCEDURE.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ENDIF
+
+&IF DEFINED(EXCLUDE-addFilterLessOrEqual) = 0 &THEN
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE addFilterLessOrEqual Procedure 
+PROCEDURE addFilterLessOrEqual :
+/*------------------------------------------------------------------------------
+  Purpose:     
+  Parameters:  <none>
+  Notes:       
+------------------------------------------------------------------------------*/
+  DEF INPUT PARAM cFilterName  AS CHAR NO-UNDO.
+  DEF INPUT PARAM cFilterValue AS CHAR NO-UNDO.
+
+  RUN addFilter(cFilterName, {&FILTER_OP_LESS_OR_EQUAL}, cFilterValue).
+
+END PROCEDURE.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ENDIF
+
+&IF DEFINED(EXCLUDE-addFilterLessThan) = 0 &THEN
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE addFilterLessThan Procedure 
+PROCEDURE addFilterLessThan :
+/*------------------------------------------------------------------------------
+  Purpose:     
+  Parameters:  <none>
+  Notes:       
+------------------------------------------------------------------------------*/
+  DEF INPUT PARAM cFilterName  AS CHAR NO-UNDO.
+  DEF INPUT PARAM cFilterValue AS CHAR NO-UNDO.
+
+  RUN addFilter(cFilterName, {&FILTER_OP_LESS_THAN}, cFilterValue).
+
+END PROCEDURE.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ENDIF
+
+&IF DEFINED(EXCLUDE-addFilterNotEqual) = 0 &THEN
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE addFilterNotEqual Procedure 
+PROCEDURE addFilterNotEqual :
+/*------------------------------------------------------------------------------
+  Purpose:     
+  Parameters:  <none>
+  Notes:       
+------------------------------------------------------------------------------*/
+  DEF INPUT PARAM cFilterName  AS CHAR NO-UNDO.
+  DEF INPUT PARAM cFilterValue AS CHAR NO-UNDO.
+
+  RUN addFilter(cFilterName, {&FILTER_OP_NOT_EQUAL}, cFilterValue).
 
 END PROCEDURE.
 
@@ -309,6 +419,23 @@ PROCEDURE addInputXmlParam :
   DEF INPUT PARAM fieldValue AS LONGCHAR NO-UNDO.
 
   RUN addInputParam("xml", fieldValue).
+
+END PROCEDURE.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ENDIF
+
+&IF DEFINED(EXCLUDE-addLessThanFilter) = 0 &THEN
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE addLessThanFilter Procedure 
+PROCEDURE addLessThanFilter :
+/*------------------------------------------------------------------------------
+  Purpose:     
+  Parameters:  <none>
+  Notes:       
+------------------------------------------------------------------------------*/
 
 END PROCEDURE.
 
